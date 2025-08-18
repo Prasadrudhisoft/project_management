@@ -1,0 +1,271 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Task - {{ config.APP_NAME }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <div class="d-flex align-items-center mb-4">
+                <a href="{{ url_for('view_task', id=task.id) }}" class="btn btn-outline-secondary me-3">
+                    <i class="fas fa-arrow-left"></i>
+                </a>
+                <h1><i class="fas fa-edit"></i> Edit Task: {{ task.title }}</h1>
+            </div>
+
+            {% if user_role == 'member' %}
+            <div class="alert alert-info mb-4">
+                <i class="fas fa-info-circle"></i>
+                <strong>Member Access:</strong> As a team member, you can only update the task status. Other fields are read-only.
+            </div>
+            {% endif %}
+
+            <div class="card">
+                <div class="card-body">
+                    <form method="POST">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <div class="mb-3">
+                                    <label for="title" class="form-label">
+                                        <i class="fas fa-tasks"></i> Task Title *
+                                    </label>
+<input type="text" 
+                                           class="form-control" 
+                                           id="title" 
+                                           name="title" 
+                                           required
+                                           value="{{ task.title }}"
+                                           placeholder="Enter task title" {% if user_role == 'member' %}disabled{% endif %}>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="status" class="form-label">
+                                        <i class="fas fa-flag"></i> Status *
+                                    </label>
+                                    <select class="form-select" id="status" name="status" required>
+                                        <option value="pending" {% if task.status == 'pending' %}selected{% endif %}>
+                                            ⏳ Pending
+                                        </option>
+                                        <option value="in_progress" {% if task.status == 'in_progress' %}selected{% endif %}>
+                                            🚀 In Progress
+                                        </option>
+                                        <option value="completed" {% if task.status == 'completed' %}selected{% endif %}>
+                                            ✅ Completed
+                                        </option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="description" class="form-label">
+                                <i class="fas fa-align-left"></i> Description
+                            </label>
+<textarea class="form-control" 
+                                      id="description" 
+                                      name="description" 
+                                      rows="4"
+                                      placeholder="Enter task description" {% if user_role == 'member' %}disabled{% endif %}>{{ task.description or '' }}</textarea>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="assigned_to" class="form-label">
+                                        <i class="fas fa-user"></i> Assigned To
+                                    </label>
+<select class="form-select" id="assigned_to" name="assigned_to" {% if user_role == 'member' %}disabled{% endif %}>
+                                        <option value="">Select user (optional)</option>
+                                        {% for user in users %}
+                                            <option value="{{ user.id }}" {% if task.assigned_to == user.id %}selected{% endif %}>
+                                                {{ user.full_name }} ({{ user.project_role }})
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="priority" class="form-label">
+                                        <i class="fas fa-exclamation-triangle"></i> Priority *
+                                    </label>
+<select class="form-select" id="priority" name="priority" required {% if user_role == 'member' %}disabled{% endif %}>
+                                        <option value="low" {% if task.priority == 'low' %}selected{% endif %}>
+                                            🟢 Low
+                                        </option>
+                                        <option value="medium" {% if task.priority == 'medium' %}selected{% endif %}>
+                                            🟡 Medium
+                                        </option>
+                                        <option value="high" {% if task.priority == 'high' %}selected{% endif %}>
+                                            🔴 High
+                                        </option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="due_date" class="form-label">
+                                        <i class="fas fa-calendar-alt"></i> Due Date
+                                    </label>
+<input type="date" 
+                                           class="form-control" 
+                                           id="due_date" 
+                                           name="due_date"
+                                           value="{{ task.due_date.strftime('%Y-%m-%d') if task.due_date else '' }}" {% if user_role == 'member' %}disabled{% endif %}>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="milestone_id" class="form-label">
+                                        <i class="fas fa-flag-checkered"></i> Milestone
+                                    </label>
+<select class="form-select" id="milestone_id" name="milestone_id" {% if user_role == 'member' %}disabled{% endif %}>
+                                        <option value="">Select milestone (optional)</option>
+                                        {% for milestone in milestones %}
+                                        <option value="{{ milestone.id }}" {% if task.milestone_id == milestone.id %}selected{% endif %}>
+                                            {{ milestone.name }}
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card bg-light mb-3">
+                            <div class="card-body">
+                                <h6 class="card-title"><i class="fas fa-info-circle"></i> Task Information</h6>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <small class="text-muted">
+                                            <strong>Project:</strong> {{ task.project_name }}
+                                        </small>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <small class="text-muted">
+                                            <strong>Created by:</strong> {{ task.created_by_name }}
+                                        </small>
+                                    </div>
+                                </div>
+                                <div class="row mt-2">
+                                    <div class="col-md-6">
+                                        <small class="text-muted">
+                                            <strong>Created:</strong> {{ task.created_at.strftime('%B %d, %Y at %I:%M %p') }}
+                                        </small>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <small class="text-muted">
+                                            <strong>Last updated:</strong> {{ task.updated_at.strftime('%B %d, %Y at %I:%M %p') if task.updated_at else 'Never' }}
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <a href="{{ url_for('view_task', id=task.id) }}" class="btn btn-secondary">
+                                    <i class="fas fa-times"></i> Cancel
+                                </a>
+                            </div>
+                            <div>
+                                <button type="submit" class="btn btn-success">
+                                    <i class="fas fa-save"></i> Update Task
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Priority selection styling
+document.getElementById('priority').addEventListener('change', function() {
+    const priority = this.value;
+    const priorityClasses = {
+        'low': 'text-success',
+        'medium': 'text-warning',
+        'high': 'text-danger'
+    };
+    
+    // Reset classes
+    this.className = 'form-select';
+    if (priorityClasses[priority]) {
+        this.classList.add(priorityClasses[priority]);
+    }
+});
+
+// Status selection styling
+document.getElementById('status').addEventListener('change', function() {
+    const status = this.value;
+    const statusClasses = {
+        'pending': 'text-warning',
+        'in_progress': 'text-info',
+        'completed': 'text-success'
+    };
+    
+    // Reset classes
+    this.className = 'form-select';
+    if (statusClasses[status]) {
+        this.classList.add(statusClasses[status]);
+    }
+});
+
+// Initialize styling
+document.addEventListener('DOMContentLoaded', function() {
+    // Priority styling
+    const prioritySelect = document.getElementById('priority');
+    const priority = prioritySelect.value;
+    const priorityClasses = {
+        'low': 'text-success',
+        'medium': 'text-warning',
+        'high': 'text-danger'
+    };
+    if (priorityClasses[priority]) {
+        prioritySelect.classList.add(priorityClasses[priority]);
+    }
+
+    // Status styling
+    const statusSelect = document.getElementById('status');
+    const status = statusSelect.value;
+    const statusClasses = {
+        'pending': 'text-warning',
+        'in_progress': 'text-info',
+        'completed': 'text-success'
+    };
+    if (statusClasses[status]) {
+        statusSelect.classList.add(statusClasses[status]);
+    }
+});
+
+// Form validation
+document.querySelector('form').addEventListener('submit', function(e) {
+    const title = document.getElementById('title').value.trim();
+    
+    if (!title) {
+        e.preventDefault();
+        alert('Task title is required');
+        document.getElementById('title').focus();
+        return false;
+    }
+    
+    if (title.length < 3) {
+        e.preventDefault();
+        alert('Task title must be at least 3 characters long');
+        document.getElementById('title').focus();
+        return false;
+    }
+});
+</script>
+{% endblock %}

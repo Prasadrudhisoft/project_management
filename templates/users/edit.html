@@ -1,0 +1,238 @@
+{% extends "base.html" %}
+
+{% block title %}Edit User - {{ config.APP_NAME }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="d-flex align-items-center mb-4">
+                <a href="{{ url_for('users') }}" class="btn btn-outline-secondary me-3">
+                    <i class="fas fa-arrow-left"></i>
+                </a>
+                <h1><i class="fas fa-user-edit"></i> Edit User: {{ user.full_name }}</h1>
+            </div>
+
+            <div class="card">
+                <div class="card-body">
+                    <form method="POST">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="full_name" class="form-label">
+                                        <i class="fas fa-user"></i> Full Name *
+                                    </label>
+                                    <input type="text" 
+                                           class="form-control" 
+                                           id="full_name" 
+                                           name="full_name" 
+                                           required
+                                           value="{{ user.full_name }}"
+                                           placeholder="Enter full name">
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="email" class="form-label">
+                                        <i class="fas fa-envelope"></i> Email Address *
+                                    </label>
+                                    <input type="email" 
+                                           class="form-control" 
+                                           id="email" 
+                                           name="email" 
+                                           required
+                                           value="{{ user.email }}"
+                                           placeholder="user@example.com">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="password" class="form-label">
+                                        <i class="fas fa-lock"></i> New Password
+                                    </label>
+                                    <input type="password" 
+                                           class="form-control" 
+                                           id="password" 
+                                           name="password" 
+                                           minlength="6"
+                                           placeholder="Leave blank to keep current password">
+                                    <div class="form-text">Leave blank to keep the current password</div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="phone" class="form-label">
+                                        <i class="fas fa-phone"></i> Phone Number
+                                    </label>
+                                    <input type="tel" 
+                                           class="form-control" 
+                                           id="phone" 
+                                           name="phone"
+                                           value="{{ user.phone or '' }}"
+                                           placeholder="(123) 456-7890">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="role" class="form-label">
+                                        <i class="fas fa-user-tag"></i> User Role *
+                                    </label>
+                                    <select class="form-select {{ 'text-danger' if user.role == 'admin' else 'text-warning' if user.role == 'manager' else 'text-info' }}" 
+                                            id="role" 
+                                            name="role" 
+                                            required
+                                            {% if user.id == session.user_id and user.role == 'admin' %}disabled{% endif %}>
+                                        <option value="member" {% if user.role == 'member' %}selected{% endif %}>
+                                            Member - Basic access to assigned tasks
+                                        </option>
+                                        <option value="manager" {% if user.role == 'manager' %}selected{% endif %}>
+                                            Manager - Can manage projects and tasks
+                                        </option>
+                                        {% if current_user_role == 'admin' %}
+                                        <option value="admin" {% if user.role == 'admin' %}selected{% endif %}>
+                                            Admin - Full system access
+                                        </option>
+                                        {% endif %}
+                                    </select>
+                                    {% if user.id == session.user_id and user.role == 'admin' %}
+                                    <div class="form-text text-muted">
+                                        <i class="fas fa-info-circle"></i> You cannot change your own admin role
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">
+                                        <i class="fas fa-toggle-on"></i> Account Status
+                                    </label>
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" 
+                                               type="checkbox" 
+                                               id="is_active" 
+                                               name="is_active" 
+                                               {% if user.is_active %}checked{% endif %}
+                                               {% if user.id == session.user_id %}disabled{% endif %}>
+                                        <label class="form-check-label" for="is_active">
+                                            Account is active
+                                        </label>
+                                    </div>
+                                    {% if user.id == session.user_id %}
+                                    <div class="form-text text-muted">
+                                        <i class="fas fa-info-circle"></i> You cannot deactivate your own account
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card bg-light mb-3">
+                            <div class="card-body">
+                                <h6 class="card-title"><i class="fas fa-info-circle"></i> User Information</h6>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <small class="text-muted">
+                                            <strong>Created:</strong> {{ user.created_at.strftime('%B %d, %Y at %I:%M %p') }}
+                                        </small>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <small class="text-muted">
+                                            <strong>User ID:</strong> {{ user.id }}
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <a href="{{ url_for('users') }}" class="btn btn-secondary">
+                                <i class="fas fa-times"></i> Cancel
+                            </a>
+                            <button type="submit" class="btn btn-success">
+                                <i class="fas fa-save"></i> Update User
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Form validation for password
+document.getElementById('password').addEventListener('input', function() {
+    const password = this.value;
+    const feedback = this.nextElementSibling;
+    
+
+    if (password && password.length < 6) {
+
+        this.classList.add('is-invalid');
+        this.classList.remove('is-valid');
+        feedback.textContent = 'Password must be at least 6 characters';
+        feedback.classList.add('text-danger');
+    } else if (password && password.length >= 6) {
+   
+        this.classList.remove('is-invalid');
+        this.classList.add('is-valid');
+        feedback.textContent = 'New password looks good!';
+        feedback.classList.remove('text-danger');
+        feedback.classList.add('text-success');
+    } else {
+        this.classList.remove('is-invalid', 'is-valid');
+        feedback.textContent = 'Leave blank to keep the current password';
+        feedback.classList.remove('text-danger', 'text-success');
+    }
+});
+
+
+// Role selection styling
+document.getElementById('role').addEventListener('change', function() {
+    const role = this.value;
+    const roleClasses = {
+        'member': 'text-info',
+        'manager': 'text-warning', 
+        'admin': 'text-danger'
+    };
+    
+    // Reset classes
+    this.className = 'form-select';
+    if (roleClasses[role]) {
+        this.classList.add(roleClasses[role]);
+    }
+});
+
+// Status toggle styling
+document.getElementById('is_active').addEventListener('change', function() {
+    const label = this.nextElementSibling;
+    if (this.checked) {
+        label.innerHTML = '<i class="fas fa-check-circle text-success"></i> Account is active';
+    } else {
+        label.innerHTML = '<i class="fas fa-pause-circle text-warning"></i> Account is inactive';
+    }
+});
+
+// Initialize status label
+document.addEventListener('DOMContentLoaded', function() {
+    const activeCheckbox = document.getElementById('is_active');
+    const label = activeCheckbox.nextElementSibling;
+    if (activeCheckbox.checked) {
+        label.innerHTML = '<i class="fas fa-check-circle text-success"></i> Account is active';
+    } else {
+        label.innerHTML = '<i class="fas fa-pause-circle text-warning"></i> Account is inactive';
+    }
+});
+</script>
+{% endblock %}

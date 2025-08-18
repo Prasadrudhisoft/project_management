@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+
+{% block title %}Users - {{ config.APP_NAME }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>
+            <i class="fas fa-users"></i> Users
+            <small class="text-muted">({{ users|length }} users)</small>
+        </h1>
+        <a href="{{ url_for('new_user') }}" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Add New User
+        </a>
+    </div>
+
+    {% if users %}
+    <div class="card">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Phone</th>
+                            <th>Role</th>
+                            <th>Status</th>
+                            <th>Created</th>
+                            <th class="text-center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user in users %}
+                        <tr>
+                            <td>
+                                <i class="fas fa-user text-muted me-2"></i>
+                                {{ user.full_name }}
+                            </td>
+                            <td>{{ user.email }}</td>
+                            <td>{{ user.phone or '-' }}</td>
+                            <td>
+                                {% if user.role == 'admin' %}
+                                    <span class="badge bg-danger">
+                                        <i class="fas fa-crown"></i> Admin
+                                    </span>
+                                {% elif user.role == 'manager' %}
+                                    <span class="badge bg-warning">
+                                        <i class="fas fa-user-tie"></i> Manager
+                                    </span>
+                                {% else %}
+                                    <span class="badge bg-info">
+                                        <i class="fas fa-user"></i> Member
+                                    </span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if user.is_active %}
+                                    <span class="badge bg-success">
+                                        <i class="fas fa-check-circle"></i> Active
+                                    </span>
+                                {% else %}
+                                    <span class="badge bg-secondary">
+                                        <i class="fas fa-pause-circle"></i> Inactive
+                                    </span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <small class="text-muted">
+                                    {{ user.created_at.strftime('%b %d, %Y') }}
+                                </small>
+                            </td>
+                            <td class="text-center">
+                                <div class="btn-group" role="group">
+                                    {% if session.user_role == 'admin' or (session.user_role == 'manager' and user.role != 'admin') %}
+                                    <a href="{{ url_for('edit_user', id=user.id) }}" 
+                                       class="btn btn-sm btn-outline-primary"
+                                       title="Edit User">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    {% else %}
+                                    <span class="btn btn-sm btn-outline-secondary disabled" 
+                                          title="Managers cannot edit admin users">
+                                        <i class="fas fa-lock"></i>
+                                    </span>
+                                    {% endif %}
+                                    
+                                    {% if user.id != session.user_id and session.user_role == 'admin' %}
+                                    <form method="POST" action="{{ url_for('toggle_user_status', id=user.id) }}" 
+                                          style="display: inline;">
+                                        <button type="submit" 
+                                                class="btn btn-sm {% if user.is_active %}btn-outline-warning{% else %}btn-outline-success{% endif %}"
+                                                title="{% if user.is_active %}Deactivate{% else %}Activate{% endif %} User"
+                                                onclick="return confirm('Are you sure you want to {% if user.is_active %}deactivate{% else %}activate{% endif %} {{ user.full_name }}?')">
+                                            <i class="fas {% if user.is_active %}fa-pause{% else %}fa-play{% endif %}"></i>
+                                        </button>
+                                    </form>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="card">
+        <div class="card-body text-center py-5">
+            <i class="fas fa-users fa-3x text-muted mb-3"></i>
+            <h4 class="text-muted">No Users Found</h4>
+            <p class="text-muted">Start by adding your first team member.</p>
+            <a href="{{ url_for('new_user') }}" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Add New User
+            </a>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Auto-hide success/error messages
+setTimeout(function() {
+    $('.alert').fadeOut();
+}, 5000);
+</script>
+{% endblock %}

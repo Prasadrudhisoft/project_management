@@ -1,0 +1,229 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Team Members - {{ project.name }} - Project Manager{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1><i class="bi bi-people me-2"></i>Manage Team Members</h1>
+        <a href="{{ url_for('view_project', id=project.id) }}" class="btn btn-secondary">
+            <i class="bi bi-arrow-left me-1"></i>Back to Project
+        </a>
+    </div>
+
+    <!-- Project Info Card -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0"><i class="bi bi-folder me-2"></i>{{ project.name }}</h5>
+        </div>
+        <div class="card-body">
+            <p class="text-muted mb-2">{{ project.description or 'No description available' }}</p>
+            <div class="row">
+                <div class="col-md-6">
+                    <small class="text-muted">
+                        <strong>Status:</strong> 
+                        <span class="badge bg-{% if project.status == 'active' %}success{% elif project.status == 'completed' %}primary{% elif project.status == 'planning' %}info{% else %}warning{% endif %}">
+                            {{ project.status.title() }}
+                        </span>
+                    </small>
+                </div>
+                <div class="col-md-6">
+                    <small class="text-muted">
+                        <strong>Manager:</strong> 
+                        {% if project.assigned_manager_id %}
+                            <span class="text-primary">Assigned</span>
+                        {% else %}
+                            <span class="text-warning">Not assigned</span>
+                        {% endif %}
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Assign Team Members -->
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-person-plus me-2"></i>Assign Team Members</h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST">
+                        <div class="mb-3">
+                            <label class="form-label">
+                                <i class="bi bi-people me-1"></i>Select Team Members
+                            </label>
+                            <div class="form-text mb-2">
+                                Choose members to assign to this project. Only users with the 'Member' role can be assigned as team members.
+                            </div>
+                            
+                            {% if available_members %}
+                                <!-- Select All / Deselect All -->
+                                <div class="mb-2">
+                                    <button type="button" class="btn btn-sm btn-outline-primary me-2" onclick="selectAllMembers()">
+                                        <i class="bi bi-check-all me-1"></i>Select All
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="deselectAllMembers()">
+                                        <i class="bi bi-x-square me-1"></i>Deselect All
+                                    </button>
+                                </div>
+                                
+                                <div class="border rounded p-3" style="max-height: 300px; overflow-y: auto;">
+                                {% for member in available_members %}
+                                <div class="form-check mb-3 p-2 border rounded{% if member.current_projects %} bg-light{% endif %}">
+                                    <input class="form-check-input member-checkbox" type="checkbox" 
+                                           name="member_ids" value="{{ member.id }}" 
+                                           id="member_{{ member.id }}"
+                                           {% if member.id in assigned_member_ids %}checked{% endif %}>
+                                    <label class="form-check-label w-100" for="member_{{ member.id }}">
+                                        <strong>{{ member.full_name }}</strong>
+                                        <br>
+                                        <small class="text-muted"><i class="bi bi-envelope me-1"></i>{{ member.email }}</small>
+                                        {% if member.current_projects %}
+                                            <br>
+                                            <small class="text-info">
+                                                <i class="bi bi-briefcase me-1"></i><strong>Current Projects:</strong> {{ member.current_projects }}
+                                            </small>
+                                        {% else %}
+                                            <br>
+                                            <small class="text-success">
+                                                <i class="bi bi-check-circle me-1"></i><strong>Available</strong> - Not currently assigned to any active projects
+                                            </small>
+                                        {% endif %}
+                                    </label>
+                                </div>
+                                {% endfor %}
+                                </div>
+                            {% else %}
+                                <div class="alert alert-info">
+                                    <i class="bi bi-info-circle me-2"></i>
+                                    No available team members found. All members in your organization may already be assigned to this project, or there may be no users with the 'Member' role.
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <a href="{{ url_for('view_project', id=project.id) }}" class="btn btn-secondary">
+                                <i class="bi bi-x-circle me-1"></i>Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary" onclick="return confirmAssignment()">
+                                <i class="bi bi-people-fill me-1"></i>Update Team Members
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Currently Assigned Members -->
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-people-fill me-2"></i>Currently Assigned</h5>
+                </div>
+                <div class="card-body">
+                    {% if assigned_members %}
+                        <div class="list-group list-group-flush">
+                            {% for member in assigned_members %}
+                            <div class="list-group-item d-flex justify-content-between align-items-start px-0">
+                                <div>
+                                    <h6 class="mb-1">{{ member.full_name }}</h6>
+                                    <small class="text-muted">{{ member.email }}</small>
+                                    <br>
+                                    <small class="text-muted">
+                                        <i class="bi bi-calendar me-1"></i>
+                                        Joined: {{ member.joined_at.strftime('%b %d, %Y') if member.joined_at else 'Unknown' }}
+                                    </small>
+                                </div>
+                                <form method="POST" action="{{ url_for('remove_project_team_member', project_id=project.id, member_id=member.id) }}" 
+                                      style="display: inline;" onsubmit="return confirmRemoval('{{ member.full_name }}')">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger" title="Remove from project">
+                                        <i class="bi bi-person-dash"></i>
+                                    </button>
+                                </form>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-muted text-center py-3">
+                            <i class="bi bi-people display-6 text-muted mb-2"></i>
+                            <p class="mb-0">No team members assigned yet.</p>
+                            <small>Select members from the form to assign them to this project.</small>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Info Card -->
+            <div class="card mt-4">
+                <div class="card-body">
+                    <h6 class="card-title">
+                        <i class="bi bi-info-circle me-2"></i>Information
+                    </h6>
+                    <ul class="list-unstyled small mb-0">
+                        <li class="mb-2">
+                            <i class="bi bi-check-circle text-success me-1"></i>
+                            Only users with 'Member' role can be assigned as team members
+                        </li>
+                        <li class="mb-2">
+                            <i class="bi bi-envelope text-primary me-1"></i>
+                            The project manager will be notified of team member changes
+                        </li>
+                        <li class="mb-2">
+                            <i class="bi bi-eye text-info me-1"></i>
+                            Assigned members can view project details and tasks
+                        </li>
+                        <li class="mb-0">
+                            <i class="bi bi-shield-check text-warning me-1"></i>
+                            Only admins can manage team member assignments
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function selectAllMembers() {
+    const checkboxes = document.querySelectorAll('.member-checkbox');
+    checkboxes.forEach(checkbox => {
+        checkbox.checked = true;
+    });
+}
+
+function deselectAllMembers() {
+    const checkboxes = document.querySelectorAll('.member-checkbox');
+    checkboxes.forEach(checkbox => {
+        checkbox.checked = false;
+    });
+}
+
+function confirmAssignment() {
+    const checkboxes = document.querySelectorAll('.member-checkbox:checked');
+    const count = checkboxes.length;
+    
+    if (count === 0) {
+        return confirm('This will remove all team members from the project. Are you sure you want to continue?');
+    } else {
+        return confirm(`This will assign ${count} team member(s) to the project. Any previously assigned members not selected will be removed. Continue?`);
+    }
+}
+
+function confirmRemoval(memberName) {
+    return confirm(`Are you sure you want to remove "${memberName}" from this project team?`);
+}
+
+// Auto-check already assigned members
+document.addEventListener('DOMContentLoaded', function() {
+    const assignedIds = JSON.parse('{{ assigned_member_ids | tojson | safe }}');
+    assignedIds.forEach(id => {
+        const checkbox = document.getElementById(`member_${id}`);
+        if (checkbox) {
+            checkbox.checked = true;
+        }
+    });
+});
+</script>
+{% endblock %}

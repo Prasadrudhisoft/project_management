@@ -1,0 +1,913 @@
+{% extends 'base.html' %}
+
+{% block title %}Member Dashboard - Project Manager{% endblock %}
+
+{% block extra_css %}
+<style>
+        * { box-sizing: border-box; }
+        
+        /* CSS Variables for Member Theme */
+        :root {
+            --member-primary: #6f42c1;
+            --member-secondary: #e83e8c;
+            --member-gradient: linear-gradient(135deg, #6f42c1 0%, #e83e8c 100%);
+            --member-light: #f8f4ff;
+            --shadow-light: 0 2px 8px rgba(111, 66, 193, 0.15);
+            --shadow-medium: 0 4px 16px rgba(111, 66, 193, 0.2);
+            --shadow-glow: 0 0 20px rgba(111, 66, 193, 0.3);
+            --border-radius: 16px;
+            --transition-smooth: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            line-height: 1.6;
+            color: #212529;
+            background: linear-gradient(135deg, #f8f4ff 0%, #fff0f8 50%, #f8f9fa 100%);
+            margin: 0;
+            padding: 0;
+            position: relative;
+            overflow-x: hidden;
+        }
+        
+        /* Background Decoration */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: radial-gradient(circle at 25% 25%, rgba(111, 66, 193, 0.05) 0%, transparent 50%),
+                              radial-gradient(circle at 75% 75%, rgba(232, 62, 140, 0.05) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: -1;
+        }
+        
+        /* Animation Keyframes */
+        @keyframes slideInRight {
+            0% {
+                opacity: 0;
+                transform: translateX(50px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        @keyframes fadeInUp {
+            0% {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes bounceIn {
+            0% {
+                opacity: 0;
+                transform: scale(0.3);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+            70% {
+                transform: scale(0.9);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+        
+        @keyframes shimmer {
+            0% {
+                transform: translateX(-100%);
+            }
+            100% {
+                transform: translateX(100%);
+            }
+        }
+        
+        /* Navigation */
+        .navbar {
+            background: linear-gradient(135deg, #6f42c1 0%, #e83e8c 100%);
+            padding: 1rem 0;
+            margin-bottom: 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .navbar .container-fluid {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .navbar-brand {
+            color: white;
+            text-decoration: none;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+        
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            transition: all 0.3s;
+        }
+        
+        .nav-links a:hover {
+            background-color: rgba(255,255,255,0.1);
+        }
+        
+        .user-menu {
+            position: relative;
+            display: inline-block;
+        }
+        
+        .user-toggle {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            cursor: pointer;
+        }
+        
+        .dropdown-menu {
+            display: none;
+            position: absolute;
+            right: 0;
+            top: 100%;
+            background: white;
+            box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.15);
+            border-radius: 0.375rem;
+            padding: 0.5rem 0;
+            min-width: 200px;
+            z-index: 1000;
+        }
+        
+        .dropdown-menu.show {
+            display: block;
+        }
+        
+        .dropdown-item {
+            display: block;
+            color: #212529;
+            padding: 0.5rem 1rem;
+            text-decoration: none;
+            transition: background-color 0.3s;
+        }
+        
+        .dropdown-item:hover {
+            background-color: #f8f9fa;
+        }
+        
+        /* Layout */
+        .container-fluid {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 15px;
+        }
+        
+        .row {
+            display: flex;
+            flex-wrap: wrap;
+            margin: 0 -15px;
+        }
+        
+        .col-12 { flex: 0 0 100%; max-width: 100%; padding: 0 15px; }
+        .col-md-3 { flex: 0 0 25%; max-width: 25%; padding: 0 15px; }
+        .col-md-4 { flex: 0 0 33.333333%; max-width: 33.333333%; padding: 0 15px; }
+        .col-md-6 { flex: 0 0 50%; max-width: 50%; padding: 0 15px; }
+        .col-lg-8 { flex: 0 0 66.666667%; max-width: 66.666667%; padding: 0 15px; }
+        .col-lg-4 { flex: 0 0 33.333333%; max-width: 33.333333%; padding: 0 15px; }
+        .col-sm-6 { flex: 0 0 50%; max-width: 50%; padding: 0 15px; }
+        
+        .mt-4 { margin-top: 2rem; }
+        .mb-3 { margin-bottom: 1rem; }
+        .mb-4 { margin-bottom: 2rem; }
+        .me-1 { margin-right: 0.25rem; }
+        .me-2 { margin-right: 0.5rem; }
+        .p-3 { padding: 1rem; }
+        
+        /* Enhanced Cards with Modern Animations */
+        .card {
+            background: linear-gradient(145deg, #ffffff 0%, var(--member-light) 100%);
+            border: none;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-light);
+            margin-bottom: 1.5rem;
+            transition: var(--transition-smooth);
+            position: relative;
+            overflow: hidden;
+            animation: fadeInUp 0.8s ease-out;
+        }
+        
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent);
+            transition: left 0.6s;
+        }
+        
+        .card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: var(--shadow-medium);
+        }
+        
+        .card:hover::before {
+            left: 100%;
+        }
+        
+        /* Animated Member Stat Cards */
+        .member-stat-card {
+            background: var(--member-gradient);
+            animation: bounceIn 0.8s ease-out;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .member-stat-card::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 70%);
+            animation: shimmer 3s linear infinite;
+        }
+        
+        .member-stat-card:hover {
+            animation: bounceIn 0.6s ease-out;
+        }
+        
+        /* Apply different animation delays to cards */
+        .row .col-md-3:nth-child(1) .card { animation-delay: 0.1s; }
+        .row .col-md-3:nth-child(2) .card { animation-delay: 0.2s; }
+        .row .col-md-3:nth-child(3) .card { animation-delay: 0.3s; }
+        .row .col-md-3:nth-child(4) .card { animation-delay: 0.4s; }
+        
+        /* Member card specific styling */
+        .member-card {
+            border-left: 4px solid var(--member-primary);
+            animation: slideInRight 0.8s ease-out;
+        }
+        
+        /* Header Section Animation */
+        .member-header {
+            background: var(--member-gradient);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .member-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="dots" width="20" height="20" patternUnits="userSpaceOnUse"><circle cx="10" cy="10" r="2" fill="%23ffffff" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23dots)"/></svg>');
+            opacity: 0.4;
+        }
+        
+        .card-header {
+            padding: 1rem;
+            background-color: rgba(0,0,0,.03);
+            border-bottom: 1px solid rgba(0,0,0,.125);
+            border-top-left-radius: 0.5rem;
+            border-top-right-radius: 0.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .card-body {
+            padding: 1.5rem;
+        }
+        
+        /* Member-specific styling */
+        .member-card {
+            border-left: 4px solid #6f42c1;
+        }
+        
+        .member-stat-card {
+            background: linear-gradient(135deg, #6f42c1, #e83e8c);
+            color: white;
+        }
+        
+        .member-header {
+            background: linear-gradient(135deg, #6f42c1, #e83e8c);
+            color: white;
+            padding: 2rem 0;
+        }
+        
+        /* Task Priority Cards */
+        .task-priority-high {
+            border-left: 4px solid #dc3545;
+            background: linear-gradient(135deg, #fff5f5, #fff);
+        }
+        
+        .task-priority-medium {
+            border-left: 4px solid #ffc107;
+            background: linear-gradient(135deg, #fffbf0, #fff);
+        }
+        
+        .task-priority-low {
+            border-left: 4px solid #6c757d;
+            background: linear-gradient(135deg, #f8f9fa, #fff);
+        }
+        
+        /* Enhanced Stat Cards with Proper Colors */
+        .bg-primary { 
+            background: linear-gradient(135deg, #0d6efd 0%, #0b5ed7 100%) !important; 
+            color: white !important;
+            border: none !important;
+        }
+        .bg-success { 
+            background: linear-gradient(135deg, #198754 0%, #157347 100%) !important; 
+            color: white !important;
+            border: none !important;
+        }
+        .bg-info { 
+            background: linear-gradient(135deg, #0dcaf0 0%, #31d2f2 100%) !important; 
+            color: white !important;
+            border: none !important;
+        }
+        .bg-warning { 
+            background: linear-gradient(135deg, #ffc107 0%, #ffca2c 100%) !important; 
+            color: #212529 !important;
+            border: none !important;
+        }
+        .bg-danger { 
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%) !important; 
+            color: white !important;
+            border: none !important;
+        }
+        
+        .stat-card {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 100%;
+        }
+        
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin: 0;
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+            margin: 0;
+            opacity: 0.9;
+        }
+        
+        .stat-icon {
+            font-size: 3rem;
+            opacity: 0.3;
+        }
+        
+        /* Badges */
+        .badge {
+            display: inline-block;
+            padding: 0.35em 0.65em;
+            font-size: 0.75em;
+            font-weight: 700;
+            line-height: 1;
+            text-align: center;
+            white-space: nowrap;
+            vertical-align: baseline;
+            border-radius: 0.375rem;
+        }
+        
+        .badge.bg-primary { background-color: #0d6efd; color: white; }
+        .badge.bg-success { background-color: #198754; color: white; }
+        .badge.bg-secondary { background-color: #6c757d; color: white; }
+        .badge.bg-warning { background-color: #ffc107; color: #212529; }
+        .badge.bg-danger { background-color: #dc3545; color: white; }
+        
+        .badge-priority-high { background-color: #dc3545; color: white; }
+        .badge-priority-medium { background-color: #ffc107; color: #212529; }
+        .badge-priority-low { background-color: #6c757d; color: white; }
+        
+        /* Buttons */
+        .btn {
+            display: inline-block;
+            font-weight: 400;
+            line-height: 1.5;
+            color: #212529;
+            text-align: center;
+            text-decoration: none;
+            vertical-align: middle;
+            cursor: pointer;
+            border: 1px solid transparent;
+            padding: 0.375rem 0.75rem;
+            font-size: 0.875rem;
+            border-radius: 0.375rem;
+            transition: all 0.15s ease-in-out;
+            margin: 0.25rem;
+        }
+        
+        .btn-sm { padding: 0.25rem 0.5rem; font-size: 0.8rem; }
+        
+        .btn-purple { color: #fff; background-color: #6f42c1; border-color: #6f42c1; }
+        .btn-purple:hover { background-color: #5a32a3; border-color: #512d90; }
+        
+        .btn-primary { color: #fff; background-color: #0d6efd; border-color: #0d6efd; }
+        .btn-primary:hover { background-color: #0b5ed7; border-color: #0a58ca; }
+        
+        .btn-success { color: #fff; background-color: #198754; border-color: #198754; }
+        .btn-success:hover { background-color: #157347; border-color: #146c43; }
+        
+        .btn-outline-purple {
+            color: #6f42c1;
+            border-color: #6f42c1;
+            background-color: transparent;
+        }
+        .btn-outline-purple:hover {
+            color: #fff;
+            background-color: #6f42c1;
+        }
+        
+        /* Progress bars */
+        .progress {
+            height: 8px;
+            background-color: #e9ecef;
+            border-radius: 0.375rem;
+            overflow: hidden;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #6f42c1, #e83e8c);
+            transition: width 0.3s;
+        }
+        
+        /* Text styles */
+        .text-muted { color: #6c757d; }
+        .text-center { text-align: center; }
+        .text-purple { color: #6f42c1; }
+        .text-danger { color: #dc3545; }
+        .text-warning { color: #ffc107; }
+        .text-decoration-none { text-decoration: none; }
+        
+        /* Flexbox utilities */
+        .d-flex { display: flex; }
+        .justify-content-between { justify-content: space-between; }
+        .align-items-center { align-items: center; }
+        .flex-wrap { flex-wrap: wrap; }
+        .gap-2 > * { margin-right: 0.5rem; }
+        
+        /* Icons */
+        .bi::before {
+            display: inline-block;
+            width: 1em;
+            height: 1em;
+            vertical-align: -0.125em;
+        }
+        
+        .bi-person-workspace::before { content: "💼"; }
+        .bi-clipboard-check::before { content: "✅"; }
+        .bi-clock::before { content: "🕒"; }
+        .bi-exclamation-triangle::before { content: "⚠️"; }
+        .bi-calendar-check::before { content: "📅"; }
+        .bi-person-circle::before { content: "👤"; }
+        .bi-box-arrow-right::before { content: "→"; }
+        .bi-plus::before { content: "+"; }
+        .bi-eye::before { content: "👁"; }
+        .bi-chat::before { content: "💬"; }
+        .bi-list-task::before { content: "📋"; }
+        .bi-trophy::before { content: "🏆"; }
+        
+        /* Task List */
+        .task-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            border-bottom: 1px solid #dee2e6;
+            transition: background-color 0.3s;
+        }
+        
+        .task-item:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .task-item:last-child {
+            border-bottom: none;
+        }
+        
+        h1 { font-size: 2.5rem; margin-bottom: 0.5rem; color: white; }
+        h2 { font-size: 2rem; margin-bottom: 1rem; }
+        h5 { font-size: 1.25rem; margin: 0; }
+        h6 { font-size: 1rem; margin: 0; }
+        
+        /* Member badge */
+        .member-badge {
+            background: linear-gradient(45deg, #6f42c1, #e83e8c);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 1rem;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        /* Responsive Improvements */
+        @media (max-width: 768px) {
+            .col-md-3, .col-md-4, .col-md-6, .col-lg-4, .col-lg-8, .col-sm-6 {
+                flex: 0 0 100%;
+                max-width: 100%;
+                margin-bottom: 1rem;
+            }
+            
+            .nav-links {
+                display: none;
+            }
+            
+            .stat-card {
+                text-align: center;
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+            
+            .stat-icon {
+                font-size: 2rem;
+                margin-bottom: 0.5rem;
+            }
+            
+            .stat-number {
+                font-size: 2rem;
+            }
+            
+            .task-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.5rem;
+                padding: 0.75rem;
+            }
+            
+            /* Mobile card headers */
+            .card-header {
+                flex-direction: column;
+                align-items: flex-start !important;
+                gap: 0.75rem;
+            }
+            
+            .card-header h5 {
+                margin-bottom: 0;
+            }
+            
+            /* Mobile buttons */
+            .card-header .btn {
+                width: auto;
+                min-width: 120px;
+            }
+            
+            /* Mobile quick actions */
+            .d-flex.flex-wrap.gap-2 {
+                flex-direction: column;
+            }
+            
+            .d-flex.flex-wrap.gap-2 .btn {
+                width: 100%;
+                margin-bottom: 0.5rem;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .container-fluid {
+                padding-left: 10px;
+                padding-right: 10px;
+            }
+            
+            .member-header {
+                padding: 1.5rem 0;
+            }
+            
+            h1 {
+                font-size: 1.75rem;
+            }
+            
+            .stat-number {
+                font-size: 1.5rem;
+            }
+            
+            .badge {
+                font-size: 0.7rem;
+                padding: 0.25rem 0.5rem;
+            }
+            
+            .task-item {
+                padding: 0.5rem;
+            }
+            
+            /* Mobile overdue task cards */
+            .alert .row [class*='col-'] {
+                margin-bottom: 0.75rem;
+            }
+        }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Member Header -->
+<div class="member-header">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12">
+                <h1><i class="bi bi-person-workspace me-2"></i>My Workspace</h1>
+                <p class="text-light" style="opacity: 0.9;">Track your tasks, monitor progress, and collaborate with your team</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container-fluid mt-4">
+        <!-- Member Stats Cards -->
+        <div class="row mb-4">
+            <div class="col-md-3 col-sm-6 mb-3">
+                <div class="card member-stat-card">
+                    <div class="card-body">
+                        <div class="stat-card">
+                            <div>
+                                <h4 class="stat-number">{{ recent_tasks|length if recent_tasks else 0 }}</h4>
+                                <p class="stat-label">My Tasks</p>
+                            </div>
+                            <div class="stat-icon">
+                                <i class="bi bi-clipboard-check"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6 mb-3">
+                <div class="card bg-success text-white">
+                    <div class="card-body">
+                        <div class="stat-card">
+                            <div>
+                                <h4 class="stat-number">
+                                    {% set completed_count = recent_tasks|selectattr('status', 'equalto', 'completed')|list|length if recent_tasks else 0 %}
+                                    {{ completed_count }}
+                                </h4>
+                                <p class="stat-label">Completed</p>
+                            </div>
+                            <div class="stat-icon">
+                                <i class="bi bi-trophy"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6 mb-3">
+                <div class="card bg-warning">
+                    <div class="card-body">
+                        <div class="stat-card">
+                            <div>
+                                <h4 class="stat-number">
+                                    {% set pending_count = recent_tasks|selectattr('status', 'equalto', 'pending')|list|length if recent_tasks else 0 %}
+                                    {{ pending_count }}
+                                </h4>
+                                <p class="stat-label">Pending</p>
+                            </div>
+                            <div class="stat-icon">
+                                <i class="bi bi-clock"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6 mb-3">
+                <div class="card bg-info">
+                    <div class="card-body">
+                        <div class="stat-card">
+                            <div>
+                                <h4 class="stat-number">
+                                    {% set progress_count = recent_tasks|selectattr('status', 'equalto', 'in_progress')|list|length if recent_tasks else 0 %}
+                                    {{ progress_count }}
+                                </h4>
+                                <p class="stat-label">In Progress</p>
+                            </div>
+                            <div class="stat-icon">
+                                <i class="fas fa-bolt"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- My Tasks -->
+            <div class="col-lg-8 mb-4">
+                <div class="card member-card">
+                    <div class="card-header">
+                        <h5><i class="bi bi-list-task me-2"></i>My Active Tasks</h5>
+                        <a href="{{ url_for('tasks') }}" class="btn btn-sm btn-outline-purple">View All</a>
+                    </div>
+                    <div class="card-body" style="padding: 0;">
+                        {% if recent_tasks %}
+                            {% for task in recent_tasks %}
+                            <div class="task-item task-priority-{{ task.priority }}">
+                                <div>
+                                    <h6><a href="{{ url_for('view_task', id=task.id) }}" class="text-decoration-none">{{ task.title }}</a></h6>
+                                    <small class="text-muted">
+                                        <i class="bi bi-calendar-check me-1"></i>{{ task.project_name }}
+                                        {% if task.due_date %} • Due: {{ task.due_date.strftime('%m/%d/%Y') }}{% endif %}
+                                    </small>
+                                </div>
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="badge badge-priority-{{ task.priority }}">{{ task.priority.title() }}</span>
+                                    <span class="badge bg-{{ 'success' if task.status == 'completed' else 'primary' if task.status == 'in_progress' else 'secondary' }}">
+                                        {{ task.status.replace('_', ' ').title() }}
+                                    </span>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="text-center p-4">
+                                <p class="text-muted">No tasks assigned to you yet.</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="col-lg-4 mb-4">
+                <!-- Personal Progress -->
+                <div class="card member-card mb-4">
+                    <div class="card-header">
+                        <h5><i class="bi bi-trophy me-2"></i>My Progress</h5>
+                    </div>
+                    <div class="card-body">
+                        {% if recent_tasks %}
+                            {% set total_tasks = recent_tasks|length %}
+                            {% set completed_tasks = recent_tasks|selectattr('status', 'equalto', 'completed')|list|length %}
+                            {% set progress = ((completed_tasks / total_tasks * 100) if total_tasks > 0 else 0)|round %}
+                            
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span>Task Completion</span>
+                                    <span class="text-purple">{{ progress }}%</span>
+                                </div>
+                                <div class="progress">
+                                    <div class="progress-bar" data-progress="{{ progress }}"></div>
+                                </div>
+                                <small class="text-muted">{{ completed_tasks }} of {{ total_tasks }} tasks completed</small>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between">
+                                    <span>This Week</span>
+                                    <span class="text-muted">{{ completed_tasks }} completed</span>
+                                </div>
+                            </div>
+                        {% else %}
+                            <p class="text-muted text-center">No tasks to track progress.</p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="card member-card mb-4">
+                    <div class="card-header">
+                        <h5><i class="bi bi-plus me-2"></i>Quick Actions</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex flex-wrap gap-2">
+                            <a href="{{ url_for('new_message') }}" class="btn btn-purple">
+                                <i class="bi bi-chat me-1"></i>Send Message
+                            </a>
+                            <a href="{{ url_for('projects') }}" class="btn btn-outline-purple">
+                                <i class="bi bi-eye me-1"></i>View Projects
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Activity -->
+                <div class="card member-card">
+                    <div class="card-header">
+                        <h5><i class="bi bi-clock me-2"></i>Recent Activity</h5>
+                    </div>
+                    <div class="card-body">
+                        {% if recent_tasks %}
+                            {% for task in recent_tasks[:3] %}
+                            <div class="mb-3">
+                                <small class="text-muted">{{ task.updated_at.strftime('%m/%d %H:%M') if task.updated_at else 'Recently' }}</small>
+                                <br><strong>{{ task.title }}</strong>
+                                <br><small class="text-purple">{{ task.project_name }}</small>
+                            </div>
+                            {% if not loop.last %}<hr>{% endif %}
+                            {% endfor %}
+                        {% else %}
+                            <p class="text-muted text-center">No recent activity.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Overdue Tasks Alert -->
+        {% if overdue_tasks %}
+        <div class="row">
+            <div class="col-12">
+                <div class="card border-danger">
+                    <div class="card-header bg-danger text-white">
+                        <h5><i class="bi bi-exclamation-triangle me-2"></i>Attention: You have {{ overdue_tasks|length }} overdue tasks</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            {% for task in overdue_tasks %}
+                            {% if task.assigned_to == session.user_id %}
+                            <div class="col-md-4 mb-3">
+                                <div class="card border-warning">
+                                    <div class="card-body p-3">
+                                        <h6><a href="{{ url_for('view_task', id=task.id) }}" class="text-decoration-none">{{ task.title }}</a></h6>
+                                        <small class="text-muted">{{ task.project_name }}</small><br>
+                                        <small class="text-danger">Due: {{ task.due_date.strftime('%m/%d/%Y') }}</small>
+                                        <br><span class="badge badge-priority-{{ task.priority }}">{{ task.priority.title() }} Priority</span>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Set progress bar widths from data attributes
+        document.querySelectorAll('.progress-bar[data-progress]').forEach(function(bar) {
+            var progress = bar.getAttribute('data-progress');
+            bar.style.width = progress + '%';
+        });
+        
+        // Add loading states to action buttons
+        var actionButtons = document.querySelectorAll('.btn');
+        actionButtons.forEach(function(btn) {
+            if (btn.href && (btn.textContent.includes('Send') || btn.textContent.includes('View'))) {
+                btn.addEventListener('click', function() {
+                    var originalText = this.innerHTML;
+                    this.innerHTML = originalText.replace(/Send|View/, 'Loading...');
+                    this.disabled = true;
+                    
+                    // Re-enable after timeout if navigation fails
+                    setTimeout(function() {
+                        if (document.contains(btn)) {
+                            btn.innerHTML = originalText;
+                            btn.disabled = false;
+                        }
+                    }, 5000);
+                });
+            }
+        });
+        
+        // Add hover effects to task items
+        document.querySelectorAll('.task-item').forEach(function(item) {
+            item.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateX(5px)';
+                this.style.transition = 'transform 0.3s ease';
+            });
+            
+            item.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateX(0)';
+            });
+        });
+    });
+</script>
+{% endblock %}

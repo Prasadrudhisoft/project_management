@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Milestone - {{ milestone.name }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="card">
+                <div class="card-header">
+                    <h4><i class="bi bi-flag me-2"></i>Edit Milestone</h4>
+                    <small class="text-muted">Project: {{ project.name }}</small>
+                </div>
+                <div class="card-body">
+                    <form method="POST">
+                        <div class="form-group mb-3">
+                            <label for="name" class="form-label">Milestone Name *</label>
+                            <input type="text" class="form-control" id="name" name="name" required 
+                                   value="{{ milestone.name }}" placeholder="Enter milestone name">
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label for="description" class="form-label">Description</label>
+                            <textarea class="form-control" id="description" name="description" rows="4" 
+                                      placeholder="Describe this milestone">{{ milestone.description or '' }}</textarea>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label for="due_date" class="form-label">Due Date</label>
+                                    <input type="date" class="form-control" id="due_date" name="due_date" 
+                                           value="{{ milestone.due_date.strftime('%Y-%m-%d') if milestone.due_date }}">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label for="status" class="form-label">Status</label>
+                                    <select class="form-select" id="status" name="status" required>
+                                        <option value="pending" {{ 'selected' if milestone.status == 'pending' }}>Pending</option>
+                                        <option value="in_progress" {{ 'selected' if milestone.status == 'in_progress' }}>In Progress</option>
+                                        <option value="completed" {{ 'selected' if milestone.status == 'completed' }}>Completed</option>
+                                        <option value="overdue" {{ 'selected' if milestone.status == 'overdue' }}>Overdue</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Milestone Statistics -->
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <div class="card bg-light">
+                                    <div class="card-body text-center">
+                                        <h5 class="card-title">{{ milestone.task_count or 0 }}</h5>
+                                        <p class="card-text">Total Tasks</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="card bg-light">
+                                    <div class="card-body text-center">
+                                        <h5 class="card-title">{{ milestone.completed_tasks or 0 }}</h5>
+                                        <p class="card-text">Completed</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="card bg-light">
+                                    <div class="card-body text-center">
+                                        <h5 class="card-title">
+                                            {% if milestone.task_count and milestone.task_count > 0 %}
+                                                {{ ((milestone.completed_tasks or 0) * 100 // milestone.task_count) }}%
+                                            {% else %}
+                                                0%
+                                            {% endif %}
+                                        </h5>
+                                        <p class="card-text">Progress</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-check me-1"></i>Update Milestone
+                            </button>
+                            <a href="{{ url_for('view_project', id=project.id) }}" class="btn btn-secondary">
+                                <i class="bi bi-arrow-left me-1"></i>Back to Project
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Report - {{ report.project.name }}</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; line-height: 1.6; }
+        .header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid #007bff; padding-bottom: 20px; }
+        .section { margin-bottom: 30px; }
+        .section h3 { color: #007bff; border-bottom: 1px solid #ddd; padding-bottom: 10px; }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px; }
+        .stat-card { background: #f8f9fa; padding: 20px; border-radius: 8px; text-align: center; border-left: 4px solid #007bff; }
+        .stat-number { font-size: 2em; font-weight: bold; color: #007bff; }
+        .table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        .table th, .table td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
+        .table th { background-color: #f8f9fa; font-weight: bold; }
+        .badge { padding: 4px 8px; border-radius: 4px; font-size: 0.8em; }
+        .badge-success { background-color: #28a745; color: white; }
+        .badge-warning { background-color: #ffc107; color: black; }
+        .badge-danger { background-color: #dc3545; color: white; }
+        .badge-secondary { background-color: #6c757d; color: white; }
+        @media print {
+            .no-print { display: none; }
+            body { margin: 0; }
+            .section { page-break-inside: avoid; }
+        }
+        .progress-bar { width: 100%; height: 20px; background-color: #e9ecef; border-radius: 10px; overflow: hidden; }
+        .progress-fill { height: 100%; background-color: #28a745; transition: width 0.3s; }
+        .print-info { color: #666; font-size: 0.9em; margin-top: 30px; text-align: center; }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="header">
+        <h1>📊 Project Report</h1>
+        <h2>{{ report.project.name }}</h2>
+        <p><strong>Organization:</strong> {{ report.project.organization_name or 'N/A' }}</p>
+        <p><strong>Report Generated:</strong> {{ report.generated_at.strftime('%B %d, %Y at %I:%M %p') }}</p>
+        {% if report.project.start_date or report.project.end_date %}
+            <p><strong>Project Duration:</strong> 
+                {{ report.project.start_date.strftime('%B %d, %Y') if report.project.start_date else 'Not set' }} - 
+                {{ report.project.end_date.strftime('%B %d, %Y') if report.project.end_date else 'Not set' }}
+            </p>
+        {% endif %}
+    </div>
+
+    <!-- Project Overview -->
+    <div class="section">
+        <h3>📋 Project Overview</h3>
+        <p><strong>Description:</strong> {{ report.project.description or 'No description available' }}</p>
+        <p><strong>Status:</strong> 
+            <span class="badge badge-{{ 'success' if report.project.status == 'completed' else 'warning' if report.project.status == 'active' else 'secondary' }}">
+                {{ report.project.status.replace('_', ' ').title() }}
+            </span>
+        </p>
+        <p><strong>Created by:</strong> {{ report.project.created_by_name }} on {{ report.project.created_at.strftime('%B %d, %Y') }}</p>
+    </div>
+
+    <!-- Task Statistics -->
+    <div class="section">
+        <h3>📈 Task Statistics</h3>
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-number">{{ report.task_stats.total_tasks or 0 }}</div>
+                <div>Total Tasks</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">{{ report.task_stats.completed_tasks or 0 }}</div>
+                <div>Completed Tasks</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">{{ report.task_stats.in_progress_tasks or 0 }}</div>
+                <div>In Progress</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">{{ report.task_stats.pending_tasks or 0 }}</div>
+                <div>Pending Tasks</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">{{ report.task_stats.overdue_tasks or 0 }}</div>
+                <div>Overdue Tasks</div>
+            </div>
+        </div>
+
+        <!-- Progress Bar -->
+        {% if report.task_stats.total_tasks and report.task_stats.total_tasks > 0 %}
+            {% set completion_percentage = (report.task_stats.completed_tasks * 100 // report.task_stats.total_tasks) %}
+            <div style="margin-top: 20px;">
+                <p><strong>Overall Progress: {{ completion_percentage }}%</strong></p>
+                <div class="progress-bar">
+                    <div class="progress-fill" data-width="{{ completion_percentage }}"></div>
+                </div>
+            </div>
+            <script>
+                // Set progress bar width using JavaScript to avoid CSS parsing issues
+                document.addEventListener('DOMContentLoaded', function() {
+                    const progressFill = document.querySelector('.progress-fill');
+                    if (progressFill) {
+                        const width = progressFill.getAttribute('data-width');
+                        progressFill.style.width = width + '%';
+                    }
+                });
+            </script>
+        {% endif %}
+    </div>
+
+    <!-- Team Performance -->
+    {% if report.team_performance %}
+    <div class="section">
+        <h3>👥 Team Performance</h3>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Team Member</th>
+                    <th>Email</th>
+                    <th>Assigned Tasks</th>
+                    <th>Completed Tasks</th>
+                    <th>Overdue Tasks</th>
+                    <th>Completion Rate</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for member in report.team_performance %}
+                    {% set completion_rate = (member.completed_tasks * 100 // member.assigned_tasks) if member.assigned_tasks > 0 else 0 %}
+                    <tr>
+                        <td>{{ member.full_name }}</td>
+                        <td>{{ member.email }}</td>
+                        <td>{{ member.assigned_tasks or 0 }}</td>
+                        <td>{{ member.completed_tasks or 0 }}</td>
+                        <td>{{ member.overdue_tasks or 0 }}</td>
+                        <td>
+                            <span class="badge badge-{{ 'success' if completion_rate >= 80 else 'warning' if completion_rate >= 60 else 'danger' }}">
+                                {{ completion_rate }}%
+                            </span>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+    <!-- Milestones Progress -->
+    {% if report.milestones_progress %}
+    <div class="section">
+        <h3>🏆 Milestones Progress</h3>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Milestone</th>
+                    <th>Due Date</th>
+                    <th>Status</th>
+                    <th>Total Tasks</th>
+                    <th>Completed Tasks</th>
+                    <th>Progress</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for milestone in report.milestones_progress %}
+                    {% set progress = (milestone.completed_tasks * 100 // milestone.milestone_tasks) if milestone.milestone_tasks > 0 else 0 %}
+                    <tr>
+                        <td>{{ milestone.name }}</td>
+                        <td>{{ milestone.due_date.strftime('%B %d, %Y') if milestone.due_date else 'Not set' }}</td>
+                        <td>
+                            <span class="badge badge-{{ 'success' if milestone.status == 'completed' else 'warning' if milestone.status == 'in_progress' else 'secondary' }}">
+                                {{ milestone.status.replace('_', ' ').title() }}
+                            </span>
+                        </td>
+                        <td>{{ milestone.milestone_tasks or 0 }}</td>
+                        <td>{{ milestone.completed_tasks or 0 }}</td>
+                        <td>{{ progress }}%</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+    <!-- Daily Task Completions Chart -->
+    {% if report.daily_completions %}
+    <div class="section">
+        <h3>📅 Task Completion Timeline</h3>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Tasks Completed</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for completion in report.daily_completions %}
+                    <tr>
+                        <td>{{ completion.completion_date.strftime('%B %d, %Y') if completion.completion_date else 'N/A' }}</td>
+                        <td>{{ completion.tasks_completed or 0 }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+    <!-- Actions -->
+    <div class="section no-print">
+        <button onclick="window.print()" style="background-color: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer;">
+            🖨️ Print Report
+        </button>
+        <button onclick="window.close()" style="background-color: #6c757d; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; margin-left: 10px;">
+            ❌ Close
+        </button>
+    </div>
+
+    <div class="print-info">
+        <p>This report was automatically generated by Simple Project Manager on {{ report.generated_at.strftime('%B %d, %Y at %I:%M %p') }}</p>
+    </div>
+</body>
+</html>

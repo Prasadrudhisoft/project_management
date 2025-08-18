@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+
+{% block title %}New Project - Project Manager{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1><i class="bi bi-plus-circle me-2"></i>Create New Project</h1>
+        <a href="{{ url_for('projects') }}" class="btn btn-secondary">
+            <i class="bi bi-arrow-left me-1"></i>Back to Projects
+        </a>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-info-circle me-2"></i>Project Information</h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST">
+                        <div class="mb-3">
+                            <label for="name" class="form-label">Project Name *</label>
+                            <input type="text" class="form-control" id="name" name="name" required 
+                                   placeholder="Enter project name" maxlength="255">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="description" class="form-label">Description</label>
+                            <textarea class="form-control" id="description" name="description" 
+                                      placeholder="Enter project description (optional)" rows="4"></textarea>
+                        </div>
+                        
+                        {% if session.user_role == 'admin' and managers %}
+                        <div class="mb-3">
+                            <label for="assigned_manager_id" class="form-label">
+                                <i class="bi bi-person-badge me-1"></i>Assign Manager (Optional)
+                            </label>
+                            <select class="form-select" id="assigned_manager_id" name="assigned_manager_id">
+                                <option value="">-- No Manager Assigned --</option>
+                                {% for manager in managers %}
+                                    <option value="{{ manager.id }}">{{ manager.full_name }} ({{ manager.email }})</option>
+                                {% endfor %}
+                            </select>
+                            <small class="text-muted">Choose a manager to assign responsibility for this project</small>
+                        </div>
+                        {% endif %}
+                        
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle me-2"></i>
+                            <strong>Note:</strong> After creating the project, you can assign team members by going to the project details page and clicking the "Manage Team Members" button (Admin only).
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="start_date" class="form-label">Start Date</label>
+                                    <input type="date" class="form-control" id="start_date" name="start_date">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="end_date" class="form-label">End Date</label>
+                                    <input type="date" class="form-control" id="end_date" name="end_date">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between mt-4">
+                            <a href="{{ url_for('projects') }}" class="btn btn-secondary">
+                                <i class="bi bi-x-circle me-1"></i>Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-plus-circle me-1"></i>Create Project
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

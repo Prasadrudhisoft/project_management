@@ -1,0 +1,481 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ project.name|default('Project') }} - Project Manager{% endblock %}
+
+{% block extra_css %}
+<style>
+    .card {
+        margin-bottom: 1.5rem;
+    }
+    
+    .progress {
+        height: 20px;
+        background-color: #e9ecef;
+        border-radius: 0.375rem;
+        overflow: hidden;
+        margin: 0.5rem 0;
+    }
+    
+    .progress-bar {
+        height: 100%;
+        background: linear-gradient(90deg, #0d6efd, #198754);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.75rem;
+        font-weight: 500;
+        transition: width 0.6s ease;
+    }
+    
+    .table-responsive {
+        overflow-x: auto;
+    }
+    
+    @keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+        100% { transform: scale(1); }
+    }
+    
+    .pulse-animation {
+        animation: pulse 2s infinite;
+    }
+    
+    .badge {
+        display: inline-block;
+        padding: 0.35em 0.65em;
+        font-size: 0.75em;
+        font-weight: 700;
+        line-height: 1;
+        text-align: center;
+        white-space: nowrap;
+        vertical-align: baseline;
+        border-radius: 0.375rem;
+    }
+    
+    .overdue-task {
+        color: #dc3545;
+        font-weight: bold;
+    }
+    
+    /* Milestone and team member separator styling */
+    .milestone-separator {
+        margin: 0.5rem 0;
+    }
+    
+    .team-member-separator {
+        margin: 0.5rem 0;
+    }
+    
+    /* Milestone separator styling */
+    .milestone-separator {
+        margin: 0.5rem 0;
+    }
+    
+    /* Team member separator styling */
+    .team-member-separator {
+        margin: 0.5rem 0;
+    }
+    
+    /* Team Member Card Styling */
+    .team-member-card {
+        transition: all 0.3s ease;
+        border: 1px solid var(--gray-200);
+    }
+    
+    .team-member-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        border-color: var(--primary-color);
+    }
+    
+    .avatar-circle {
+        width: 45px;
+        height: 45px;
+        border-radius: 50%;
+        font-size: 1.1rem;
+        font-weight: 600;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+    }
+    
+    .member-name {
+        font-size: 1rem;
+        margin-bottom: 0.25rem;
+    }
+    
+    .badge-role {
+        font-size: 0.7rem;
+        padding: 0.25rem 0.6rem;
+    }
+    
+    .member-details {
+        line-height: 1.4;
+    }
+    
+    .member-joined {
+        font-size: 0.75rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ 'danger' if category == 'error' else category }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <!-- Project Header -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <div>
+                        <h1 class="mb-0"><i class="bi bi-folder"></i>{{ project.name|default('Untitled Project') }}</h1>
+                        <p class="text-muted mb-0">
+                            Created by {{ project.created_by_name|default('Unknown') }} 
+                            {% if project.created_at is defined and project.created_at %}
+                                on {{ project.created_at.strftime('%B %d, %Y') }}
+                            {% endif %}
+                        </p>
+                    </div>
+                    <div>
+                        <span class="badge bg-{{ 'success' if project.status == 'completed' else 'primary' if project.status == 'active' else 'secondary' }} me-2" id="status-badge">
+                            {{ project.status|default('unknown')|replace('_', ' ')|title }}
+                        </span>
+                        {% if session.user_role in ['admin', 'manager'] %}
+                            <a href="{{ url_for('edit_project', id=project.id) }}" class="btn btn-primary btn-sm">
+                                <i class="bi bi-pencil"></i>Edit Project
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="card-body">
+                    {% if project.description is defined and project.description %}
+                        <p>{{ project.description }}</p>
+                    {% else %}
+                        <p class="text-muted">No description provided for this project.</p>
+                    {% endif %}
+                    
+                    <div class="row">
+                        <div class="col-md-4">
+                            <strong>Start Date:</strong><br>
+                            {% if project.start_date is defined and project.start_date %}
+                                {{ project.start_date.strftime('%B %d, %Y') }}
+                            {% else %}
+                                <span class="text-muted">Not set</span>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-4">
+                            <strong>End Date:</strong><br>
+                            {% if project.end_date is defined and project.end_date %}
+                                {{ project.end_date.strftime('%B %d, %Y') }}
+                            {% else %}
+                                <span class="text-muted">Not set</span>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-4">
+                            <strong>Progress:</strong><br>
+                            {% set completed_tasks = tasks|selectattr('status', 'equalto', 'completed')|list|length if tasks is defined and tasks else 0 %}
+                            {% set total_tasks = tasks|length if tasks is defined and tasks else 0 %}
+                            {% set progress = (completed_tasks / total_tasks * 100)|round|int if total_tasks > 0 else 0 %}
+                            <div class="progress">
+                                <div class="progress-bar" role="progressbar" data-progress="{{ progress }}" aria-valuenow="{{ progress }}" aria-valuemin="0" aria-valuemax="100">{{ progress }}%</div>
+                            </div>
+                            <small class="text-muted">{{ completed_tasks }}/{{ total_tasks }} tasks completed</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+        <div class="row">
+            <!-- Tasks Section -->
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h5><i class="bi bi-list-task"></i>Tasks</h5>
+                        {% if session.user_role in ['admin', 'manager'] %}
+                            <a href="{{ url_for('new_task') }}?project_id={{ project.id }}" class="btn btn-success btn-sm">
+                                <i class="bi bi-plus-circle"></i>New Task
+                            </a>
+                        {% endif %}
+                    </div>
+                    <div class="card-body">
+                        {% if tasks is defined and tasks %}
+                            <div class="table-responsive">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Task</th>
+                                            <th>Assigned To</th>
+                                            <th>Priority</th>
+                                            <th>Status</th>
+                                            <th>Due Date</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for task in tasks %}
+                                        <tr>
+                                            <td>
+                                                <a href="{{ url_for('view_task', id=task.id|default('')) }}" class="text-decoration-none">
+                                                    <strong>{{ task.title|default('Untitled Task') }}</strong>
+                                                </a>
+                                                {% if task.description is defined and task.description %}
+                                                    <br><small class="text-muted">{{ task.description[:100] }}{% if task.description|length > 100 %}...{% endif %}</small>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                {% if task.assigned_to_name is defined and task.assigned_to_name %}
+                                                    {{ task.assigned_to_name }}
+                                                {% else %}
+                                                    <span class="text-muted">Unassigned</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-{{ 'danger' if task.priority == 'high' else 'warning' if task.priority == 'medium' else 'secondary' }}">
+                                                    {{ task.priority|default('low')|title }}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-{{ 'success' if task.status == 'completed' else 'primary' if task.status == 'in_progress' else 'secondary' }}">
+                                                    {{ task.status|default('pending')|replace('_', ' ')|title }}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                {% if task.due_date is defined and task.due_date %}
+                                                    {% if task.due_date|to_date and task.due_date|to_date < today() and task.status != 'completed' %}
+                                                        <span class="overdue-task">{{ task.due_date.strftime('%m/%d/%Y') }}</span>
+                                                        <br><small class="overdue-task">Overdue</small>
+                                                    {% else %}
+                                                        {{ task.due_date.strftime('%m/%d/%Y') }}
+                                                    {% endif %}
+                                                {% else %}
+                                                    <span class="text-muted">No due date</span>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        {% else %}
+                            <p class="text-muted text-center">No tasks found for this project.</p>
+                            {% if session.user_role in ['admin', 'manager'] %}
+                                <div class="text-center">
+                                    <a href="{{ url_for('new_task') }}?project_id={{ project.id }}" class="btn btn-success">
+                                        <i class="bi bi-plus-circle"></i>Create First Task
+                                    </a>
+                                </div>
+                            {% endif %}
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="col-md-4">
+                <!-- Team Members -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h6 class="mb-0"><i class="bi bi-people me-2"></i>Team Members</h6>
+                            <div>
+                                <span class="badge bg-info me-2">{{ team_members|length if team_members else 0 }}</span>
+                                {% if session.user_role == 'admin' %}
+                                    <a href="{{ url_for('manage_project_team_members', id=project.id) }}" class="btn btn-sm btn-primary" title="Manage Team Members">
+                                        <i class="bi bi-gear"></i>
+                                    </a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        {% if team_members is defined and team_members %}
+                            <div class="team-members-grid">
+                                {% for member in team_members %}
+                                    <div class="team-member-card mb-3 p-3 border rounded-3 bg-light">
+                                        <div class="d-flex align-items-center">
+                                            <div class="member-avatar me-3">
+                                                <div class="avatar-circle bg-primary text-white d-flex align-items-center justify-content-center">
+                                                    {{ member.full_name[0:1].upper() if member.full_name else 'U' }}
+                                                </div>
+                                            </div>
+                                            <div class="member-info flex-grow-1">
+                                                <div class="member-name fw-bold text-dark">
+                                                    {{ member.full_name|default('Unknown User') }}
+                                                </div>
+                                                <div class="member-details small text-muted">
+                                                    <span class="badge badge-role bg-secondary me-1">
+                                                        {{ member.project_role|default(member.role|default('member'))|title }}
+                                                    </span>
+                                                    {% if member.email %}
+                                                        <i class="bi bi-envelope me-1"></i>{{ member.email }}
+                                                    {% endif %}
+                                                </div>
+                                                {% if member.joined_at %}
+                                                    <div class="member-joined small text-muted mt-1">
+                                                        <i class="bi bi-calendar-plus me-1"></i>
+                                                        Joined {{ member.joined_at.strftime('%B %Y') if member.joined_at else 'Recently' }}
+                                                    </div>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <div class="text-center py-4">
+                                <i class="bi bi-people-fill text-muted mb-3" style="font-size: 3rem;"></i>
+                                <p class="text-muted mb-2">No team members assigned to this project yet.</p>
+                                {% if session.user_role in ['admin', 'manager'] %}
+                                    <small class="text-muted">Team members will appear here when they are assigned tasks or added to the project.</small>
+                                {% endif %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Milestones -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h6><i class="bi bi-flag"></i>Milestones</h6>
+                            {% if session.user_role in ['admin', 'manager'] %}
+                                <a href="{{ url_for('new_milestone', project_id=project.id) }}" class="btn btn-success btn-sm">
+                                    <i class="bi bi-plus-circle"></i>Add Milestone
+                                </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        {% if milestones is defined and milestones %}
+                            {% for milestone in milestones %}
+                                <div class="mb-3">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <strong>{{ milestone.name|default('Untitled Milestone') }}</strong>
+                                        <div>
+                                            <span class="badge bg-{{ 'success' if milestone.status == 'completed' else 'primary' if milestone.status == 'in_progress' else 'secondary' }}">
+                                                {{ milestone.status|default('pending')|replace('_', ' ')|title }}
+                                            </span>
+                                            {% if session.user_role in ['admin', 'manager'] %}
+                                                <a href="{{ url_for('edit_milestone', id=milestone.id) }}" class="btn btn-sm btn-outline-primary ms-2">
+                                                    <i class="bi bi-pencil"></i>
+                                                </a>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    {% if milestone.description is defined and milestone.description %}
+                                        <small class="text-muted">{{ milestone.description }}</small>
+                                    {% endif %}
+                                    {% if milestone.due_date is defined and milestone.due_date %}
+                                        <br><small class="text-muted">Due: {{ milestone.due_date.strftime('%m/%d/%Y') }}</small>
+                                    {% endif %}
+                                    {% if milestone.assigned_member_name is defined and milestone.assigned_member_name %}
+                                        <br><small class="text-info">Assigned to: {{ milestone.assigned_member_name }}</small>
+                                    {% endif %}
+                                </div>
+                                {% if not loop.last %}<hr class="milestone-separator">{% endif %}
+                            {% endfor %}
+                        {% else %}
+                            <p class="text-muted text-center mb-0">No milestones created yet.</p>
+                            {% if session.user_role in ['admin', 'manager'] %}
+                                <div class="text-center mt-2">
+                                    <a href="{{ url_for('new_milestone', project_id=project.id|default('')) }}" class="btn btn-success btn-sm">
+                                        <i class="bi bi-plus-circle"></i>Create First Milestone
+                                    </a>
+                                </div>
+                            {% endif %}
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="card">
+                    <div class="card-header">
+                        <h6>Quick Actions</h6>
+                    </div>
+                    <div class="card-body">
+                        {% if session.user_role in ['admin', 'manager'] %}
+                            <a href="{{ url_for('new_task') }}?project_id={{ project.id }}" class="btn btn-success btn-sm mb-2 w-100">
+                                <i class="bi bi-plus-circle"></i>Add Task
+                            </a>
+                            <a href="{{ url_for('new_milestone', project_id=project.id) }}" class="btn btn-warning btn-sm mb-2 w-100">
+                                <i class="bi bi-flag"></i>Add Milestone
+                            </a>
+                            <a href="{{ url_for('edit_project', id=project.id) }}" class="btn btn-primary btn-sm mb-2 w-100">
+                                <i class="bi bi-pencil"></i>Edit Project
+                            </a>
+                            <a href="{{ url_for('project_visibility', id=project.id) }}" class="btn btn-info btn-sm mb-2 w-100">
+                                <i class="bi bi-eye"></i>Manage Visibility
+                            </a>
+                            <a href="{{ url_for('project_report', project_id=project.id) }}" class="btn btn-secondary btn-sm mb-2 w-100" target="_blank">
+                                <i class="bi bi-file-text"></i>Generate Report
+                            </a>
+                        {% endif %}
+                        <a href="{{ url_for('projects') }}" class="btn btn-outline-secondary btn-sm w-100">
+                            <i class="bi bi-arrow-left"></i>Back to Projects
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Set progress bar width
+        var progressBar = document.querySelector('.progress-bar');
+        if (progressBar) {
+            var progress = progressBar.getAttribute('data-progress');
+            progressBar.style.width = progress + '%';
+        }
+        
+        // Set up pulse animation for completed projects
+        var statusBadge = document.getElementById('status-badge');
+        if (statusBadge && statusBadge.textContent.trim().toLowerCase() === 'completed') {
+            statusBadge.classList.add('pulse-animation');
+        }
+        
+        // Add loading state to action buttons
+        var actionButtons = document.querySelectorAll('.btn');
+        actionButtons.forEach(function(btn) {
+            if (btn.href && (btn.textContent.includes('Add') || btn.textContent.includes('Edit') || btn.textContent.includes('New'))) {
+                btn.addEventListener('click', function(e) {
+                    var originalText = this.innerHTML;
+                    var loadingText = originalText.replace(/Add|New|Edit|Create/, 'Loading...');
+                    
+                    this.innerHTML = loadingText;
+                    this.disabled = true;
+                    
+                    // Re-enable after a short delay if navigation fails
+                    setTimeout(function() {
+                        if (document.contains(btn)) {
+                            btn.innerHTML = originalText;
+                            btn.disabled = false;
+                        }
+                    }, 5000);
+                });
+            }
+        });
+        
+        // Add tooltips for overdue tasks
+        var overdueTasks = document.querySelectorAll('.overdue-task');
+        overdueTasks.forEach(function(element) {
+            element.title = 'This task is overdue and requires attention';
+        });
+    });
+    
+</script>
+{% endblock %}

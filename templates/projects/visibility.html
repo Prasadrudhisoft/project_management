@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+
+{% block title %}Project Visibility - {{ project.name }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="card">
+                <div class="card-header">
+                    <h4><i class="bi bi-eye me-2"></i>Project Visibility Settings</h4>
+                    <small class="text-muted">{{ project.name }}</small>
+                </div>
+                <div class="card-body">
+                    <form method="POST">
+                        <div class="form-group mb-4">
+                            <label class="form-label">Visibility Type</label>
+                            <div class="mt-2">
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="radio" name="visibility" id="visibility_all" 
+                                           value="all" {{ 'checked' if project.visibility == 'all' or not project.visibility }} 
+                                           onchange="toggleMemberSelection()">
+                                    <label class="form-check-label" for="visibility_all">
+                                        <strong>All Members</strong>
+                                        <br><small class="text-muted">All organization members can see this project</small>
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="visibility" id="visibility_specific" 
+                                           value="specific" {{ 'checked' if project.visibility == 'specific' }}
+                                           onchange="toggleMemberSelection()">
+                                    <label class="form-check-label" for="visibility_specific">
+                                        <strong>Specific Members Only</strong>
+                                        <br><small class="text-muted">Only selected members can see this project</small>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="member-selection" class="form-group mb-4" style="display: none;">
+                            <label class="form-label">Select Members</label>
+                            <div class="border rounded p-3" style="max-height: 300px; overflow-y: auto;">
+                                {% if members %}
+                                    {% for member in members %}
+                                        {% set is_visible = member.id in (visible_members | map(attribute='id') | list) %}
+                                        <div class="form-check mb-2">
+                                            <input class="form-check-input" type="checkbox" name="member_ids" 
+                                                   value="{{ member.id }}" id="member_{{ member.id }}" 
+                                                   {{ 'checked' if is_visible }}>
+                                            <label class="form-check-label" for="member_{{ member.id }}">
+                                                <strong>{{ member.full_name }}</strong>
+                                                <br><small class="text-muted">{{ member.email }}</small>
+                                            </label>
+                                        </div>
+                                    {% endfor %}
+                                {% else %}
+                                    <p class="text-muted">No members available for selection.</p>
+                                {% endif %}
+                            </div>
+                            <small class="form-text text-muted">
+                                Note: Admins and managers can always see all projects regardless of visibility settings.
+                            </small>
+                        </div>
+
+                        {% if visible_members and project.visibility == 'specific' %}
+                        <div class="alert alert-info">
+                            <h6>Currently Visible to:</h6>
+                            <ul class="mb-0">
+                                {% for member in visible_members %}
+                                    <li>{{ member.full_name }} ({{ member.email }})</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                        {% endif %}
+
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-check me-1"></i>Update Visibility
+                            </button>
+                            <a href="{{ url_for('view_project', id=project.id) }}" class="btn btn-secondary">
+                                <i class="bi bi-arrow-left me-1"></i>Back to Project
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function toggleMemberSelection() {
+    const specificRadio = document.getElementById('visibility_specific');
+    const memberSelection = document.getElementById('member-selection');
+    
+    if (specificRadio.checked) {
+        memberSelection.style.display = 'block';
+    } else {
+        memberSelection.style.display = 'none';
+    }
+}
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', function() {
+    toggleMemberSelection();
+});
+</script>
+{% endblock %}

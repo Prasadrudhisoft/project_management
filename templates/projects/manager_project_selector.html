@@ -1,0 +1,310 @@
+{% extends "base.html" %}
+
+{% block title %}My Assigned Projects - Project Manager{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1><i class="bi bi-person-badge me-2"></i>My Assigned Projects</h1>
+        <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">
+            <i class="bi bi-arrow-left me-1"></i>Back to Dashboard
+        </a>
+    </div>
+
+    <div class="row">
+        <!-- Project Selection Card -->
+        <div class="col-lg-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-folder-fill me-2"></i>Select Project</h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted">Choose a project from the dropdown to view its details and manage tasks:</p>
+                    
+                    <div class="mb-3">
+                        <label for="projectSelect" class="form-label">Available Projects</label>
+                        <select class="form-select" id="projectSelect" onchange="loadProjectDetails()">
+                            <option value="">-- Select a Project --</option>
+                            {% for project in projects %}
+                                <option value="{{ project.id }}" 
+                                        data-name="{{ project.name }}"
+                                        data-description="{{ project.description or '' }}"
+                                        data-status="{{ project.status }}"
+                                        data-task-count="{{ project.task_count }}"
+                                        data-completed-tasks="{{ project.completed_tasks }}"
+                                        data-start-date="{{ project.start_date or '' }}"
+                                        data-end-date="{{ project.end_date or '' }}">
+                                    {{ project.name }}
+                                    {% if project.status %}
+                                        ({{ project.status.replace('_', ' ').title() }})
+                                    {% endif %}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div id="noProjectMessage" class="alert alert-info">
+                        <i class="bi bi-info-circle me-2"></i>
+                        Please select a project to view its details.
+                    </div>
+
+                    <div id="projectActions" class="d-none">
+                        <div class="d-grid gap-2">
+                            <a href="#" id="viewProjectBtn" class="btn btn-primary">
+                                <i class="bi bi-eye me-1"></i>View Project Details
+                            </a>
+                            <a href="#" id="createTaskBtn" class="btn btn-success">
+                                <i class="bi bi-plus-circle me-1"></i>Create New Task
+                            </a>
+                            <a href="#" id="viewTasksBtn" class="btn btn-outline-primary">
+                                <i class="bi bi-list-task me-1"></i>View All Tasks
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Project Details Card -->
+        <div class="col-lg-6 mb-4">
+            <div id="projectDetailsCard" class="card d-none">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-info-circle me-2"></i>Project Details</h5>
+                </div>
+                <div class="card-body">
+                    <h6 id="projectName" class="card-title"></h6>
+                    <p id="projectDescription" class="card-text text-muted"></p>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <small class="text-muted">Status:</small>
+                            <div id="projectStatus" class="fw-bold"></div>
+                        </div>
+                        <div class="col-md-6">
+                            <small class="text-muted">Progress:</small>
+                            <div id="projectProgress"></div>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <small class="text-muted">Start Date:</small>
+                            <div id="projectStartDate">Not set</div>
+                        </div>
+                        <div class="col-md-6">
+                            <small class="text-muted">End Date:</small>
+                            <div id="projectEndDate">Not set</div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="text-center p-2 bg-light rounded">
+                                <div id="totalTasks" class="h4 mb-0">0</div>
+                                <small class="text-muted">Total Tasks</small>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="text-center p-2 bg-light rounded">
+                                <div id="completedTasks" class="h4 mb-0">0</div>
+                                <small class="text-muted">Completed</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Stats Card for Manager -->
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h6 class="mb-0"><i class="bi bi-graph-up me-2"></i>Manager Overview</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-md-4">
+                            <div class="p-2">
+                                <div class="h5 text-primary mb-0">{{ projects|length }}</div>
+                                <small class="text-muted">Assigned Projects</small>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="p-2">
+                                <div class="h5 text-success mb-0">
+                                    {{ projects|selectattr('status', 'equalto', 'completed')|list|length }}
+                                </div>
+                                <small class="text-muted">Completed</small>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="p-2">
+                                <div class="h5 text-warning mb-0">
+                                    {{ projects|selectattr('status', 'equalto', 'active')|list|length }}
+                                </div>
+                                <small class="text-muted">Active</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Projects Table -->
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0"><i class="bi bi-clock-history me-2"></i>All Assigned Projects</h5>
+        </div>
+        <div class="card-body">
+            {% if projects %}
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Project Name</th>
+                                <th>Status</th>
+                                <th>Tasks</th>
+                                <th>Progress</th>
+                                <th>Dates</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for project in projects %}
+                                <tr>
+                                    <td>
+                                        <div class="fw-bold">{{ project.name }}</div>
+                                        {% if project.description %}
+                                            <small class="text-muted">{{ project.description[:50] }}{% if project.description|length > 50 %}...{% endif %}</small>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% set status_class = {
+                                            'planning': 'secondary',
+                                            'active': 'primary', 
+                                            'completed': 'success',
+                                            'on_hold': 'warning'
+                                        } %}
+                                        <span class="badge bg-{{ status_class.get(project.status, 'secondary') }}">
+                                            {{ project.status.replace('_', ' ').title() if project.status else 'Planning' }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-info">{{ project.completed_tasks }}/{{ project.task_count }}</span>
+                                    </td>
+                                    <td>
+                                        {% set progress_percent = (project.completed_tasks / project.task_count * 100) if project.task_count > 0 else 0 %}
+                                        <div class="progress" style="height: 20px;">
+                                            <div class="progress-bar" role="progressbar" data-width="{{ "%.0f"|format(progress_percent) }}">
+                                                {{ "%.0f"|format(progress_percent) }}%
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <small>
+                                            {% if project.start_date %}
+                                                Start: {{ project.start_date }}<br>
+                                            {% endif %}
+                                            {% if project.end_date %}
+                                                End: {{ project.end_date }}
+                                            {% endif %}
+                                        </small>
+                                    </td>
+                                    <td>
+                                        <div class="btn-group-vertical btn-group-sm">
+                                            <a href="{{ url_for('view_project', id=project.id) }}" class="btn btn-outline-primary btn-sm">
+                                                <i class="bi bi-eye"></i> View
+                                            </a>
+                                            <a href="{{ url_for('new_task') }}?project_id={{ project.id }}" class="btn btn-outline-success btn-sm">
+                                                <i class="bi bi-plus"></i> Task
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="text-center py-5">
+                    <i class="bi bi-folder-x text-muted" style="font-size: 3rem;"></i>
+                    <h5 class="text-muted mt-3">No Projects Assigned</h5>
+                    <p class="text-muted">Contact your administrator to get projects assigned to you.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+function loadProjectDetails() {
+    const select = document.getElementById('projectSelect');
+    const selectedOption = select.options[select.selectedIndex];
+    const noProjectMessage = document.getElementById('noProjectMessage');
+    const projectDetailsCard = document.getElementById('projectDetailsCard');
+    const projectActions = document.getElementById('projectActions');
+
+    if (selectedOption.value === "") {
+        noProjectMessage.classList.remove('d-none');
+        projectDetailsCard.classList.add('d-none');
+        projectActions.classList.add('d-none');
+        return;
+    }
+
+    noProjectMessage.classList.add('d-none');
+    projectDetailsCard.classList.remove('d-none');
+    projectActions.classList.remove('d-none');
+
+    // Populate project details
+    const projectId = selectedOption.value;
+    document.getElementById('projectName').textContent = selectedOption.dataset.name;
+    document.getElementById('projectDescription').textContent = selectedOption.dataset.description || 'No description provided';
+    
+    // Status with badge
+    const status = selectedOption.dataset.status || 'planning';
+    const statusClass = {
+        'planning': 'secondary',
+        'active': 'primary',
+        'completed': 'success',
+        'on_hold': 'warning'
+    }[status] || 'secondary';
+    document.getElementById('projectStatus').innerHTML = '<span class="badge bg-' + statusClass + '">' + status.replace('_', ' ').toUpperCase() + '</span>';
+    
+    // Progress
+    const totalTasks = parseInt(selectedOption.dataset.taskCount) || 0;
+    const completedTasks = parseInt(selectedOption.dataset.completedTasks) || 0;
+    const progressPercent = totalTasks > 0 ? (completedTasks / totalTasks * 100).toFixed(0) : 0;
+    
+    const progressDiv = document.getElementById('projectProgress');
+    progressDiv.innerHTML = '<div class="progress" style="height: 20px;"><div class="progress-bar" role="progressbar" style="width: ' + progressPercent + '%">' + progressPercent + '%</div></div>';
+    
+    // Dates
+    document.getElementById('projectStartDate').textContent = selectedOption.dataset.startDate || 'Not set';
+    document.getElementById('projectEndDate').textContent = selectedOption.dataset.endDate || 'Not set';
+    
+    // Task counts
+    document.getElementById('totalTasks').textContent = totalTasks;
+    document.getElementById('completedTasks').textContent = completedTasks;
+    
+    // Update action button links
+    document.getElementById('viewProjectBtn').href = '/projects/' + projectId;
+    document.getElementById('createTaskBtn').href = '/tasks/new?project_id=' + projectId;
+    document.getElementById('viewTasksBtn').href = '/projects/' + projectId + '#tasks';
+}
+
+// Initialize progress bars on page load
+document.addEventListener('DOMContentLoaded', function() {
+    // Set width for all progress bars using data attributes
+    const progressBars = document.querySelectorAll('.progress-bar[data-width]');
+    progressBars.forEach(function(bar) {
+        bar.style.width = bar.getAttribute('data-width') + '%';
+    });
+    
+    // Auto-select project if there's only one
+    const select = document.getElementById('projectSelect');
+    if (select.options.length === 2) { // Only default option + 1 project
+        select.selectedIndex = 1;
+        loadProjectDetails();
+    }
+});
+</script>
+{% endblock %}

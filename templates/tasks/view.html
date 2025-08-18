@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ task.title }} - Project Manager</title>
+    
+    <style>
+        * { box-sizing: border-box; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            line-height: 1.6;
+            color: #212529;
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 0;
+        }
+        
+        /* Navigation */
+        .navbar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 1rem 0;
+            margin-bottom: 2rem;
+        }
+        
+        .navbar .container-fluid {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .navbar-brand {
+            color: white;
+            text-decoration: none;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+        
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            transition: all 0.3s;
+        }
+        
+        .nav-links a:hover {
+            background-color: rgba(255,255,255,0.1);
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 15px;
+        }
+        
+        .row {
+            display: flex;
+            flex-wrap: wrap;
+            margin: 0 -15px;
+        }
+        
+        .col-12 { flex: 0 0 100%; max-width: 100%; padding: 0 15px; }
+        .col-md-8 { flex: 0 0 66.666%; max-width: 66.666%; padding: 0 15px; }
+        .col-md-4 { flex: 0 0 33.333%; max-width: 33.333%; padding: 0 15px; }
+        
+        .card {
+            background-color: #fff;
+            border: 1px solid rgba(0,0,0,.125);
+            border-radius: 0.5rem;
+            box-shadow: 0 0.125rem 0.25rem rgba(0,0,0,0.075);
+            margin-bottom: 1.5rem;
+        }
+        
+        .card-header {
+            padding: 1rem;
+            background-color: rgba(0,0,0,.03);
+            border-bottom: 1px solid rgba(0,0,0,.125);
+            border-top-left-radius: 0.5rem;
+            border-top-right-radius: 0.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .card-body {
+            padding: 1.5rem;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 0.35em 0.65em;
+            font-size: 0.75em;
+            font-weight: 700;
+            line-height: 1;
+            text-align: center;
+            white-space: nowrap;
+            vertical-align: baseline;
+            border-radius: 0.375rem;
+        }
+        
+        .badge.bg-success { background-color: #198754; color: white; }
+        .badge.bg-primary { background-color: #0d6efd; color: white; }
+        .badge.bg-secondary { background-color: #6c757d; color: white; }
+        .badge.bg-warning { background-color: #ffc107; color: #212529; }
+        .badge.bg-danger { background-color: #dc3545; color: white; }
+        
+        .btn {
+            display: inline-block;
+            font-weight: 400;
+            line-height: 1.5;
+            color: #212529;
+            text-align: center;
+            text-decoration: none;
+            vertical-align: middle;
+            cursor: pointer;
+            border: 1px solid transparent;
+            padding: 0.375rem 0.75rem;
+            font-size: 0.875rem;
+            border-radius: 0.375rem;
+            transition: all 0.15s ease-in-out;
+            margin-right: 0.5rem;
+        }
+        
+        .btn-primary {
+            color: #fff;
+            background-color: #0d6efd;
+            border-color: #0d6efd;
+        }
+        
+        .btn-primary:hover {
+            background-color: #0b5ed7;
+            border-color: #0a58ca;
+        }
+        
+        .btn-secondary {
+            color: #fff;
+            background-color: #6c757d;
+            border-color: #6c757d;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #5c636a;
+            border-color: #565e64;
+        }
+        
+        .btn-sm { 
+            padding: 0.25rem 0.5rem; 
+            font-size: 0.8rem; 
+        }
+        
+        .text-muted { color: #6c757d; }
+        .text-center { text-align: center; }
+        .text-decoration-none { text-decoration: none; }
+        .text-danger { color: #dc3545; }
+        .text-success { color: #198754; }
+        
+        .mb-0 { margin-bottom: 0; }
+        .mb-2 { margin-bottom: 0.5rem; }
+        .mb-3 { margin-bottom: 1rem; }
+        .me-2 { margin-right: 0.5rem; }
+        
+        .d-flex { display: flex; }
+        .justify-content-between { justify-content: space-between; }
+        .align-items-center { align-items: center; }
+        
+        h1 { font-size: 2.5rem; margin-bottom: 1rem; }
+        h5 { font-size: 1.25rem; margin: 0; }
+        h6 { font-size: 1rem; margin: 0; }
+        
+        .alert {
+            position: relative;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border: 1px solid transparent;
+            border-radius: 0.375rem;
+        }
+        
+        .alert-warning {
+            color: #664d03;
+            background-color: #fff3cd;
+            border-color: #ffecb5;
+        }
+        
+        @media (max-width: 768px) {
+            .col-md-4, .col-md-8 {
+                flex: 0 0 100%;
+                max-width: 100%;
+            }
+            
+            .nav-links {
+                display: none;
+            }
+            
+            h1 { font-size: 2rem; }
+        }
+        
+        .bi::before {
+            display: inline-block;
+            width: 1em;
+            height: 1em;
+            vertical-align: -0.125em;
+            margin-right: 0.25rem;
+        }
+        
+        .bi-list-task::before { content: "📋"; }
+        .bi-pencil::before { content: "✏️"; }
+        .bi-chat-dots::before { content: "💬"; }
+        .bi-calendar-event::before { content: "📅"; }
+        .bi-person::before { content: "👤"; }
+        .bi-flag::before { content: "🚩"; }
+        .bi-exclamation-triangle::before { content: "⚠️"; }
+        
+        /* Avatar styles */
+        .avatar-circle {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+        }
+        
+        .fw-semibold { font-weight: 600; }
+        .text-primary { color: #0d6efd; }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="{{ url_for('dashboard') }}">
+                Project Manager
+            </a>
+            
+            <div class="nav-links">
+                <a href="{{ url_for('dashboard') }}">Dashboard</a>
+                <a href="{{ url_for('projects') }}">Projects</a>
+                <a href="{{ url_for('tasks') }}">My Tasks</a>
+                <a href="{{ url_for('messages') }}">Messages</a>
+                <a href="{{ url_for('logout') }}">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+
+                    <div class="alert alert-{{ category }}" style="padding: 1rem; margin-bottom: 1rem; border: 1px solid transparent; border-radius: 0.375rem;">
+
+
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <!-- Task Header -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <div>
+                            <h1 class="mb-0"><i class="bi bi-list-task"></i>{{ task.title }}</h1>
+                            <p class="text-muted mb-0">
+                                Created by {{ task.created_by_name }} on {{ task.created_at.strftime('%B %d, %Y') }}
+                                {% if task.project_name %}in <strong>{{ task.project_name }}</strong>{% endif %}
+                            </p>
+                        </div>
+                        <div>
+                            <span class="badge bg-{{ 'danger' if task.priority == 'high' else 'warning' if task.priority == 'medium' else 'secondary' }} me-2">
+                                {{ task.priority.title() }} Priority
+                            </span>
+                            <span class="badge bg-{{ 'success' if task.status == 'completed' else 'primary' if task.status == 'in_progress' else 'secondary' }} me-2">
+                                {{ task.status.replace('_', ' ').title() }}
+                            </span>
+                            {% if session.user_role in ['admin', 'manager'] or task.assigned_to == session.user_id or task.created_by == session.user_id %}
+                                <a href="{{ url_for('edit_task', id=task.id) }}" class="btn btn-primary btn-sm">
+                                    <i class="bi bi-pencil"></i>Edit Task
+                                </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        {% if task.description %}
+                            <p>{{ task.description }}</p>
+                        {% else %}
+                            <p class="text-muted">No description provided.</p>
+                        {% endif %}
+                        
+                        <!-- Overdue Warning -->
+                        {% if task.due_date and task.due_date < today() and task.status != 'completed' %}
+                            <div class="alert alert-warning">
+                                <i class="bi bi-exclamation-triangle"></i>
+                                <strong>Overdue!</strong> This task was due on {{ task.due_date.strftime('%B %d, %Y') }}.
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Task Details -->
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>Task Details</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <strong><i class="bi bi-person"></i>Assigned To:</strong><br>
+                                {% if task.assigned_to_name %}
+                                    <div class="d-flex align-items-center mt-1">
+                                        <div class="avatar-circle me-2" style="width: 32px; height: 32px; font-size: 0.8rem;">{{ task.assigned_to_name[:1].upper() }}</div>
+                                        <div>
+                                            <div class="fw-semibold">{{ task.assigned_to_name }}</div>
+                                            {% if task.assigned_to_role %}
+                                                <small class="text-primary">{{ task.assigned_to_role.title() }}</small>
+                                            {% endif %}
+                                            {% if task.assigned_to_email %}
+                                                <br><small class="text-muted">{{ task.assigned_to_email }}</small>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                {% else %}
+                                    <span class="text-muted">Unassigned</span>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <strong><i class="bi bi-calendar-event"></i>Due Date:</strong><br>
+                                {% if task.due_date %}
+                                    {{ task.due_date.strftime('%B %d, %Y') }}
+                                    {% if task.due_date < today() and task.status != 'completed' %}
+                                        <span class="text-danger">(Overdue)</span>
+                                    {% endif %}
+                                {% else %}
+                                    <span class="text-muted">No due date set</span>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <strong>Status:</strong><br>
+                                <span class="badge bg-{{ 'success' if task.status == 'completed' else 'primary' if task.status == 'in_progress' else 'secondary' }}">
+                                    {{ task.status.replace('_', ' ').title() }}
+                                </span>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <strong>Priority:</strong><br>
+                                <span class="badge bg-{{ 'danger' if task.priority == 'high' else 'warning' if task.priority == 'medium' else 'secondary' }}">
+                                    {{ task.priority.title() }}
+                                </span>
+                            </div>
+                        </div>
+                        
+                        {% if task.milestone_name %}
+                        <div class="mb-3">
+                            <strong><i class="bi bi-flag"></i>Milestone:</strong><br>
+                            {{ task.milestone_name }}
+                        </div>
+                        {% endif %}
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <strong>Created:</strong><br>
+                                {{ task.created_at.strftime('%B %d, %Y at %I:%M %p') }}
+                            </div>
+                            
+                            {% if task.updated_at and task.updated_at != task.created_at %}
+                            <div class="col-md-6">
+                                <strong>Last Updated:</strong><br>
+                                {{ task.updated_at.strftime('%B %d, %Y at %I:%M %p') }}
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Comments Section -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5><i class="bi bi-chat-dots"></i>Comments</h5>
+                    </div>
+                    <div class="card-body">
+                        {% if comments %}
+                            {% for comment in comments %}
+                                <div class="mb-3" style="padding: 1rem; background-color: #f8f9fa; border-radius: 0.375rem;">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div>
+                                            <strong>{{ comment.user_name }}</strong>
+                                            <small class="text-muted">{{ comment.created_at.strftime('%B %d, %Y at %I:%M %p') }}</small>
+                                        </div>
+                                    </div>
+                                    <p class="mb-0" style="margin-top: 0.5rem;">{{ comment.content }}</p>
+                                </div>
+                            {% endfor %}
+                        {% else %}
+                            <p class="text-muted text-center">No comments yet.</p>
+                        {% endif %}
+                        
+                        <!-- Add Comment Form -->
+                        <div style="border-top: 1px solid #dee2e6; margin-top: 1rem; padding-top: 1rem;">
+                            <form method="POST" action="{{ url_for('add_task_comment', task_id=task.id) }}">
+                                <div class="form-group mb-3">
+                                    <label for="comment" class="form-label">Add a comment:</label>
+                                    <textarea class="form-control" id="comment" name="comment" rows="3" 
+                                              placeholder="Enter your comment..." required style="display: block; width: 100%; padding: 0.375rem 0.75rem; font-size: 1rem; line-height: 1.5; color: #212529; background-color: #fff; border: 1px solid #ced4da; border-radius: 0.375rem;"></textarea>
+                                </div>
+                                <button type="submit" class="btn btn-primary btn-sm">Add Comment</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="col-md-4">
+                <!-- Quick Actions -->
+                <div class="card">
+                    <div class="card-header">
+                        <h6>Quick Actions</h6>
+                    </div>
+                    <div class="card-body">
+                        {% if session.user_role in ['admin', 'manager'] or task.assigned_to == session.user_id or task.created_by == session.user_id %}
+                            <a href="{{ url_for('edit_task', id=task.id) }}" class="btn btn-primary btn-sm mb-2" style="width: 100%;">
+                                <i class="bi bi-pencil"></i>Edit Task
+                            </a>
+                        {% endif %}
+                        
+                        {% if task.project_id %}
+                            <a href="{{ url_for('view_project', id=task.project_id) }}" class="btn btn-secondary btn-sm mb-2" style="width: 100%;">
+                                View Project
+                            </a>
+                        {% endif %}
+                        
+                        <a href="{{ url_for('tasks') }}" class="btn btn-secondary btn-sm" style="width: 100%;">
+                            Back to Tasks
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Project Info -->
+                {% if task.project_name %}
+                <div class="card">
+                    <div class="card-header">
+                        <h6>Project</h6>
+                    </div>
+                    <div class="card-body">
+                        <p class="mb-0">
+                            <strong>{{ task.project_name }}</strong>
+                        </p>
+                        {% if task.project_description %}
+                            <small class="text-muted">{{ task.project_description[:100] }}{% if task.project_description|length > 100 %}...{% endif %}</small>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</body>
+</html>

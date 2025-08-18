@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+
+{% block title %}Messages - Project Manager{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1><i class="bi bi-envelope me-2"></i>Messages</h1>
+        <a href="{{ url_for('new_message') }}" class="btn btn-primary">
+            <i class="bi bi-plus me-1"></i>New Message
+        </a>
+    </div>
+
+    {% if messages %}
+    <div class="card">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th>Subject</th>
+                            <th>From/To</th>
+                            <th>Project</th>
+                            <th>Date</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for message in messages %}
+                        <tr class="{% if message.recipient_id == session.user_id and not message.read_at %}table-warning{% endif %}">
+                            <td>
+                                <strong><a href="{{ url_for('view_message', id=message.id) }}" class="text-decoration-none">{{ message.subject }}</a></strong>
+                                <br><small class="text-muted">{{ message.content[:50] }}...</small>
+                            </td>
+                            <td>
+                                {% if message.sender_id == session.user_id %}
+                                <small class="text-muted">To:</small> {{ message.recipient_name }}
+                                {% else %}
+                                <small class="text-muted">From:</small> {{ message.sender_name }}
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if message.project_name %}
+                                <span class="badge bg-info">{{ message.project_name }}</span>
+                                {% else %}
+                                <small class="text-muted">General</small>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <small>{{ message.created_at.strftime('%m/%d/%Y %I:%M %p') }}</small>
+                            </td>
+                            <td>
+                                {% if message.recipient_id == session.user_id %}
+                                    {% if message.read_at %}
+                                        <span class="badge bg-success">Read</span>
+                                    {% else %}
+                                        <span class="badge bg-warning">Unread</span>
+                                    {% endif %}
+                                {% else %}
+                                    <span class="badge bg-primary">Sent</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <a href="{{ url_for('view_message', id=message.id) }}" class="btn btn-sm btn-outline-primary">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="text-center py-5">
+        <i class="bi bi-envelope fs-1 text-muted mb-3"></i>
+        <h4 class="text-muted">No Messages</h4>
+        <p class="text-muted">Start a conversation by sending your first message.</p>
+        <a href="{{ url_for('new_message') }}" class="btn btn-primary">
+            <i class="bi bi-plus me-1"></i>Send First Message
+        </a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Project - Project Manager</title>
+    
+    <style>
+        * { box-sizing: border-box; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            line-height: 1.6;
+            color: #212529;
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 0;
+        }
+        
+        /* Navigation */
+        .navbar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 1rem 0;
+            margin-bottom: 2rem;
+        }
+        
+        .navbar .container-fluid {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .navbar-brand {
+            color: white;
+            text-decoration: none;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+        
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            transition: all 0.3s;
+        }
+        
+        .nav-links a:hover {
+            background-color: rgba(255,255,255,0.1);
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 0 15px;
+        }
+        
+        .row {
+            display: flex;
+            flex-wrap: wrap;
+            margin-right: -15px;
+            margin-left: -15px;
+        }
+        
+        .justify-content-center { justify-content: center; }
+        .col-md-10 { flex: 0 0 83.333333%; max-width: 83.333333%; padding: 0 15px; }
+        .col-md-8 { flex: 0 0 66.666667%; max-width: 66.666667%; }
+        .col-md-6 { flex: 0 0 50%; max-width: 50%; }
+        .col-md-4 { flex: 0 0 33.333333%; max-width: 33.333333%; }
+        
+        .d-flex { display: flex; }
+        .align-items-center { align-items: center; }
+        .justify-content-between { justify-content: space-between; }
+        .mb-3 { margin-bottom: 1rem; }
+        .mb-4 { margin-bottom: 1.5rem; }
+        .me-3 { margin-right: 1rem; }
+        .mt-2 { margin-top: 0.5rem; }
+        
+        .card {
+            background-color: #fff;
+            border: 1px solid rgba(0,0,0,.125);
+            border-radius: 0.5rem;
+            box-shadow: 0 0.125rem 0.25rem rgba(0,0,0,0.075);
+            margin-bottom: 2rem;
+        }
+        
+        .card-body {
+            padding: 1.5rem;
+        }
+        
+        .card-title {
+            margin-bottom: 0.5rem;
+            font-size: 1rem;
+            font-weight: 600;
+        }
+        
+        .bg-light { background-color: #f8f9fa !important; }
+        .text-muted { color: #6c757d !important; }
+        .text-info { color: #0dcaf0 !important; }
+        .text-success { color: #198754 !important; }
+        .text-warning { color: #ffc107 !important; }
+        .text-primary { color: #0d6efd !important; }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+        
+        .form-control, .form-select {
+            display: block;
+            width: 100%;
+            padding: 0.375rem 0.75rem;
+            font-size: 1rem;
+            font-weight: 400;
+            line-height: 1.5;
+            color: #212529;
+            background-color: #fff;
+            border: 1px solid #ced4da;
+            border-radius: 0.375rem;
+            transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;
+        }
+        
+        .form-control:focus, .form-select:focus {
+            color: #212529;
+            background-color: #fff;
+            border-color: #86b7fe;
+            outline: 0;
+            box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, .25);
+        }
+        
+        textarea.form-control {
+            resize: vertical;
+        }
+        
+        .btn {
+            display: inline-block;
+            font-weight: 400;
+            line-height: 1.5;
+            color: #212529;
+            text-align: center;
+            text-decoration: none;
+            vertical-align: middle;
+            cursor: pointer;
+            border: 1px solid transparent;
+            padding: 0.375rem 0.75rem;
+            font-size: 1rem;
+            border-radius: 0.375rem;
+            transition: all 0.15s ease-in-out;
+            margin-right: 0.5rem;
+        }
+        
+        .btn-outline-secondary {
+            color: #6c757d;
+            border-color: #6c757d;
+        }
+        
+        .btn-outline-secondary:hover {
+            color: #fff;
+            background-color: #6c757d;
+            border-color: #6c757d;
+        }
+        
+        .btn-secondary {
+            color: #fff;
+            background-color: #6c757d;
+            border-color: #6c757d;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #5c636a;
+            border-color: #565e64;
+        }
+        
+        .btn-success {
+            color: #fff;
+            background-color: #198754;
+            border-color: #198754;
+        }
+        
+        .btn-success:hover {
+            background-color: #157347;
+            border-color: #146c43;
+        }
+        
+        .btn-danger {
+            color: #fff;
+            background-color: #dc3545;
+            border-color: #dc3545;
+        }
+        
+        .btn-danger:hover {
+            background-color: #c82333;
+            border-color: #bd2130;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin: 0;
+        }
+        
+        h6 {
+            font-size: 1rem;
+            margin: 0;
+        }
+        
+        small {
+            font-size: 0.875em;
+        }
+        
+        .alert {
+            position: relative;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border: 1px solid transparent;
+            border-radius: 0.375rem;
+        }
+        
+        .alert-success {
+            color: #0f5132;
+            background-color: #d1e7dd;
+            border-color: #badbcc;
+        }
+        
+        .alert-danger {
+            color: #842029;
+            background-color: #f8d7da;
+            border-color: #f5c2c7;
+        }
+        
+        .alert-info {
+            color: #055160;
+            background-color: #d1ecf1;
+            border-color: #b8daff;
+        }
+        
+        .fas::before {
+            display: inline-block;
+            width: 1em;
+            height: 1em;
+            vertical-align: -0.125em;
+            margin-right: 0.25rem;
+        }
+        
+        .fa-arrow-left::before { content: "←"; }
+        .fa-edit::before { content: "✏️"; }
+        .fa-project-diagram::before { content: "📊"; }
+        .fa-flag::before { content: "🚩"; }
+        .fa-align-left::before { content: "📝"; }
+        .fa-calendar-alt::before { content: "📅"; }
+        .fa-calendar-check::before { content: "✅"; }
+        .fa-info-circle::before { content : "ℹ️"; }
+        .fa-times::before { content: "✖️"; }
+        .fa-save::before { content: "💾"; }
+        .fa-user-tie::before { content: "👔"; }
+        .fa-trash::before { content: "🗑️"; }
+        
+        @media (max-width: 768px) {
+            .nav-links { display: none; }
+            .col-md-10, .col-md-8, .col-md-6, .col-md-4 {
+                flex: 0 0 100%;
+                max-width: 100%;
+            }
+            .d-flex { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="{{ url_for('dashboard') }}">
+                Project Manager
+            </a>
+            
+            <div class="nav-links">
+                <a href="{{ url_for('dashboard') }}">Dashboard</a>
+                <a href="{{ url_for('projects') }}">Projects</a>
+                <a href="{{ url_for('tasks') }}">My Tasks</a>
+                <a href="{{ url_for('messages') }}">Messages</a>
+                <a href="{{ url_for('logout') }}">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ 'danger' if category == 'error' else 'success' if category == 'success' else 'info' }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <div class="row justify-content-center">
+            <div class="col-md-10">
+                <div class="d-flex align-items-center mb-4">
+                    <a href="{{ url_for('view_project', id=project.id) }}" class="btn btn-outline-secondary me-3">
+                        <i class="fas fa-arrow-left"></i>
+                    </a>
+                    <h1><i class="fas fa-edit"></i> Edit Project: {{ project.name or 'Untitled Project' }}</h1>
+                </div>
+
+                <div class="card">
+                    <div class="card-body">
+                        <form method="POST">
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <div class="mb-3">
+                                        <label for="name" class="form-label">
+                                            <i class="fas fa-project-diagram"></i> Project Name *
+                                        </label>
+                                        <input type="text" 
+                                               class="form-control" 
+                                               id="name" 
+                                               name="name" 
+                                               required
+                                               value="{{ project.name or '' }}"
+                                               placeholder="Enter project name">
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        <label for="status" class="form-label">
+                                            <i class="fas fa-flag"></i> Status *
+                                        </label>
+                                        <select class="form-select" id="status" name="status" required>
+                                            <option value="planning" {% if project.status == 'planning' %}selected{% endif %}>
+                                                📋 Planning
+                                            </option>
+                                            <option value="active" {% if project.status == 'active' %}selected{% endif %}>
+                                                🚀 Active
+                                            </option>
+                                            <option value="on_hold" {% if project.status == 'on_hold' %}selected{% endif %}>
+                                                ⏸️ On Hold
+                                            </option>
+                                            <option value="completed" {% if project.status == 'completed' %}selected{% endif %}>
+                                                ✅ Completed
+                                            </option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="description" class="form-label">
+                                    <i class="fas fa-align-left"></i> Description
+                                </label>
+                                <textarea class="form-control" 
+                                          id="description" 
+                                          name="description" 
+                                          rows="4"
+                                          placeholder="Enter project description">{{ project.description or '' }}</textarea>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="assigned_manager_id" class="form-label">
+                                    <i class="fas fa-user-tie"></i> Assigned Manager
+                                </label>
+                                <select class="form-select" id="assigned_manager_id" name="assigned_manager_id">
+                                    <option value="">Select a manager (optional)</option>
+                                    {% for manager in managers %}
+                                        <option value="{{ manager.id }}" 
+                                                {% if project.assigned_manager_id == manager.id %}selected{% endif %}>
+                                            {{ manager.full_name }} ({{ manager.email }})
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                                <small class="form-text text-muted">
+                                    Assign a manager to oversee this project. Leave blank if no specific manager is needed.
+                                </small>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="start_date" class="form-label">
+                                            <i class="fas fa-calendar-alt"></i> Start Date
+                                        </label>
+                                        <input type="date" 
+                                               class="form-control" 
+                                               id="start_date" 
+                                               name="start_date"
+                                               value="{% if project.start_date %}{{ project.start_date.strftime('%Y-%m-%d') }}{% endif %}">
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="end_date" class="form-label">
+                                            <i class="fas fa-calendar-check"></i> End Date
+                                        </label>
+                                        <input type="date" 
+                                               class="form-control" 
+                                               id="end_date" 
+                                               name="end_date"
+                                               value="{% if project.end_date %}{{ project.end_date.strftime('%Y-%m-%d') }}{% endif %}">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="card bg-light mb-3">
+                                <div class="card-body">
+                                    <h6 class="card-title"><i class="fas fa-info-circle"></i> Project Information</h6>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <small class="text-muted">
+                                                <strong>Created:</strong> 
+                                                {% if project.created_at %}
+                                                    {{ project.created_at.strftime('%B %d, %Y at %I:%M %p') }}
+                                                {% else %}
+                                                    Unknown
+                                                {% endif %}
+                                            </small>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <small class="text-muted">
+                                                <strong>Created by:</strong> {{ project.created_by_name or 'Unknown' }}
+                                            </small>
+                                        </div>
+                                    </div>
+                                    <div class="row mt-2">
+                                        <div class="col-md-6">
+                                            <small class="text-muted">
+                                                <strong>Last updated:</strong> 
+                                                {% if project.updated_at %}
+                                                    {{ project.updated_at.strftime('%B %d, %Y at %I:%M %p') }}
+                                                {% else %}
+                                                    Never
+                                                {% endif %}
+                                            </small>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <small class="text-muted">
+                                                <strong>Project ID:</strong> {{ project.id or 'Unknown' }}
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <a href="{{ url_for('view_project', id=project.id) }}" class="btn btn-secondary">
+                                        <i class="fas fa-times"></i> Cancel
+                                    </a>
+                                </div>
+                                <div>
+                                    <button type="submit" class="btn btn-success" id="submitBtn">
+                                        <i class="fas fa-save"></i> Update Project
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Delete Project Section (Admin Only) -->
+                {% if session['user_role'] == 'admin' %}
+                <div class="card" style="border-color: #dc3545;">
+                    <div class="card-body">
+                        <h6 class="card-title" style="color: #dc3545;">
+                            <i class="fas fa-trash"></i> Danger Zone
+                        </h6>
+                        <p class="text-muted mb-3">
+                            Deleting this project will permanently remove all associated tasks, milestones, comments, and project data. This action cannot be undone.
+                        </p>
+                        <form method="POST" action="{{ url_for('delete_project', id=project.id) }}" id="deleteForm" onsubmit="return confirmDelete()">
+                            <button type="submit" class="btn btn-danger">
+                                <i class="fas fa-trash"></i> Delete Project
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Date validation
+        document.addEventListener('DOMContentLoaded', function() {
+            var startDateInput = document.getElementById('start_date');
+            var endDateInput = document.getElementById('end_date');
+            
+            // Auto-adjust end date when start date changes
+            startDateInput.addEventListener('change', function() {
+                var startDate = this.value;
+                if (startDate && endDateInput.value && endDateInput.value < startDate) {
+                    endDateInput.value = startDate;
+                }
+                if (startDate) {
+                    endDateInput.min = startDate;
+                }
+            });
+            
+            // Validate end date is not before start date
+            endDateInput.addEventListener('change', function() {
+                var startDate = startDateInput.value;
+                var endDate = this.value;
+                
+                if (startDate && endDate && endDate < startDate) {
+                    alert('End date cannot be before start date');
+                    this.value = startDate;
+                }
+            });
+        });
+
+        // Status selection styling
+        function updateStatusStyling() {
+            var statusSelect = document.getElementById('status');
+            var status = statusSelect.value;
+            var statusClasses = {
+                'planning': 'text-info',
+                'active': 'text-success',
+                'on_hold': 'text-warning',
+                'completed': 'text-primary'
+            };
+            
+            // Reset classes
+            statusSelect.className = 'form-select';
+            if (statusClasses[status]) {
+                statusSelect.classList.add(statusClasses[status]);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            var statusSelect = document.getElementById('status');
+            statusSelect.addEventListener('change', updateStatusStyling);
+            updateStatusStyling(); // Initialize styling
+        });
+
+        // Form validation
+        document.addEventListener('DOMContentLoaded', function() {
+            var form = document.querySelector('form');
+            var submitBtn = document.getElementById('submitBtn');
+            
+            form.addEventListener('submit', function(e) {
+                var name = document.getElementById('name').value.trim();
+                
+                if (!name) {
+                    e.preventDefault();
+                    alert('Project name is required');
+                    document.getElementById('name').focus();
+                    return false;
+                }
+                
+                if (name.length < 3) {
+                    e.preventDefault();
+                    alert('Project name must be at least 3 characters long');
+                    document.getElementById('name').focus();
+                    return false;
+                }
+                
+                // Add loading state
+                submitBtn.innerHTML = '<i class="fas fa-save"></i> Updating...';
+                submitBtn.disabled = true;
+            });
+        });
+        
+        // Delete confirmation
+        function confirmDelete() {
+            var projectName = '{{ project.name or "this project" }}';
+            var confirmation = confirm('Are you sure you want to delete "' + projectName + '"?\n\nThis will permanently delete:\n- The project\n- All tasks and milestones\n- All comments and messages\n- All project data\n\nThis action cannot be undone!');
+            
+            if (confirmation) {
+                var doubleConfirmation = prompt('To confirm deletion, please type the project name exactly:\n"' + projectName + '"');
+                return doubleConfirmation === projectName;
+            }
+            
+            return false;
+        }
+    </script>
+</body>
+</html>

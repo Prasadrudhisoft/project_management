@@ -1,0 +1,309 @@
+{% extends "base.html" %}
+
+{% block title %}Notifications - {{ app_config.APP_NAME }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .notification-item {
+        border-left: 4px solid #dee2e6;
+        transition: all 0.3s ease;
+    }
+    
+    .notification-item.unread {
+        border-left-color: #007bff;
+        background-color: #f8f9fa;
+    }
+    
+    .notification-item.high-priority {
+        border-left-color: #dc3545;
+    }
+    
+    .notification-item.medium-priority {
+        border-left-color: #ffc107;
+    }
+    
+    .notification-item.low-priority {
+        border-left-color: #28a745;
+    }
+    
+    .notification-item:hover {
+        background-color: #f8f9fa;
+        cursor: pointer;
+    }
+    
+    .notification-title {
+        font-weight: 600;
+        margin-bottom: 0.25rem;
+    }
+    
+    .notification-message {
+        color: #6c757d;
+        font-size: 0.9rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .notification-meta {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 0.8rem;
+        color: #6c757d;
+    }
+    
+    .notification-badge {
+        font-size: 0.75rem;
+        padding: 0.25em 0.5em;
+    }
+    
+    .notification-actions {
+        display: flex;
+        gap: 0.5rem;
+        margin-top: 1rem;
+    }
+    
+    .badge-priority-high {
+        background-color: #dc3545;
+        color: white;
+    }
+    
+    .badge-priority-medium {
+        background-color: #ffc107;
+        color: #212529;
+    }
+    
+    .badge-priority-low {
+        background-color: #28a745;
+        color: white;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 3rem;
+        color: #6c757d;
+    }
+    
+    .empty-state i {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1><i class="fas fa-bell me-2"></i>Notifications</h1>
+                
+                <div class="d-flex gap-2">
+                    <span class="badge bg-primary">
+                        {{ unread_count }} unread
+                    </span>
+                    
+                    {% if unread_count > 0 %}
+                    <button class="btn btn-outline-primary btn-sm" onclick="markAllAsRead()">
+                        <i class="fas fa-check-double me-1"></i>Mark All Read
+                    </button>
+                    {% endif %}
+                    
+                    {% if session.user_role in ['admin', 'manager'] %}
+                    <form method="POST" action="{{ url_for('generate_notifications') }}" class="d-inline">
+                        <button type="submit" class="btn btn-outline-success btn-sm" title="Generate new notifications">
+                            <i class="fas fa-sync me-1"></i>Generate
+                        </button>
+                    </form>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    {% if notifications %}
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body p-0">
+                    {% for notification in notifications %}
+                    <div class="notification-item p-3 border-bottom {% if not notification.is_read %}unread{% endif %} 
+                         {% if notification.days_until_due is not none %}
+                             {% if notification.days_until_due == 0 %}high-priority
+                             {% elif notification.days_until_due == 1 %}medium-priority
+                             {% else %}low-priority{% endif %}
+                         {% endif %}"
+                         data-notification-id="{{ notification.id }}"
+                         onclick="markAsRead('{{ notification.id }}')">
+                        
+                        <div class="notification-title">
+                            {{ notification.title }}
+                            {% if not notification.is_read %}
+                            <span class="badge bg-primary ms-2 notification-badge">New</span>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="notification-message">
+                            {{ notification.message }}
+                        </div>
+                        
+                        <div class="notification-meta">
+                            <div>
+                                {% if notification.project_name %}
+                                <span class="me-3">
+                                    <i class="fas fa-folder me-1"></i>{{ notification.project_name }}
+                                </span>
+                                {% endif %}
+                                
+                                {% if notification.task_title %}
+                                <span class="me-3">
+                                    <i class="fas fa-tasks me-1"></i>{{ notification.task_title }}
+                                </span>
+                                {% endif %}
+                                
+                                {% if notification.days_until_due is not none %}
+                                <span class="badge 
+                                    {% if notification.days_until_due == 0 %}badge-priority-high
+                                    {% elif notification.days_until_due == 1 %}badge-priority-medium
+                                    {% else %}badge-priority-low{% endif %}">
+                                    {% if notification.days_until_due == 0 %}
+                                        Due Today
+                                    {% elif notification.days_until_due == 1 %}
+                                        Due Tomorrow
+                                    {% else %}
+                                        {{ notification.days_until_due }} days left
+                                    {% endif %}
+                                </span>
+                                {% endif %}
+                            </div>
+                            
+                            <small>
+                                {% if notification.created_at %}
+                                {{ notification.created_at.strftime('%b %d, %Y at %I:%M %p') }}
+                                {% endif %}
+                            </small>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="empty-state">
+                        <i class="fas fa-bell-slash text-muted"></i>
+                        <h4>No Notifications</h4>
+                        <p class="text-muted mb-0">
+                            You don't have any notifications yet. 
+                            {% if session.user_role in ['admin', 'manager'] %}
+                            <br><br>
+                            <form method="POST" action="{{ url_for('generate_notifications') }}" class="d-inline">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-plus me-1"></i>Generate Notifications
+                                </button>
+                            </form>
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+function markAsRead(notificationId) {
+    fetch(`/api/notifications/${notificationId}/mark-read`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            const notificationItem = document.querySelector(`[data-notification-id="${notificationId}"]`);
+            if (notificationItem) {
+                notificationItem.classList.remove('unread');
+                const badge = notificationItem.querySelector('.badge.bg-primary');
+                if (badge) {
+                    badge.remove();
+                }
+            }
+            updateNotificationCount();
+        }
+    })
+    .catch(error => {
+        console.error('Error marking notification as read:', error);
+    });
+}
+
+function markAllAsRead() {
+    fetch('/api/notifications/mark-all-read', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Remove unread styling from all notifications
+            document.querySelectorAll('.notification-item.unread').forEach(item => {
+                item.classList.remove('unread');
+            });
+            
+            // Remove all "New" badges
+            document.querySelectorAll('.badge.bg-primary.notification-badge').forEach(badge => {
+                badge.remove();
+            });
+            
+            // Hide the "Mark All Read" button
+            const markAllBtn = document.querySelector('button[onclick="markAllAsRead()"]');
+            if (markAllBtn) {
+                markAllBtn.style.display = 'none';
+            }
+            
+            // Update unread count badge
+            const unreadBadge = document.querySelector('.badge.bg-primary');
+            if (unreadBadge && unreadBadge.textContent.includes('unread')) {
+                unreadBadge.textContent = '0 unread';
+            }
+            
+            updateNotificationCount();
+        }
+    })
+    .catch(error => {
+        console.error('Error marking all notifications as read:', error);
+    });
+}
+
+function updateNotificationCount() {
+    fetch('/api/notifications/count')
+    .then(response => response.json())
+    .then(data => {
+        // Update notification count in navigation if it exists
+        const navBadge = document.querySelector('.notification-count');
+        if (navBadge) {
+            if (data.unread_count > 0) {
+                navBadge.textContent = data.unread_count;
+                navBadge.style.display = 'inline';
+            } else {
+                navBadge.style.display = 'none';
+            }
+        }
+    })
+    .catch(error => {
+        console.error('Error updating notification count:', error);
+    });
+}
+
+// Auto-refresh notifications every 2 minutes
+setInterval(function() {
+    updateNotificationCount();
+}, 120000);
+</script>
+{% endblock %}

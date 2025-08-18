@@ -1,0 +1,1077 @@
+{% extends 'base.html' %}
+
+{% block title %}Manager Dashboard - Project Manager{% endblock %}
+
+{% block extra_css %}
+<style>
+        * { box-sizing: border-box; }
+        
+        /* CSS Variables for Manager Theme */
+        :root {
+            --manager-primary: #28a745;
+            --manager-secondary: #20c997;
+            --manager-gradient: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            --shadow-light: 0 2px 8px rgba(40, 167, 69, 0.15);
+            --shadow-medium: 0 4px 16px rgba(40, 167, 69, 0.2);
+            --shadow-glow: 0 0 20px rgba(40, 167, 69, 0.3);
+            --border-radius: 16px;
+            --transition-smooth: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            line-height: 1.6;
+            color: #212529;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            margin: 0;
+            padding: 0;
+            position: relative;
+            overflow-x: hidden;
+        }
+        
+        /* Background Pattern */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: radial-gradient(circle at 20% 50%, rgba(40, 167, 69, 0.05) 0%, transparent 50%),
+                              radial-gradient(circle at 80% 20%, rgba(32, 201, 151, 0.05) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: -1;
+        }
+        
+        /* Animation Keyframes */
+        @keyframes slideInFromLeft {
+            0% {
+                opacity: 0;
+                transform: translateX(-50px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        @keyframes fadeInUp {
+            0% {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes scaleIn {
+            0% {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+        
+        @keyframes glow {
+            0%, 100% {
+                box-shadow: var(--shadow-light);
+            }
+            50% {
+                box-shadow: var(--shadow-glow);
+            }
+        }
+        
+        /* Navigation */
+        .navbar {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            padding: 1rem 0;
+            margin-bottom: 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .navbar .container-fluid {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .navbar-brand {
+            color: white;
+            text-decoration: none;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+        
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            transition: all 0.3s;
+        }
+        
+        .nav-links a:hover {
+            background-color: rgba(255,255,255,0.1);
+        }
+        
+        .user-menu {
+            position: relative;
+            display: inline-block;
+        }
+        
+        .user-toggle {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            cursor: pointer;
+        }
+        
+        .dropdown-menu {
+            display: none;
+            position: absolute;
+            right: 0;
+            top: 100%;
+            background: white;
+            box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.15);
+            border-radius: 0.375rem;
+            padding: 0.5rem 0;
+            min-width: 200px;
+            z-index: 1000;
+        }
+        
+        .dropdown-menu.show {
+            display: block;
+        }
+        
+        .dropdown-item {
+            display: block;
+            color: #212529;
+            padding: 0.5rem 1rem;
+            text-decoration: none;
+            transition: background-color 0.3s;
+        }
+        
+        .dropdown-item:hover {
+            background-color: #f8f9fa;
+        }
+        
+        /* Layout */
+        .container-fluid {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 15px;
+        }
+        
+        .row {
+            display: flex;
+            flex-wrap: wrap;
+            margin: 0 -15px;
+        }
+        
+        .col-12 { flex: 0 0 100%; max-width: 100%; padding: 0 15px; }
+        .col-md-3 { flex: 0 0 25%; max-width: 25%; padding: 0 15px; }
+        .col-md-4 { flex: 0 0 33.333333%; max-width: 33.333333%; padding: 0 15px; }
+        .col-md-6 { flex: 0 0 50%; max-width: 50%; padding: 0 15px; }
+        .col-lg-8 { flex: 0 0 66.666667%; max-width: 66.666667%; padding: 0 15px; }
+        .col-lg-4 { flex: 0 0 33.333333%; max-width: 33.333333%; padding: 0 15px; }
+        .col-sm-6 { flex: 0 0 50%; max-width: 50%; padding: 0 15px; }
+        
+        .mt-4 { margin-top: 2rem; }
+        .mb-3 { margin-bottom: 1rem; }
+        .mb-4 { margin-bottom: 2rem; }
+        .me-1 { margin-right: 0.25rem; }
+        .me-2 { margin-right: 0.5rem; }
+        .p-3 { padding: 1rem; }
+        
+        /* Enhanced Cards with Modern Animations */
+        .card {
+            background: linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%);
+            border: none;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-light);
+            margin-bottom: 1.5rem;
+            transition: var(--transition-smooth);
+            position: relative;
+            overflow: hidden;
+            animation: fadeInUp 0.8s ease-out;
+        }
+        
+        .card::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: var(--manager-gradient);
+            border-radius: var(--border-radius);
+            z-index: -1;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-6px) scale(1.02);
+            box-shadow: var(--shadow-medium);
+        }
+        
+        .card:hover::before {
+            opacity: 0.15;
+        }
+        
+        /* Animated Manager Stat Cards */
+        .manager-stat-card {
+            background: var(--manager-gradient);
+            animation: scaleIn 0.8s ease-out;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .manager-stat-card::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, transparent 60%);
+            animation: glow 4s ease-in-out infinite;
+        }
+        
+        .manager-stat-card:hover {
+            animation: glow 1s ease-in-out;
+        }
+        
+        /* Apply different animation delays to cards */
+        .row .col-md-3:nth-child(1) .card { animation-delay: 0.1s; }
+        .row .col-md-3:nth-child(2) .card { animation-delay: 0.2s; }
+        .row .col-md-3:nth-child(3) .card { animation-delay: 0.3s; }
+        .row .col-md-3:nth-child(4) .card { animation-delay: 0.4s; }
+        
+        /* Manager card specific styling */
+        .manager-card {
+            border-left: 4px solid var(--manager-primary);
+            animation: slideInFromLeft 0.8s ease-out;
+        }
+        
+        /* Header Section Animation */
+        .manager-header {
+            background: var(--manager-gradient);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .manager-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="50" cy="50" r="1" fill="%23ffffff" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+            opacity: 0.3;
+        }
+        
+        .card-header {
+            padding: 1rem;
+            background-color: rgba(0,0,0,.03);
+            border-bottom: 1px solid rgba(0,0,0,.125);
+            border-top-left-radius: 0.5rem;
+            border-top-right-radius: 0.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .card-body {
+            padding: 1.5rem;
+        }
+        
+        /* Manager-specific styling */
+        .manager-card {
+            border-left: 4px solid #28a745;
+        }
+        
+        .manager-stat-card {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+        }
+        
+        .manager-header {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            padding: 2rem 0;
+        }
+        
+        /* Enhanced Stat Cards with Proper Colors */
+        .bg-primary { 
+            background: linear-gradient(135deg, #0d6efd 0%, #0b5ed7 100%) !important; 
+            color: white !important;
+            border: none !important;
+        }
+        .bg-success { 
+            background: linear-gradient(135deg, #198754 0%, #157347 100%) !important; 
+            color: white !important;
+            border: none !important;
+        }
+        .bg-info { 
+            background: linear-gradient(135deg, #0dcaf0 0%, #31d2f2 100%) !important; 
+            color: white !important;
+            border: none !important;
+        }
+        .bg-warning { 
+            background: linear-gradient(135deg, #ffc107 0%, #ffca2c 100%) !important; 
+            color: #212529 !important;
+            border: none !important;
+        }
+        .bg-danger { 
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%) !important; 
+            color: white !important;
+            border: none !important;
+        }
+        
+        .stat-card {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 100%;
+        }
+        
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin: 0;
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+            margin: 0;
+            opacity: 0.9;
+        }
+        
+        .stat-icon {
+            font-size: 3rem;
+            opacity: 0.3;
+        }
+        
+        /* Badges */
+        .badge {
+            display: inline-block;
+            padding: 0.35em 0.65em;
+            font-size: 0.75em;
+            font-weight: 700;
+            line-height: 1;
+            text-align: center;
+            white-space: nowrap;
+            vertical-align: baseline;
+            border-radius: 0.375rem;
+        }
+        
+        .badge.bg-primary { background-color: #0d6efd; color: white; }
+        .badge.bg-success { background-color: #198754; color: white; }
+        .badge.bg-secondary { background-color: #6c757d; color: white; }
+        .badge.bg-warning { background-color: #ffc107; color: #212529; }
+        .badge.bg-danger { background-color: #dc3545; color: white; }
+        
+        /* Buttons */
+        .btn {
+            display: inline-block;
+            font-weight: 400;
+            line-height: 1.5;
+            color: #212529;
+            text-align: center;
+            text-decoration: none;
+            vertical-align: middle;
+            cursor: pointer;
+            border: 1px solid transparent;
+            padding: 0.375rem 0.75rem;
+            font-size: 0.875rem;
+            border-radius: 0.375rem;
+            transition: all 0.15s ease-in-out;
+            margin: 0.25rem;
+        }
+        
+        .btn-sm { padding: 0.25rem 0.5rem; font-size: 0.8rem; }
+        
+        .btn-success { color: #fff; background-color: #28a745; border-color: #28a745; }
+        .btn-success:hover { background-color: #218838; border-color: #1e7e34; }
+        
+        .btn-primary { color: #fff; background-color: #0d6efd; border-color: #0d6efd; }
+        .btn-primary:hover { background-color: #0b5ed7; border-color: #0a58ca; }
+        
+        .btn-outline-success {
+            color: #28a745;
+            border-color: #28a745;
+            background-color: transparent;
+        }
+        .btn-outline-success:hover {
+            color: #fff;
+            background-color: #28a745;
+        }
+        
+        /* Progress bars */
+        .progress {
+            height: 8px;
+            background-color: #e9ecef;
+            border-radius: 0.375rem;
+            overflow: hidden;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            background-color: #28a745;
+            transition: width 0.3s;
+        }
+        
+        /* Text styles */
+        .text-muted { color: #6c757d; }
+        .text-center { text-align: center; }
+        .text-success { color: #28a745; }
+        .text-danger { color: #dc3545; }
+        .text-warning { color: #ffc107; }
+        .text-decoration-none { text-decoration: none; }
+        
+        /* Flexbox utilities */
+        .d-flex { display: flex; }
+        .justify-content-between { justify-content: space-between; }
+        .align-items-center { align-items: center; }
+        .flex-wrap { flex-wrap: wrap; }
+        .gap-2 > * { margin-right: 0.5rem; }
+        
+        /* Icons */
+        .bi::before {
+            display: inline-block;
+            width: 1em;
+            height: 1em;
+            vertical-align: -0.125em;
+        }
+        
+        .bi-kanban::before { content: "📋"; }
+        .bi-people::before { content: "👥"; }
+        .bi-clipboard-check::before { content: "✅"; }
+        .bi-exclamation-triangle::before { content: "⚠️"; }
+        .bi-graph-up::before { content: "📊"; }
+        .bi-person-circle::before { content: "👤"; }
+        .bi-box-arrow-right::before { content: "→"; }
+        .bi-plus::before { content: "+"; }
+        .bi-eye::before { content: "👁"; }
+        .bi-calendar::before { content: "📅"; }
+        .bi-clock::before { content: "🕒"; }
+        
+        /* Tables */
+        .table {
+            width: 100%;
+            margin-bottom: 1rem;
+            border-collapse: collapse;
+        }
+        
+        .table th, .table td {
+            padding: 0.75rem;
+            vertical-align: top;
+            border-bottom: 1px solid #dee2e6;
+        }
+        
+        .table th {
+            font-weight: 600;
+            color: #495057;
+            background-color: #f8f9fa;
+        }
+        
+        .table-hover tbody tr:hover {
+            background-color: rgba(0,0,0,.075);
+        }
+        
+        h1 { font-size: 2.5rem; margin-bottom: 0.5rem; color: white; }
+        h2 { font-size: 2rem; margin-bottom: 1rem; }
+        h5 { font-size: 1.25rem; margin: 0; }
+        h6 { font-size: 1rem; margin: 0; }
+        
+        /* Manager badge */
+        .manager-badge {
+            background: linear-gradient(45deg, #28a745, #20c997);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 1rem;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        /* Alert styles */
+        .alert {
+            position: relative;
+            padding: 0.75rem 1.25rem;
+            margin-bottom: 1rem;
+            border: 1px solid transparent;
+            border-radius: 0.375rem;
+        }
+
+        .alert-warning {
+            color: #856404;
+            background-color: #fff3cd;
+            border-color: #ffeaa7;
+        }
+
+        .border-danger {
+            border-color: #dc3545 !important;
+        }
+
+        .border-warning {
+            border-color: #ffc107 !important;
+        }
+
+        .table-responsive {
+            overflow-x: auto;
+        }
+        
+        /* Enhanced overdue task styles */
+        .border-left-warning {
+            border-left: 4px solid #ffc107;
+        }
+        
+        .table-sm th, .table-sm td {
+            padding: 0.5rem;
+        }
+        
+        .user-overdue-section {
+            background: #f8f9fa;
+            border-radius: 0.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .overdue-summary {
+            background: linear-gradient(45deg, #ffeaa7, #fdcb6e);
+            padding: 0.75rem;
+            border-radius: 0.375rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .btn-outline-danger {
+            color: #dc3545;
+            border-color: #dc3545;
+            background-color: transparent;
+        }
+        .btn-outline-danger:hover {
+            color: #fff;
+            background-color: #dc3545;
+        }
+        
+        .btn-outline-primary {
+            color: #0d6efd;
+            border-color: #0d6efd;
+            background-color: transparent;
+        }
+        .btn-outline-primary:hover {
+            color: #fff;
+            background-color: #0d6efd;
+        }
+        
+        .ms-2 {
+            margin-left: 0.5rem;
+        }
+        
+        .mt-2 {
+            margin-top: 0.5rem;
+        }
+        
+        .mt-3 {
+            margin-top: 1rem;
+        }
+        
+        /* Responsive Improvements */
+        @media (max-width: 768px) {
+            .col-md-3, .col-md-4, .col-md-6, .col-lg-4, .col-lg-8, .col-sm-6 {
+                flex: 0 0 100%;
+                max-width: 100%;
+                margin-bottom: 1rem;
+            }
+            
+            .nav-links {
+                display: none;
+            }
+            
+            .stat-card {
+                text-align: center;
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+            
+            .stat-icon {
+                font-size: 2rem;
+                margin-bottom: 0.5rem;
+            }
+            
+            .stat-number {
+                font-size: 2rem;
+            }
+            
+            /* Mobile card headers */
+            .card-header {
+                flex-direction: column;
+                align-items: flex-start !important;
+                gap: 0.75rem;
+            }
+            
+            .card-header h5 {
+                margin-bottom: 0;
+            }
+            
+            /* Mobile buttons */
+            .card-header .btn {
+                width: auto;
+                min-width: 120px;
+            }
+            
+            /* Mobile quick actions */
+            .d-flex.flex-wrap.gap-2 {
+                flex-direction: column;
+            }
+            
+            .d-flex.flex-wrap.gap-2 .btn {
+                width: 100%;
+                margin-bottom: 0.5rem;
+            }
+            
+            /* Mobile table fixes */
+            .table-responsive {
+                font-size: 0.85rem;
+            }
+            
+            .table th, .table td {
+                padding: 0.5rem;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .container-fluid {
+                padding-left: 10px;
+                padding-right: 10px;
+            }
+            
+            .manager-header {
+                padding: 1.5rem 0;
+            }
+            
+            h1 {
+                font-size: 1.75rem;
+            }
+            
+            .stat-number {
+                font-size: 1.5rem;
+            }
+            
+            .badge {
+                font-size: 0.7rem;
+                padding: 0.25rem 0.5rem;
+            }
+            
+            /* Mobile overdue task cards */
+            .alert .row [class*='col-'] {
+                margin-bottom: 0.75rem;
+            }
+        }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Manager Header -->
+<div class="manager-header">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12">
+                <h1><i class="bi bi-kanban me-2"></i>Manager Dashboard</h1>
+                <p class="text-light manager-subtitle">Manage projects, track team performance, and deliver outstanding deliverables</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container-fluid mt-4">
+        <!-- Manager Stats Cards -->
+        <div class="row mb-4">
+            <div class="col-md-3 col-sm-6 mb-3">
+                <div class="card manager-stat-card">
+                    <div class="card-body">
+                        <div class="stat-card">
+                            <div>
+                                <h4 class="stat-number">{{ stats.projects_total or 0 }}</h4>
+                                <p class="stat-label">Total Projects</p>
+                            </div>
+                            <div class="stat-icon">
+                                <i class="bi bi-kanban"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6 mb-3">
+                <div class="card bg-success text-white">
+                    <div class="card-body">
+                        <div class="stat-card">
+                            <div>
+                                <h4 class="stat-number">{{ stats.projects_active or 0 }}</h4>
+                                <p class="stat-label">Active Projects</p>
+                            </div>
+                            <div class="stat-icon">
+                                ▶️
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6 mb-3">
+                <div class="card bg-info">
+                    <div class="card-body">
+                        <div class="stat-card">
+                            <div>
+                                <h4 class="stat-number">{{ stats.tasks_total or 0 }}</h4>
+                                <p class="stat-label">Total Tasks</p>
+                            </div>
+                            <div class="stat-icon">
+                                <i class="bi bi-clipboard-check"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6 mb-3">
+                <div class="card bg-warning">
+                    <div class="card-body">
+                        <div class="stat-card">
+                            <div>
+                                <h4 class="stat-number">{{ stats.users_total or 0 }}</h4>
+                                <p class="stat-label">Team Members</p>
+                            </div>
+                            <div class="stat-icon">
+                                <i class="bi bi-people"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Project Overview -->
+            <div class="col-lg-8 mb-4">
+                <div class="card manager-card">
+                    <div class="card-header">
+                        <h5><i class="bi bi-kanban me-2"></i>Project Overview</h5>
+                        <a href="{{ url_for('projects') }}" class="btn btn-sm btn-outline-success">Manage All</a>
+                    </div>
+                    <div class="card-body">
+                        {% if recent_projects %}
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Project Name</th>
+                                            <th>Status</th>
+                                            <th>Progress</th>
+                                            <th>Team</th>
+                                            <th>Due Date</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for project in recent_projects %}
+                                        <tr>
+                                            <td>
+                                                <strong>{{ project.name }}</strong>
+                                                <br><small class="text-muted">{{ project.description[:50] }}...</small>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-{{ 'success' if project.status == 'completed' else 'primary' if project.status == 'active' else 'secondary' }}">
+                                                    {{ project.status.replace('_', ' ').title() }}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                {% set task_count = project.task_count or 0 %}
+                                                {% set completed_tasks = project.completed_tasks or 0 %}
+                                                {% set progress = ((completed_tasks / task_count * 100) if task_count > 0 else 0)|round %}
+                                                <div class="progress">
+                                                    <div class="progress-bar project-progress-bar" data-width="{{ progress }}"></div>
+                                                </div>
+                                                <small class="text-muted">{{ progress }}% complete</small>
+                                            </td>
+                                            <td>{{ task_count }} tasks</td>
+                                            <td>
+                                                {% if project.end_date %}
+                                                    {{ project.end_date.strftime('%m/%d/%Y') }}
+                                                {% else %}
+                                                    <span class="text-muted">No deadline</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                <a href="{{ url_for('view_project', id=project.id) }}" class="btn btn-sm btn-success">
+                                                    <i class="bi bi-eye"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        {% else %}
+                            <p class="text-muted text-center">No projects found.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions &amp; Team Performance -->
+            <div class="col-lg-4 mb-4">
+                <!-- Quick Actions -->
+                <div class="card manager-card mb-4">
+                    <div class="card-header">
+                        <h5><i class="bi bi-plus me-2"></i>Quick Actions</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex flex-wrap gap-2">
+                            <a href="{{ url_for('new_project') }}" class="btn btn-success">
+                                <i class="bi bi-plus me-1"></i>New Project
+                            </a>
+                            <a href="{{ url_for('new_task') }}" class="btn btn-primary">
+                                <i class="bi bi-plus me-1"></i>New Task
+                            </a>
+                            <a href="{{ url_for('users') }}" class="btn btn-outline-success">
+                                <i class="bi bi-people me-1"></i>Manage Team
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Team Performance -->
+                <div class="card manager-card">
+                    <div class="card-header">
+                        <h5><i class="bi bi-graph-up me-2"></i>Team Performance</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between">
+                                <span>Completed Tasks</span>
+                                <span class="text-success">{{ stats.tasks_completed or 0 }}</span>
+                            </div>
+                            <div class="progress">
+                                <div class="progress-bar bg-success task-progress-bar" 
+                                     data-width="{{ ((stats.tasks_completed or 0) / (stats.tasks_total or 1) * 100) if (stats.tasks_total or 0) > 0 else 0 }}"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between">
+                                <span>Project Completion Rate</span>
+                                <span class="text-info">
+                        {% set project_completion_rate = ((stats.projects_completed or 0) / (stats.projects_total or 1)) * 100 %}
+                                    {{ project_completion_rate|round }}%
+                                </span>
+                            </div>
+                            <div class="progress">
+                                <div class="progress-bar bg-info project-completion-bar" 
+                                     data-width="{{ project_completion_rate|round }}"></div>
+                            </div>
+                        </div>
+
+                        {% if stats.overdue_tasks and stats.overdue_tasks > 0 %}
+                        <div class="alert alert-warning">
+                            <small><i class="bi bi-exclamation-triangle me-1"></i>{{ stats.overdue_tasks }} overdue tasks</small>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Critical Tasks Alert -->
+        {% if overdue_tasks or overdue_tasks_by_user %}
+        <div class="row">
+            <!-- Manager's Own Overdue Tasks -->
+            {% if overdue_tasks %}
+            <div class="col-12 mb-4">
+                <div class="card border-danger">
+                    <div class="card-header bg-danger text-white">
+                        <h5><i class="bi bi-exclamation-triangle me-2"></i>Your Overdue Tasks ({{ overdue_tasks|length }})</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            {% for task in overdue_tasks[:6] %}
+                            <div class="col-md-4 col-lg-2 mb-3">
+                                <div class="card border-warning">
+                                    <div class="card-body p-3">
+                                        <h6><a href="{{ url_for('view_task', id=task.id) }}" class="text-decoration-none">{{ task.title }}</a></h6>
+                                        <small class="text-muted">{{ task.project_name }}</small><br>
+                                        <small class="text-danger">Due: {{ task.due_date|to_date }}</small>
+                                        <br><small class="text-warning">{{ task.days_overdue }} days overdue</small>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% if overdue_tasks|length > 6 %}
+                        <div class="text-center mt-3">
+                            <a href="{{ url_for('tasks') }}" class="btn btn-outline-danger btn-sm">View All {{ overdue_tasks|length }} Overdue Tasks</a>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Team Members' Overdue Tasks -->
+            {% if overdue_tasks_by_user %}
+            <div class="col-12">
+                <div class="card border-warning">
+                    <div class="card-header bg-warning text-dark">
+                        <h5><i class="bi bi-people me-2"></i>Team Overdue Tasks by Member</h5>
+                    </div>
+                    <div class="card-body">
+                        {% for user_name, user_data in overdue_tasks_by_user.items() %}
+                        <div class="card mb-3 border-left-warning">
+                            <div class="card-header bg-light">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <h6 class="mb-0">
+                                        <i class="bi bi-person-circle me-2"></i>{{ user_name }}
+                                       <span class="badge bg-secondary ms-2">{{ user_data.user_role.title() }}</span>
+                                    </h6>
+                                    <span class="badge bg-danger">{{ user_data.total_overdue }} overdue</span>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-sm table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>Task</th>
+                                                <th>Project</th>
+                                                <th>Due Date</th>
+                                                <th>Days Overdue</th>
+                                                <th>Priority</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for task in user_data.tasks[:5] %}
+                                            <tr>
+                                                <td>
+                                                    <strong>{{ task.title }}</strong>
+                                                    {% if task.description %}
+                                                    <br><small class="text-muted">{{ task.description[:50] }}{% if task.description|length > 50 %}...{% endif %}</small>
+                                                    {% endif %}
+                                                </td>
+                                                <td><span class="badge bg-info">{{ task.project_name }}</span></td>
+                                                <td>
+                                                    <small class="text-danger">
+                                                        {{ task.due_date|to_date }}
+                                                    </small>
+                                                </td>
+                                                <td>
+                                                    <span class="badge bg-danger">{{ task.days_overdue }} days</span>
+                                                </td>
+                                                <td>
+                                                    <span class="badge bg-{{ 'danger' if task.priority == 'high' else 'warning' if task.priority == 'medium' else 'secondary' }}">
+                                                        {{ task.priority.title() }}
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    <a href="{{ url_for('view_task', id=task.id) }}" class="btn btn-sm btn-outline-primary">
+                                                        <i class="bi bi-eye"></i>
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                                {% if user_data.tasks|length > 5 %}
+                                <div class="text-center mt-2">
+                                    <small class="text-muted">Showing 5 of {{ user_data.tasks|length }} overdue tasks for {{ user_name }}</small>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Set progress bar widths using JavaScript to avoid CSS syntax issues
+        var projectProgressBars = document.querySelectorAll('.project-progress-bar');
+        projectProgressBars.forEach(function(bar) {
+            var width = bar.getAttribute('data-width');
+            if (width) {
+                bar.style.width = width + '%';
+            }
+        });
+
+        var taskProgressBar = document.querySelector('.task-progress-bar');
+        if (taskProgressBar) {
+            var width = taskProgressBar.getAttribute('data-width');
+            if (width) {
+                taskProgressBar.style.width = width + '%';
+            }
+        }
+
+        // Set project completion progress bar width
+        var projectCompletionBar = document.querySelector('.project-completion-bar');
+        if (projectCompletionBar) {
+            var width = projectCompletionBar.getAttribute('data-width');
+            if (width) {
+                projectCompletionBar.style.width = width + '%';
+            }
+        }
+
+        // Add loading states to action buttons
+        var actionButtons = document.querySelectorAll('.btn');
+        actionButtons.forEach(function(btn) {
+            if (btn.href && (btn.textContent.includes('New') || btn.textContent.includes('Manage'))) {
+                btn.addEventListener('click', function() {
+                    var originalText = this.innerHTML;
+                    this.innerHTML = originalText.replace(/New|Manage/, 'Loading...');
+                    this.disabled = true;
+                    
+                    // Re-enable after timeout if navigation fails
+                    setTimeout(function() {
+                        if (document.contains(btn)) {
+                            btn.innerHTML = originalText;
+                            btn.disabled = false;
+                        }
+                    }, 5000);
+                });
+            }
+        });
+    });
+</script>
+
+<style>
+.manager-subtitle {
+    opacity: 0.9;
+}
+</style>
+{% endblock %}

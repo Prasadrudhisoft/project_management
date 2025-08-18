@@ -1,0 +1,157 @@
+{% extends "base.html" %}
+
+{% block title %}New User - {{ config.APP_NAME }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="d-flex align-items-center mb-4">
+                <a href="{{ url_for('users') }}" class="btn btn-outline-secondary me-3">
+                    <i class="fas fa-arrow-left"></i>
+                </a>
+                <h1><i class="fas fa-user-plus"></i> Add New User</h1>
+            </div>
+
+            <div class="card">
+                <div class="card-body">
+                    <form method="POST">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="full_name" class="form-label">
+                                        <i class="fas fa-user"></i> Full Name *
+                                    </label>
+                                    <input type="text" 
+                                           class="form-control" 
+                                           id="full_name" 
+                                           name="full_name" 
+                                           required
+                                           placeholder="Enter full name">
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="email" class="form-label">
+                                        <i class="fas fa-envelope"></i> Email Address *
+                                    </label>
+                                    <input type="email" 
+                                           class="form-control" 
+                                           id="email" 
+                                           name="email" 
+                                           required
+                                           placeholder="user@example.com">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="password" class="form-label">
+                                        <i class="fas fa-lock"></i> Password *
+                                    </label>
+                                    <input type="password" 
+                                           class="form-control" 
+                                           id="password" 
+                                           name="password" 
+                                           required
+                                           minlength="6"
+                                           placeholder="Enter password">
+                                    <div class="form-text">Minimum 6 characters</div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="phone" class="form-label">
+                                        <i class="fas fa-phone"></i> Phone Number
+                                    </label>
+                                    <input type="tel" 
+                                           class="form-control" 
+                                           id="phone" 
+                                           name="phone"
+                                           placeholder="(123) 456-7890">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="role" class="form-label">
+                                <i class="fas fa-user-tag"></i> User Role *
+                            </label>
+                            <select class="form-select" id="role" name="role" required>
+                                <option value="">Select a role...</option>
+                                <option value="member">
+                                    <i class="fas fa-user"></i> Member - Basic access to assigned tasks
+                                </option>
+                                <option value="manager">
+                                    <i class="fas fa-user-tie"></i> Manager - Can manage projects and tasks
+                                </option>
+                                {% if session.user_role == 'admin' %}
+                                <option value="admin">
+                                    <i class="fas fa-crown"></i> Admin - Full system access
+                                </option>
+                                {% endif %}
+                            </select>
+                            <div class="form-text">
+                                <strong>Role Descriptions:</strong><br>
+                                <i class="fas fa-user text-info"></i> <strong>Member:</strong> Can view and update assigned tasks<br>
+                                <i class="fas fa-user-tie text-warning"></i> <strong>Manager:</strong> Can create/manage projects and assign tasks<br>
+                                {% if session.user_role == 'admin' %}
+                                <i class="fas fa-crown text-danger"></i> <strong>Admin:</strong> Full access including user management
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <a href="{{ url_for('users') }}" class="btn btn-secondary">
+                                <i class="fas fa-times"></i> Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-user-plus"></i> Create User
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Form validation
+document.getElementById('password').addEventListener('input', function() {
+    const password = this.value;
+    const feedback = this.nextElementSibling;
+    
+    if (password.length < 6) {
+        this.classList.add('is-invalid');
+        feedback.textContent = 'Password must be at least 6 characters';
+    } else {
+        this.classList.remove('is-invalid');
+        this.classList.add('is-valid');
+        feedback.textContent = 'Password looks good!';
+    }
+});
+
+// Role selection styling
+document.getElementById('role').addEventListener('change', function() {
+    const role = this.value;
+    const roleClasses = {
+        'member': 'text-info',
+        'manager': 'text-warning', 
+        'admin': 'text-danger'
+    };
+    
+    // Reset classes
+    this.className = 'form-select';
+    if (roleClasses[role]) {
+        this.classList.add(roleClasses[role]);
+    }
+});
+</script>
+{% endblock %}

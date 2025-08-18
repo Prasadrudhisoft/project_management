@@ -1,0 +1,223 @@
+{% extends "base.html" %}
+
+{% block title %}Reports Dashboard{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="bi bi-graph-up me-2"></i>Reports Dashboard</h2>
+    </div>
+
+    <!-- Report Types -->
+    <div class="row">
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-header bg-primary text-white">
+                    <h5><i class="bi bi-folder me-2"></i>Project Reports</h5>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">Generate detailed reports for project progress, task completion, and team performance.</p>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Select Project:</label>
+                        <select class="form-select" id="project-select">
+                            <option value="">Choose a project...</option>
+                            {% for project in projects %}
+                                <option value="{{ project.id }}">{{ project.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Date Range (Optional):</label>
+                        <div class="row">
+                            <div class="col-6">
+                                <input type="date" class="form-control form-control-sm" id="project-start-date" placeholder="Start Date">
+                            </div>
+                            <div class="col-6">
+                                <input type="date" class="form-control form-control-sm" id="project-end-date" placeholder="End Date">
+                            </div>
+                        </div>
+                    </div>
+
+                    <button class="btn btn-primary" onclick="generateProjectReport()">
+                        <i class="bi bi-file-earmark-bar-graph me-1"></i>Generate Report
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-header bg-success text-white">
+                    <h5><i class="bi bi-person me-2"></i>User Performance Reports</h5>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">Generate individual user performance reports including task completion rates and project involvement.</p>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Select User:</label>
+                        <select class="form-select" id="user-select">
+                            <option value="">Choose a user...</option>
+                            {% for user in users %}
+                                <option value="{{ user.id }}">{{ user.full_name }} ({{ user.role.title() }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Date Range (Optional):</label>
+                        <div class="row">
+                            <div class="col-6">
+                                <input type="date" class="form-control form-control-sm" id="user-start-date" placeholder="Start Date">
+                            </div>
+                            <div class="col-6">
+                                <input type="date" class="form-control form-control-sm" id="user-end-date" placeholder="End Date">
+                            </div>
+                        </div>
+                    </div>
+
+                    <button class="btn btn-success" onclick="generateUserReport()">
+                        <i class="bi bi-file-earmark-person me-1"></i>Generate Report
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        {% if session.user_role == 'admin' %}
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-header bg-warning text-dark">
+                    <h5><i class="bi bi-building me-2"></i>Organization Report</h5>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">Generate comprehensive organization-wide reports including overall statistics and top performers.</p>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Date Range (Optional):</label>
+                        <div class="row">
+                            <div class="col-6">
+                                <input type="date" class="form-control form-control-sm" id="org-start-date" placeholder="Start Date">
+                            </div>
+                            <div class="col-6">
+                                <input type="date" class="form-control form-control-sm" id="org-end-date" placeholder="End Date">
+                            </div>
+                        </div>
+                    </div>
+
+                    <button class="btn btn-warning" onclick="generateOrganizationReport()">
+                        <i class="bi bi-file-earmark-spreadsheet me-1"></i>Generate Report
+                    </button>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="bi bi-speedometer2 me-2"></i>Quick Statistics</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-md-3">
+                            <h3 class="text-primary">{{ projects|length }}</h3>
+                            <p class="text-muted">Total Projects</p>
+                        </div>
+                        <div class="col-md-3">
+                            <h3 class="text-success">{{ users|length }}</h3>
+                            <p class="text-muted">Team Members</p>
+                        </div>
+                        <div class="col-md-3">
+                            <h3 class="text-warning">
+                                {{ projects|selectattr('status', 'equalto', 'active')|list|length }}
+                            </h3>
+                            <p class="text-muted">Active Projects</p>
+                        </div>
+                        <div class="col-md-3">
+                            <h3 class="text-info">
+                                {{ projects|selectattr('status', 'equalto', 'completed')|list|length }}
+                            </h3>
+                            <p class="text-muted">Completed Projects</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function generateProjectReport() {
+    const projectId = document.getElementById('project-select').value;
+    const startDate = document.getElementById('project-start-date').value;
+    const endDate = document.getElementById('project-end-date').value;
+    
+    if (!projectId) {
+        alert('Please select a project first.');
+        return;
+    }
+    
+    let url = `/reports/project/${projectId}`;
+    const params = new URLSearchParams();
+    
+    if (startDate) params.append('start_date', startDate);
+    if (endDate) params.append('end_date', endDate);
+    
+    if (params.toString()) {
+        url += '?' + params.toString();
+    }
+    
+    window.open(url, '_blank');
+}
+
+function generateUserReport() {
+    const userId = document.getElementById('user-select').value;
+    const startDate = document.getElementById('user-start-date').value;
+    const endDate = document.getElementById('user-end-date').value;
+    
+    if (!userId) {
+        alert('Please select a user first.');
+        return;
+    }
+    
+    let url = `/reports/user/${userId}`;
+    const params = new URLSearchParams();
+    
+    if (startDate) params.append('start_date', startDate);
+    if (endDate) params.append('end_date', endDate);
+    
+    if (params.toString()) {
+        url += '?' + params.toString();
+    }
+    
+    window.open(url, '_blank');
+}
+
+function generateOrganizationReport() {
+    const startDate = document.getElementById('org-start-date').value;
+    const endDate = document.getElementById('org-end-date').value;
+    
+    let url = '/reports/organization';
+    const params = new URLSearchParams();
+    
+    if (startDate) params.append('start_date', startDate);
+    if (endDate) params.append('end_date', endDate);
+    
+    if (params.toString()) {
+        url += '?' + params.toString();
+    }
+    
+    window.open(url, '_blank');
+}
+
+// Set maximum date to today for all date inputs
+const today = new Date().toISOString().split('T')[0];
+document.querySelectorAll('input[type="date"]').forEach(input => {
+    input.max = today;
+});
+</script>
+{% endblock %}
