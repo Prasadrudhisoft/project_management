@@ -2161,15 +2161,17 @@ class DatabaseHelper:
         finally:
             conn.close()
     
-    def get_project_assignable_members(self, project_id):
-        """Get all users who can be assigned tasks in a project (team members + manager + admins)"""
+    def get_project_assignable_members(self, project_id, current_user_role):
+        """Get all users who can be assigned tasks in a project (team members + manager + admins if allowed)"""
         conn = self.get_connection()
         if not conn:
             return []
         
         try:
             cursor = conn.cursor(pymysql.cursors.DictCursor)
-            cursor.execute("""
+
+            # Base query (admins only included if allowed)
+            query = """
                 SELECT u.id, u.full_name, u.email, u.role,
                        CASE 
                            WHEN u.id = p.assigned_manager_id THEN 'Project Manager'
@@ -2181,7 +2183,7 @@ class DatabaseHelper:
                 FROM projects p
                 LEFT JOIN users u ON (u.id = p.assigned_manager_id 
                                      OR u.id IN (SELECT pm2.user_id FROM project_members pm2 WHERE pm2.project_id = p.id)
-                                     OR u.role = 'admin')
+                                     {admin_condition})
                 LEFT JOIN project_members pm ON pm.project_id = p.id AND pm.user_id = u.id
                 WHERE p.id = %s 
                 AND u.id IS NOT NULL 
@@ -2195,7 +2197,16 @@ class DatabaseHelper:
                         ELSE 3 
                     END,
                     u.full_name
-            """, (project_id,))
+            """
+
+            # Manager should NOT see admins
+            if current_user_role == "manager":
+                admin_condition = ""
+            else:
+                admin_condition = "OR u.role = 'admin'"
+
+            final_query = query.format(admin_condition=admin_condition)
+            cursor.execute(final_query, (project_id,))
             return cursor.fetchall()
         finally:
             conn.close()

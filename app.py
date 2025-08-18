@@ -485,7 +485,7 @@ def new_task():
     if request.args.get('project_id'):
         project_id = request.args.get('project_id')
         milestones = db.get_project_milestones(project_id)
-        users = db.get_project_assignable_members(project_id)
+        users = db.get_project_assignable_members(project_id,user_role)
     
     return render_template('tasks/new.html', projects=projects, users=users, milestones=milestones)
 
@@ -501,6 +501,11 @@ def view_task(id):
     project = db.get_project_by_id(task['project_id'])
     if project['organization_id'] != session['organization_id']:
         flash('Access denied.', 'error')
+        return redirect(url_for('tasks'))
+
+    # Extra check: if member, ensure task is assigned to them
+    if session['user_role'] == 'member' and task['assigned_to'] != session['user_id']:
+        flash('You are not allowed to view this task.', 'error')
         return redirect(url_for('tasks'))
     
     comments = db.get_task_comments(id)
@@ -554,15 +559,19 @@ def edit_task(id):
             flash('Failed to update task.', 'error')
     
     projects = db.get_organization_projects(session['organization_id'])
-    users = db.get_project_assignable_members(task['project_id'])
+    # ✅ pass role too
+    users = db.get_project_assignable_members(task['project_id'], session['user_role'])
     milestones = db.get_project_milestones(task['project_id'])
     
-    return render_template('tasks/edit.html', 
-                         task=task, 
-                         projects=projects, 
-                         users=users, 
-                         milestones=milestones,
-                         user_role=session['user_role'])
+    return render_template(
+        'tasks/edit.html', 
+        task=task, 
+        projects=projects, 
+        users=users, 
+        milestones=milestones,
+        user_role=session['user_role']
+    )
+
 
 ###################### Messages Routes
 @app.route('/messages')
@@ -756,23 +765,9 @@ def api_project_milestones(project_id):
 @app.route('/api/project/<int:project_id>/assignable-members')
 @login_required
 def api_project_assignable_members(project_id):
-    """Get assignable members for a specific project"""
-    # Verify user has access to this project
-    project = db.get_project_by_id(project_id)
-    if not project or project['organization_id'] != session['organization_id']:
-        return jsonify({'error': 'Project not found'}), 404
-    
-    # Get assignable members
-    members = db.get_project_assignable_members(project_id)
-    return jsonify([
-        {
-            'id': m['id'], 
-            'full_name': m['full_name'], 
-            'email': m['email'],
-            'role': m['role'],
-            'project_role': m['project_role']
-        } for m in members
-    ])
+    user_role = session.get('user_role')
+    members = db.get_project_assignable_members(project_id, user_role)
+    return jsonify(members)
 
 @app.route('/api/manager/projects')
 @login_required
