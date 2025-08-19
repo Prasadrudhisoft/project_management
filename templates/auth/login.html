@@ -15,15 +15,203 @@
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
             line-height: 1.6;
             color: #212529;
-            background-color: #f8f9fa;
+            background: linear-gradient(45deg, #1e3c72, #2a5298, #3498db, #5dade2, #85c1e9, #aed6f1, #0066cc);
+            background-size: 400% 400%;
+            background-attachment: fixed;
+            animation: blueGradientShift 10s ease infinite;
             margin: 0;
             padding: 0;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+        
+        @keyframes blueGradientShift {
+            0% { 
+                background-position: 0% 50%;
+                filter: brightness(1) saturate(1);
+            }
+            25% { 
+                background-position: 100% 50%;
+                filter: brightness(1.1) saturate(1.2);
+            }
+            50% { 
+                background-position: 100% 100%;
+                filter: brightness(0.9) saturate(1.3);
+            }
+            75% { 
+                background-position: 50% 100%;
+                filter: brightness(1.05) saturate(1.1);
+            }
+            100% { 
+                background-position: 0% 50%;
+                filter: brightness(1) saturate(1);
+            }
+        }
+        
+        /* Animated background particles with blue theme */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(circle at 20% 80%, rgba(30, 60, 114, 0.4) 0%, transparent 60%),
+                radial-gradient(circle at 80% 20%, rgba(52, 152, 219, 0.5) 0%, transparent 55%),
+                radial-gradient(circle at 40% 40%, rgba(93, 173, 226, 0.4) 0%, transparent 50%),
+                radial-gradient(circle at 60% 60%, rgba(133, 193, 233, 0.3) 0%, transparent 65%),
+                radial-gradient(circle at 90% 10%, rgba(174, 214, 241, 0.4) 0%, transparent 50%),
+                radial-gradient(circle at 10% 90%, rgba(0, 102, 204, 0.3) 0%, transparent 70%);
+            animation: blueFloat 12s ease-in-out infinite;
+            pointer-events: none;
+        }
+        
+        /* Project Management themed background elements */
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                /* Kanban Board */
+                linear-gradient(90deg, rgba(52, 152, 219, 0.1) 1px, transparent 1px),
+                linear-gradient(rgba(52, 152, 219, 0.1) 1px, transparent 1px),
+                /* Task Cards */
+                radial-gradient(circle at 15% 25%, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.08) 30%, transparent 50%),
+                radial-gradient(circle at 85% 35%, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.06) 25%, transparent 40%),
+                radial-gradient(circle at 25% 75%, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 35%, transparent 55%),
+                radial-gradient(circle at 75% 85%, rgba(255, 255, 255, 0.13) 0%, rgba(255, 255, 255, 0.07) 28%, transparent 45%);
+            background-size: 
+                80px 80px,
+                80px 80px,
+                200px 120px,
+                180px 100px,
+                220px 140px,
+                190px 110px;
+            background-position:
+                0 0,
+                0 0,
+                0 0,
+                100px 50px,
+                50px 200px,
+                150px 300px;
+            animation: projectGrid 20s linear infinite;
+            pointer-events: none;
+            opacity: 0.6;
+            z-index: 0;
+        }
+        
+        @keyframes projectGrid {
+            0% { 
+                background-position:
+                    0 0,
+                    0 0,
+                    0 0,
+                    100px 50px,
+                    50px 200px,
+                    150px 300px;
+            }
+            100% { 
+                background-position:
+                    80px 80px,
+                    80px 80px,
+                    200px 120px,
+                    300px 170px,
+                    270px 340px,
+                    370px 430px;
+            }
+        }
+        
+        /* Floating project icons */
+        .project-icons {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+        }
+        
+        .project-icon {
+            position: absolute;
+            font-size: 24px;
+            color: rgba(52, 152, 219, 0.3);
+            animation: float-icons 15s linear infinite;
+            opacity: 0;
+        }
+        
+        .project-icon:nth-child(1) { left: 10%; animation-delay: 0s; }
+        .project-icon:nth-child(2) { left: 20%; animation-delay: -2s; }
+        .project-icon:nth-child(3) { left: 30%; animation-delay: -4s; }
+        .project-icon:nth-child(4) { left: 40%; animation-delay: -6s; }
+        .project-icon:nth-child(5) { left: 50%; animation-delay: -8s; }
+        .project-icon:nth-child(6) { left: 60%; animation-delay: -10s; }
+        .project-icon:nth-child(7) { left: 70%; animation-delay: -12s; }
+        .project-icon:nth-child(8) { left: 80%; animation-delay: -14s; }
+        .project-icon:nth-child(9) { left: 90%; animation-delay: -16s; }
+        
+        @keyframes float-icons {
+            0% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+        
+        @keyframes blueFloat {
+            0%, 100% { 
+                opacity: 0.7; 
+                transform: translateY(0px) scale(1) rotate(0deg);
+                filter: hue-rotate(0deg) blur(0px);
+            }
+            20% { 
+                opacity: 1; 
+                transform: translateY(-25px) scale(1.15) rotate(72deg);
+                filter: hue-rotate(15deg) blur(1px);
+            }
+            40% { 
+                opacity: 0.8; 
+                transform: translateY(-15px) scale(1.08) rotate(144deg);
+                filter: hue-rotate(30deg) blur(2px);
+            }
+            60% { 
+                opacity: 0.9; 
+                transform: translateY(-30px) scale(1.12) rotate(216deg);
+                filter: hue-rotate(20deg) blur(1px);
+            }
+            80% { 
+                opacity: 1; 
+                transform: translateY(-20px) scale(1.1) rotate(288deg);
+                filter: hue-rotate(10deg) blur(0.5px);
+            }
+        }
+        
+        @keyframes float {
+            0%, 100% { opacity: 0.7; transform: translateY(0px) scale(1); }
+            50% { opacity: 1; transform: translateY(-10px) scale(1.1); }
         }
         
         .container {
             max-width: 1200px;
             margin: 0 auto;
             padding: 0 15px;
+            position: relative;
+            z-index: 1;
         }
         
         .row {
@@ -69,38 +257,89 @@
         }
         
         .card {
-            background-color: #fff;
-            border: 1px solid rgba(0,0,0,.125);
-            border-radius: 0.375rem;
-            box-shadow: 0 0.125rem 0.25rem rgba(0,0,0,0.075);
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            transform: translateY(0);
+            animation: slideInUp 0.8s ease-out;
+        }
+        
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 25px 50px rgba(0,0,0,0.15);
         }
         
         .shadow {
-            box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.15);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
         }
         
         .card-header {
-            padding: 0.5rem 1rem;
-            background-color: rgba(0,0,0,.03);
-            border-bottom: 1px solid rgba(0,0,0,.125);
-            border-top-left-radius: 0.375rem;
-            border-top-right-radius: 0.375rem;
+            padding: 1.5rem 1rem;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 25%, #3498db 50%, #5dade2 75%, #2980b9 100%);
+            border-bottom: none;
+            border-top-left-radius: 20px;
+            border-top-right-radius: 20px;
+            position: relative;
+            overflow: hidden;
+            animation: headerPulse 4s ease-in-out infinite;
+        }
+        
+        @keyframes headerPulse {
+            0%, 100% { 
+                background: linear-gradient(135deg, #1e3c72 0%, #2a5298 25%, #3498db 50%, #5dade2 75%, #2980b9 100%);
+                box-shadow: 0 0 20px rgba(52, 152, 219, 0.3);
+            }
+            50% { 
+                background: linear-gradient(135deg, #2980b9 0%, #3498db 25%, #5dade2 50%, #85c1e9 75%, #1e3c72 100%);
+                box-shadow: 0 0 30px rgba(52, 152, 219, 0.6);
+            }
+        }
+        
+        .card-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.2), transparent);
+            transform: rotate(45deg);
+            animation: blueShimmer 3s linear infinite;
+        }
+        
+        @keyframes blueShimmer {
+            0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+            100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
         }
         
         .card-body {
-            padding: 1rem;
+            padding: 2rem 1.5rem;
         }
         
         .card-footer {
-            padding: 0.5rem 1rem;
-            background-color: rgba(0,0,0,.03);
-            border-top: 1px solid rgba(0,0,0,.125);
-            border-bottom-left-radius: 0.375rem;
-            border-bottom-right-radius: 0.375rem;
+            padding: 1rem 1.5rem;
+            background: linear-gradient(135deg, rgba(30, 60, 114, 0.1), rgba(52, 152, 219, 0.05));
+            border-top: 1px solid rgba(52, 152, 219, 0.2);
+            border-bottom-left-radius: 20px;
+            border-bottom-right-radius: 20px;
         }
         
         .bg-primary {
-            background-color: #0d6efd !important;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 25%, #3498db 50%, #5dade2 75%, #2980b9 100%) !important;
         }
         
         .text-white {
@@ -117,73 +356,171 @@
         
         h4, h6 {
             margin: 0;
+            position: relative;
+            z-index: 1;
         }
         
         .form-label {
             margin-bottom: 0.5rem;
-            font-weight: 500;
+            font-weight: 600;
+            color: #495057;
+            transition: color 0.2s ease;
         }
         
         .form-control {
             display: block;
             width: 100%;
-            padding: 0.375rem 0.75rem;
+            padding: 0.75rem 1rem;
             font-size: 1rem;
             line-height: 1.5;
             color: #212529;
-            background-color: #fff;
-            background-image: none;
-            border: 1px solid #ced4da;
-            border-radius: 0.375rem;
-            transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;
+            background-color: rgba(255, 255, 255, 0.9);
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            position: relative;
         }
         
         .form-control:focus {
             color: #212529;
-            background-color: #fff;
-            border-color: #86b7fe;
+            background-color: rgba(255, 255, 255, 1);
+            border-color: #3498db;
             outline: 0;
-            box-shadow: 0 0 0 0.25rem rgba(13,110,253,.25);
+            box-shadow: 0 0 0 0.25rem rgba(52, 152, 219, 0.25), 0 0 20px rgba(52, 152, 219, 0.4);
+            transform: translateY(-2px);
+            animation: inputGlow 2s ease-in-out infinite;
+        }
+        
+        @keyframes inputGlow {
+            0%, 100% { box-shadow: 0 0 0 0.25rem rgba(52, 152, 219, 0.25), 0 0 20px rgba(52, 152, 219, 0.4); }
+            50% { box-shadow: 0 0 0 0.25rem rgba(52, 152, 219, 0.4), 0 0 30px rgba(52, 152, 219, 0.6); }
+        }
+        
+        .form-control:hover:not(:focus) {
+            border-color: #5dade2;
+            transform: translateY(-1px);
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.2);
+        }
+        
+        .input-group {
+            position: relative;
+            margin-bottom: 1.5rem;
+        }
+        
+        .floating-label {
+            position: absolute;
+            left: 1rem;
+            top: 0.75rem;
+            color: #6c757d;
+            font-size: 1rem;
+            pointer-events: none;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 0 0.5rem;
+            border-radius: 4px;
+        }
+        
+        .form-control:focus + .floating-label,
+        .form-control:not(:placeholder-shown) + .floating-label {
+            top: -0.5rem;
+            left: 0.75rem;
+            font-size: 0.875rem;
+            color: #3498db;
+            font-weight: 600;
+            animation: labelBounce 0.5s ease;
+        }
+        
+        @keyframes labelBounce {
+            0% { transform: translateY(0) scale(1); }
+            50% { transform: translateY(-5px) scale(1.05); }
+            100% { transform: translateY(0) scale(1); }
         }
         
         .btn {
             display: inline-block;
-            font-weight: 400;
+            font-weight: 600;
             line-height: 1.5;
             color: #212529;
             text-align: center;
             text-decoration: none;
             vertical-align: middle;
             cursor: pointer;
-            border: 1px solid transparent;
-            padding: 0.375rem 0.75rem;
+            border: none;
+            padding: 0.75rem 2rem;
             font-size: 1rem;
-            border-radius: 0.375rem;
-            transition: all 0.15s ease-in-out;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+        
+        .btn:hover::before {
+            left: 100%;
         }
         
         .btn-primary {
             color: #fff;
-            background-color: #0d6efd;
-            border-color: #0d6efd;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 25%, #3498db 50%, #5dade2 75%, #2980b9 100%);
+            background-size: 200% 200%;
+            box-shadow: 0 4px 15px rgba(52, 152, 219, 0.4);
+            animation: buttonGradient 3s ease infinite;
+        }
+        
+        @keyframes buttonGradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
         }
         
         .btn-primary:hover {
-            color: #fff;
-            background-color: #0b5ed7;
-            border-color: #0a58ca;
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 12px 35px rgba(52, 152, 219, 0.7);
+            animation: buttonHover 0.6s ease infinite;
+        }
+        
+        @keyframes buttonHover {
+            0%, 100% { box-shadow: 0 12px 35px rgba(52, 152, 219, 0.7); }
+            50% { box-shadow: 0 15px 40px rgba(52, 152, 219, 0.8); }
+        }
+        
+        .btn-primary:active {
+            transform: translateY(-1px) scale(1.01);
+            animation: buttonPress 0.2s ease;
+        }
+        
+        @keyframes buttonPress {
+            0% { transform: translateY(-3px) scale(1.02); }
+            100% { transform: translateY(-1px) scale(1.01); }
         }
         
         .btn-secondary {
             color: #fff;
-            background-color: #6c757d;
-            border-color: #6c757d;
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 25%, #5d6d7e 50%, #85929e 75%, #566573 100%);
+            background-size: 200% 200%;
+            box-shadow: 0 4px 15px rgba(52, 73, 94, 0.4);
+            animation: secondaryButtonGradient 4s ease infinite;
+        }
+        
+        @keyframes secondaryButtonGradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
         }
         
         .btn-secondary:hover {
-            color: #fff;
-            background-color: #5c636a;
-            border-color: #565e64;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(52, 73, 94, 0.6);
         }
         
         .w-100 {
@@ -192,38 +529,72 @@
         
         .alert {
             position: relative;
-            padding: 0.75rem 1.25rem;
+            padding: 1rem 1.5rem;
             margin-bottom: 1rem;
-            border: 1px solid transparent;
-            border-radius: 0.375rem;
+            border: none;
+            border-radius: 12px;
+            animation: slideInDown 0.5s ease;
+            backdrop-filter: blur(10px);
+        }
+        
+        @keyframes slideInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
         
         .alert-danger {
             color: #721c24;
-            background-color: #f8d7da;
-            border-color: #f5c2c7;
+            background: rgba(248, 215, 218, 0.9);
+            border-left: 4px solid #dc3545;
         }
         
         .alert-success {
             color: #0f5132;
-            background-color: #d1eddd;
-            border-color: #badbcc;
+            background: rgba(209, 237, 221, 0.9);
+            border-left: 4px solid #198754;
         }
         
         .alert-info {
             color: #055160;
-            background-color: #d1ecf1;
-            border-color: #b8daff;
+            background: rgba(209, 236, 241, 0.9);
+            border-left: 4px solid #0dcaf0;
         }
         
         a {
-            color: #0d6efd;
+            color: #3498db;
             text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        a::before {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: -2px;
+            left: 50%;
+            background: linear-gradient(90deg, #3498db, #5dade2);
+            transition: all 0.3s ease;
         }
         
         a:hover {
-            color: #0a58ca;
-            text-decoration: underline;
+            color: #2980b9;
+            text-decoration: none;
+            transform: translateY(-1px);
+            text-shadow: 0 2px 8px rgba(52, 152, 219, 0.3);
+        }
+        
+        a:hover::before {
+            width: 100%;
+            left: 0;
         }
         
         /* Icons using CSS symbols */
@@ -245,30 +616,366 @@
         /* Demo credentials styling */
         .demo-item {
             cursor: pointer;
-            padding: 0.25rem;
-            border-radius: 0.25rem;
-            transition: background-color 0.15s;
+            padding: 0.75rem;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+            margin-bottom: 0.5rem;
+            border: 1px solid transparent;
         }
         
         .demo-item:hover {
-            background-color: #f8f9fa;
+            background: linear-gradient(135deg, rgba(52, 152, 219, 0.15), rgba(93, 173, 226, 0.1));
+            border-color: rgba(52, 152, 219, 0.4);
+            transform: translateX(8px) scale(1.02);
+            box-shadow: 0 5px 20px rgba(52, 152, 219, 0.2);
         }
         
-        /* Responsive design */
-        @media (max-width: 768px) {
-            .col-md-6 {
+        /* Loading animation */
+        .btn-loading {
+            position: relative;
+            pointer-events: none;
+        }
+        
+        .btn-loading::after {
+            content: '';
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            margin: auto;
+            border: 2px solid transparent;
+            border-top-color: #ffffff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            right: 0;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Success animation */
+        .success-animation {
+            animation: pulse 0.6s ease-in-out;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        /* Enhanced Responsive Design for All Devices */
+        
+        /* Extra Small Devices (Portrait Phones, less than 576px) */
+        @media (max-width: 575.98px) {
+            .container {
+                padding: 0 10px;
+            }
+            
+            .col-md-6, .col-lg-4 {
+                flex: 0 0 100%;
+                max-width: 100%;
+                padding: 0 5px;
+            }
+            
+            .card {
+                margin: 0.5rem 0;
+                border-radius: 15px;
+            }
+            
+            .card-body {
+                padding: 1.5rem 1rem;
+            }
+            
+            .card-header {
+                padding: 1rem 0.75rem;
+                border-radius: 15px 15px 0 0;
+            }
+            
+            .card-header h4 {
+                font-size: 1.1rem;
+            }
+            
+            .card-header small {
+                font-size: 0.75rem;
+            }
+            
+            .form-control {
+                padding: 0.6rem 0.8rem;
+                font-size: 16px; /* Prevents zoom on iOS */
+            }
+            
+            .floating-label {
+                font-size: 0.9rem;
+                left: 0.8rem;
+            }
+            
+            .btn {
+                padding: 0.7rem 1.5rem;
+                font-size: 0.95rem;
+            }
+            
+            .mt-3 {
+                margin-top: 0.75rem;
+            }
+            
+            .project-icon {
+                font-size: 18px;
+            }
+            
+            body {
+                background-attachment: scroll;
+            }
+            
+            /* Reduce animations for better performance on mobile */
+            .card:hover {
+                transform: translateY(-3px);
+            }
+            
+            body::after {
+                background-size: 
+                    40px 40px,
+                    40px 40px,
+                    120px 80px,
+                    100px 60px,
+                    140px 90px,
+                    110px 70px;
+            }
+        }
+        
+        /* Small Devices (Landscape Phones, 576px and up) */
+        @media (min-width: 576px) and (max-width: 767.98px) {
+            .col-md-6, .col-lg-4 {
                 flex: 0 0 100%;
                 max-width: 100%;
             }
             
+            .card {
+                margin: 0 1rem;
+                max-width: 450px;
+                margin-left: auto;
+                margin-right: auto;
+            }
+            
+            .form-control {
+                font-size: 16px; /* Prevents zoom on iOS */
+            }
+            
+            .project-icon {
+                font-size: 20px;
+            }
+            
+            body {
+                background-attachment: scroll;
+            }
+        }
+        
+        /* Medium Devices (Tablets, 768px and up) */
+        @media (min-width: 768px) and (max-width: 991.98px) {
+            .col-md-6 {
+                flex: 0 0 75%;
+                max-width: 75%;
+            }
+            
             .col-lg-4 {
-                flex: 0 0 100%;
-                max-width: 100%;
+                flex: 0 0 60%;
+                max-width: 60%;
+            }
+            
+            .card {
+                max-width: 500px;
+            }
+            
+            .project-icon {
+                font-size: 22px;
+            }
+        }
+        
+        /* Large Devices (Desktops, 992px and up) */
+        @media (min-width: 992px) and (max-width: 1199.98px) {
+            .col-lg-4 {
+                flex: 0 0 40%;
+                max-width: 40%;
+            }
+            
+            .project-icon {
+                font-size: 24px;
+            }
+        }
+        
+        /* Extra Large Devices (Large Desktops, 1200px and up) */
+        @media (min-width: 1200px) {
+            .col-lg-4 {
+                flex: 0 0 33.333333%;
+                max-width: 33.333333%;
+            }
+            
+            .container {
+                max-width: 1400px;
+            }
+            
+            .card {
+                max-width: 420px;
+            }
+            
+            .project-icon {
+                font-size: 26px;
+            }
+            
+            body::after {
+                background-size: 
+                    100px 100px,
+                    100px 100px,
+                    240px 140px,
+                    200px 120px,
+                    260px 160px,
+                    220px 130px;
+            }
+        }
+        
+        /* Ultra Wide Screens (1400px and up) */
+        @media (min-width: 1400px) {
+            .container {
+                max-width: 1600px;
+            }
+            
+            .project-icon {
+                font-size: 28px;
+            }
+        }
+        
+        /* Landscape orientation adjustments */
+        @media (orientation: landscape) and (max-height: 500px) {
+            .mt-3 {
+                margin-top: 0.5rem;
+            }
+            
+            .card-body {
+                padding: 1.5rem;
+            }
+            
+            .card-header {
+                padding: 1rem;
+            }
+            
+            /* Reduce floating elements for landscape */
+            .project-icons {
+                display: none;
+            }
+            
+            body::before,
+            body::after {
+                animation-duration: 30s;
+            }
+        }
+        
+        /* High DPI displays */
+        @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+            .card {
+                border-width: 0.5px;
+            }
+            
+            .form-control {
+                border-width: 1.5px;
+            }
+        }
+        
+        /* Dark mode support */
+        @media (prefers-color-scheme: dark) {
+            .card {
+                background: rgba(30, 30, 30, 0.95);
+                color: #f8f9fa;
+            }
+            
+            .form-control {
+                background-color: rgba(40, 40, 40, 0.9);
+                color: #f8f9fa;
+                border-color: #495057;
+            }
+            
+            .floating-label {
+                color: #adb5bd;
+                background: rgba(30, 30, 30, 0.9);
+            }
+            
+            .card-footer {
+                background: linear-gradient(135deg, rgba(30, 60, 114, 0.2), rgba(52, 152, 219, 0.1));
+            }
+        }
+        
+        /* Reduced motion preference */
+        @media (prefers-reduced-motion: reduce) {
+            *,
+            *::before,
+            *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+            
+            .project-icons {
+                display: none;
+            }
+            
+            body::before,
+            body::after {
+                animation: none;
+            }
+        }
+        
+        /* Print styles */
+        @media print {
+            body {
+                background: white;
+            }
+            
+            .project-icons,
+            body::before,
+            body::after {
+                display: none;
+            }
+            
+            .card {
+                box-shadow: none;
+                border: 2px solid #000;
+            }
+        }
+        
+        /* Back to home button enhancement */
+        .back-home {
+            animation: fadeInDown 1s ease 0.3s both;
+        }
+        
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
             }
         }
     </style>
 </head>
 <body>
+    <!-- Project Management Floating Icons -->
+    <div class="project-icons">
+        <div class="project-icon">📋</div>
+        <div class="project-icon">📊</div>
+        <div class="project-icon">⏰</div>
+        <div class="project-icon">🎯</div>
+        <div class="project-icon">📈</div>
+        <div class="project-icon">💼</div>
+        <div class="project-icon">🗂️</div>
+        <div class="project-icon">✅</div>
+        <div class="project-icon">📅</div>
+    </div>
+    
     <!-- Flash Messages -->
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
@@ -286,27 +993,29 @@
         <div class="row justify-content-center mt-3">
             <div class="col-md-6 col-lg-4">
                 <!-- Back to Home Button -->
-                <div class="text-center mb-3">
+                <div class="text-center mb-3 back-home">
                     <a href="{{ url_for('landing') }}" class="btn btn-secondary">
                         <i class="bi bi-house me-2"></i>Back to Home
                     </a>
                 </div>
                 <div class="card shadow">
                     <div class="card-header text-center bg-primary text-white">
-                        <h4><i class="bi bi-box-arrow-in-right me-2"></i>Login</h4>
+                        <h4><i class="bi bi-box-arrow-in-right me-2"></i>Project Manager Login</h4>
+                        <small style="opacity: 0.9;">Manage your projects efficiently</small>
                     </div>
                     <div class="card-body">
-                        <form method="POST">
-                            <div class="mb-3">
-                                <label for="email" class="form-label">Email</label>
-                                <input type="email" class="form-control" id="email" name="email" required>
+                        <form method="POST" id="loginForm">
+                            <div class="input-group">
+                                <input type="email" class="form-control" id="email" name="email" placeholder=" " required>
+                                <label for="email" class="floating-label">Email Address</label>
                             </div>
-                            <div class="mb-3">
-                                <label for="password" class="form-label">Password</label>
-                                <input type="password" class="form-control" id="password" name="password" required>
+                            <div class="input-group">
+                                <input type="password" class="form-control" id="password" name="password" placeholder=" " required>
+                                <label for="password" class="floating-label">Password</label>
                             </div>
-                            <button type="submit" class="btn btn-primary w-100">
-                                <i class="bi bi-box-arrow-in-right me-2"></i>Login
+                            <button type="submit" class="btn btn-primary w-100" id="submitBtn">
+                                <i class="bi bi-box-arrow-in-right me-2"></i>
+                                <span id="btnText">Login</span>
                             </button>
                         </form>
                     </div>
@@ -337,11 +1046,12 @@
     </div>
     
     <script>
-        // Auto-hide flash messages after 5 seconds
+        // Auto-hide flash messages after 5 seconds with smooth animation
         document.addEventListener('DOMContentLoaded', function() {
             const flashMessage = document.getElementById('flash-message');
             if (flashMessage) {
                 setTimeout(function() {
+                    flashMessage.style.transform = 'translateY(-20px)';
                     flashMessage.style.opacity = '0';
                     setTimeout(function() {
                         flashMessage.remove();
@@ -350,39 +1060,177 @@
             }
         });
         
-        // Fill demo credentials
+        // Fill demo credentials with enhanced animation
         function fillCredentials(email, password) {
-            document.getElementById('email').value = email;
-            document.getElementById('password').value = password;
-            
-            // Add visual feedback
             const emailField = document.getElementById('email');
             const passwordField = document.getElementById('password');
             
-            emailField.style.backgroundColor = '#d1eddd';
-            passwordField.style.backgroundColor = '#d1eddd';
+            // Clear fields first
+            emailField.value = '';
+            passwordField.value = '';
             
-            setTimeout(function() {
-                emailField.style.backgroundColor = '';
-                passwordField.style.backgroundColor = '';
-            }, 1000);
+            // Animate typing effect
+            let emailIndex = 0;
+            let passwordIndex = 0;
+            
+            const typeEmail = setInterval(() => {
+                emailField.value += email[emailIndex];
+                emailIndex++;
+                if (emailIndex >= email.length) {
+                    clearInterval(typeEmail);
+                    // Start typing password
+                    const typePassword = setInterval(() => {
+                        passwordField.value += password[passwordIndex];
+                        passwordIndex++;
+                        if (passwordIndex >= password.length) {
+                            clearInterval(typePassword);
+                            // Final animation
+                            emailField.classList.add('success-animation');
+                            passwordField.classList.add('success-animation');
+                            setTimeout(() => {
+                                emailField.classList.remove('success-animation');
+                                passwordField.classList.remove('success-animation');
+                            }, 600);
+                        }
+                    }, 100);
+                }
+            }, 50);
         }
         
-        // Form validation enhancement
-        document.querySelector('form').addEventListener('submit', function(e) {
+        // Enhanced form validation with better UX
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
+            const submitBtn = document.getElementById('submitBtn');
+            const btnText = document.getElementById('btnText');
             
             if (!email || !password) {
                 e.preventDefault();
-                alert('Please fill in all fields');
+                
+                // Shake animation for empty fields
+                if (!email) {
+                    document.getElementById('email').style.animation = 'shake 0.5s ease-in-out';
+                    setTimeout(() => {
+                        document.getElementById('email').style.animation = '';
+                    }, 500);
+                }
+                if (!password) {
+                    document.getElementById('password').style.animation = 'shake 0.5s ease-in-out';
+                    setTimeout(() => {
+                        document.getElementById('password').style.animation = '';
+                    }, 500);
+                }
+                
                 return;
             }
             
             // Add loading state to button
-            const submitBtn = this.querySelector('button[type="submit"]');
-            submitBtn.innerHTML = 'Logging in...';
+            submitBtn.classList.add('btn-loading');
+            btnText.textContent = 'Logging in...';
             submitBtn.disabled = true;
+            
+            // Optional: Remove loading state if form submission fails (for client-side validation)
+            setTimeout(() => {
+                if (submitBtn.classList.contains('btn-loading')) {
+                    submitBtn.classList.remove('btn-loading');
+                    btnText.textContent = 'Login';
+                    submitBtn.disabled = false;
+                }
+            }, 10000); // 10 second timeout
+        });
+        
+        // Enhanced input interactions with blue theme
+        document.querySelectorAll('.form-control').forEach(input => {
+            input.addEventListener('focus', function() {
+                this.parentElement.style.transform = 'translateY(-2px)';
+                this.parentElement.style.filter = 'drop-shadow(0 8px 16px rgba(52, 152, 219, 0.2))';
+            });
+            
+            input.addEventListener('blur', function() {
+                this.parentElement.style.transform = 'translateY(0)';
+                this.parentElement.style.filter = 'none';
+            });
+            
+            input.addEventListener('input', function() {
+                if (this.value) {
+                    this.style.borderColor = '#3498db';
+                    this.style.boxShadow = '0 0 10px rgba(52, 152, 219, 0.3)';
+                } else {
+                    this.style.borderColor = '';
+                    this.style.boxShadow = '';
+                }
+            });
+        });
+        
+        // Add shake animation for validation errors
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes shake {
+                0%, 100% { transform: translateX(0); }
+                25% { transform: translateX(-8px); border-color: #e74c3c !important; }
+                75% { transform: translateX(8px); border-color: #e74c3c !important; }
+            }
+        `;
+        document.head.appendChild(style);
+        
+        // Enhanced parallax effect with blue tint (desktop only)
+        if (window.innerWidth > 767) {
+            document.addEventListener('mousemove', handleParallax);
+        }
+        
+        // Enhanced card hover effect with blue glow
+        document.querySelector('.card').addEventListener('mouseenter', function() {
+            if (window.innerWidth > 767) {
+                this.style.transform = 'translateY(-12px) rotateX(8deg)';
+                this.style.boxShadow = '0 25px 50px rgba(52, 152, 219, 0.3)';
+            } else {
+                this.style.transform = 'translateY(-5px)';
+                this.style.boxShadow = '0 15px 30px rgba(52, 152, 219, 0.2)';
+            }
+        });
+        
+        document.querySelector('.card').addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0) rotateX(0deg)';
+            this.style.boxShadow = '0 15px 35px rgba(0,0,0,0.1)';
+        });
+        
+        // Add pulsing effect to buttons on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize responsive features
+            handleResponsiveFeatures();
+            adjustFontSizes();
+            initTouchInteractions();
+            
+            const buttons = document.querySelectorAll('.btn');
+            buttons.forEach((button, index) => {
+                setTimeout(() => {
+                    button.style.animation = `pulse 1s ease-in-out`;
+                    setTimeout(() => {
+                        button.style.animation = '';
+                    }, 1000);
+                }, index * 200);
+            });
+            
+            // Start creating project management elements
+            createProjectElements();
+            
+            // Recreate elements periodically (adjusted for device)
+            const interval = window.innerWidth <= 767 ? 35000 : 25000;
+            setInterval(createProjectElements, interval);
+        });
+        
+        // Handle window resize and orientation change
+        window.addEventListener('resize', handleResponsiveFeatures);
+        window.addEventListener('orientationchange', handleOrientationChange);
+        
+        // Handle visibility change to pause animations when tab is not active
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden) {
+                // Pause heavy animations when tab is not visible
+                document.body.style.animationPlayState = 'paused';
+            } else {
+                document.body.style.animationPlayState = 'running';
+            }
         });
     </script>
 </body>
