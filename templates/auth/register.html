@@ -10,45 +10,46 @@
             box-sizing: border-box; 
         }
         
+        /* CSS Variables for better performance */
+        :root {
+            --blue-primary: #3498db;
+            --blue-secondary: #2980b9;
+            --blue-dark: #1e3c72;
+            --blue-light: #5dade2;
+            --strength-width: 0%;
+        }
+        
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
             line-height: 1.6;
             color: #212529;
-            background: linear-gradient(45deg, #1e3c72, #2a5298, #3498db, #5dade2, #85c1e9, #aed6f1, #0066cc);
+            background: linear-gradient(45deg, var(--blue-dark), #2a5298, var(--blue-primary), var(--blue-light), #85c1e9, #aed6f1, #0066cc);
             background-size: 400% 400%;
             background-attachment: fixed;
-            animation: blueGradientShift 10s ease infinite;
+            animation: blueGradientShift 12s ease infinite;
             margin: 0;
             padding: 0;
             min-height: 100vh;
             position: relative;
             overflow-x: hidden;
+            /* Performance optimizations */
+            will-change: background-position;
+            transform: translateZ(0);
         }
         
+        /* Optimized keyframes with fewer steps */
         @keyframes blueGradientShift {
-            0% { 
+            0%, 100% { 
                 background-position: 0% 50%;
                 filter: brightness(1) saturate(1);
-            }
-            25% { 
-                background-position: 100% 50%;
-                filter: brightness(1.1) saturate(1.2);
             }
             50% { 
                 background-position: 100% 100%;
-                filter: brightness(0.9) saturate(1.3);
-            }
-            75% { 
-                background-position: 50% 100%;
-                filter: brightness(1.05) saturate(1.1);
-            }
-            100% { 
-                background-position: 0% 50%;
-                filter: brightness(1) saturate(1);
+                filter: brightness(1.05) saturate(1.15);
             }
         }
         
-        /* Animated background particles with blue theme */
+        /* Simplified background particles - less resource intensive */
         body::before {
             content: '';
             position: fixed;
@@ -57,45 +58,26 @@
             width: 100%;
             height: 100%;
             background-image: 
-                radial-gradient(circle at 20% 80%, rgba(30, 60, 114, 0.4) 0%, transparent 60%),
-                radial-gradient(circle at 80% 20%, rgba(52, 152, 219, 0.5) 0%, transparent 55%),
-                radial-gradient(circle at 40% 40%, rgba(93, 173, 226, 0.4) 0%, transparent 50%),
-                radial-gradient(circle at 60% 60%, rgba(133, 193, 233, 0.3) 0%, transparent 65%),
-                radial-gradient(circle at 90% 10%, rgba(174, 214, 241, 0.4) 0%, transparent 50%),
-                radial-gradient(circle at 10% 90%, rgba(0, 102, 204, 0.3) 0%, transparent 70%);
-            animation: blueFloat 12s ease-in-out infinite;
+                radial-gradient(circle at 20% 80%, rgba(30, 60, 114, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(52, 152, 219, 0.4) 0%, transparent 45%),
+                radial-gradient(circle at 40% 40%, rgba(93, 173, 226, 0.3) 0%, transparent 40%);
+            animation: blueFloat 15s ease-in-out infinite;
             pointer-events: none;
+            will-change: transform, opacity;
         }
         
         @keyframes blueFloat {
             0%, 100% { 
-                opacity: 0.7; 
-                transform: translateY(0px) scale(1) rotate(0deg);
-                filter: hue-rotate(0deg) blur(0px);
+                opacity: 0.6; 
+                transform: translateY(0px) scale(1);
             }
-            20% { 
+            50% { 
                 opacity: 1; 
-                transform: translateY(-25px) scale(1.15) rotate(72deg);
-                filter: hue-rotate(15deg) blur(1px);
-            }
-            40% { 
-                opacity: 0.8; 
-                transform: translateY(-15px) scale(1.08) rotate(144deg);
-                filter: hue-rotate(30deg) blur(2px);
-            }
-            60% { 
-                opacity: 0.9; 
-                transform: translateY(-30px) scale(1.12) rotate(216deg);
-                filter: hue-rotate(20deg) blur(1px);
-            }
-            80% { 
-                opacity: 1; 
-                transform: translateY(-20px) scale(1.1) rotate(288deg);
-                filter: hue-rotate(10deg) blur(0.5px);
+                transform: translateY(-20px) scale(1.1);
             }
         }
         
-        /* Project Management themed background elements */
+        /* Simplified grid pattern */
         body::after {
             content: '';
             position: fixed;
@@ -104,56 +86,22 @@
             width: 100%;
             height: 100%;
             background-image: 
-                /* Kanban Board */
-                linear-gradient(90deg, rgba(52, 152, 219, 0.1) 1px, transparent 1px),
-                linear-gradient(rgba(52, 152, 219, 0.1) 1px, transparent 1px),
-                /* Task Cards */
-                radial-gradient(circle at 15% 25%, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.08) 30%, transparent 50%),
-                radial-gradient(circle at 85% 35%, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.06) 25%, transparent 40%),
-                radial-gradient(circle at 25% 75%, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 35%, transparent 55%),
-                radial-gradient(circle at 75% 85%, rgba(255, 255, 255, 0.13) 0%, rgba(255, 255, 255, 0.07) 28%, transparent 45%);
-            background-size: 
-                80px 80px,
-                80px 80px,
-                200px 120px,
-                180px 100px,
-                220px 140px,
-                190px 110px;
-            background-position:
-                0 0,
-                0 0,
-                0 0,
-                100px 50px,
-                50px 200px,
-                150px 300px;
-            animation: projectGrid 20s linear infinite;
+                linear-gradient(90deg, rgba(52, 152, 219, 0.08) 1px, transparent 1px),
+                linear-gradient(rgba(52, 152, 219, 0.08) 1px, transparent 1px);
+            background-size: 80px 80px;
+            animation: projectGrid 25s linear infinite;
             pointer-events: none;
-            opacity: 0.6;
+            opacity: 0.5;
             z-index: 0;
+            will-change: background-position;
         }
         
         @keyframes projectGrid {
-            0% { 
-                background-position:
-                    0 0,
-                    0 0,
-                    0 0,
-                    100px 50px,
-                    50px 200px,
-                    150px 300px;
-            }
-            100% { 
-                background-position:
-                    80px 80px,
-                    80px 80px,
-                    200px 120px,
-                    300px 170px,
-                    270px 340px,
-                    370px 430px;
-            }
+            0% { background-position: 0 0; }
+            100% { background-position: 80px 80px; }
         }
         
-        /* Floating project icons */
+        /* Optimized floating icons with fewer elements */
         .project-icons {
             position: fixed;
             top: 0;
@@ -168,34 +116,29 @@
         .project-icon {
             position: absolute;
             font-size: 24px;
-            color: rgba(52, 152, 219, 0.3);
-            animation: float-icons 15s linear infinite;
+            color: rgba(52, 152, 219, 0.25);
+            animation: float-icons 18s linear infinite;
             opacity: 0;
+            will-change: transform, opacity;
         }
         
-        .project-icon:nth-child(1) { left: 10%; animation-delay: 0s; }
-        .project-icon:nth-child(2) { left: 20%; animation-delay: -2s; }
-        .project-icon:nth-child(3) { left: 30%; animation-delay: -4s; }
-        .project-icon:nth-child(4) { left: 40%; animation-delay: -6s; }
-        .project-icon:nth-child(5) { left: 50%; animation-delay: -8s; }
-        .project-icon:nth-child(6) { left: 60%; animation-delay: -10s; }
-        .project-icon:nth-child(7) { left: 70%; animation-delay: -12s; }
-        .project-icon:nth-child(8) { left: 80%; animation-delay: -14s; }
-        .project-icon:nth-child(9) { left: 90%; animation-delay: -16s; }
+        .project-icon:nth-child(1) { left: 15%; animation-delay: 0s; }
+        .project-icon:nth-child(2) { left: 35%; animation-delay: -4s; }
+        .project-icon:nth-child(3) { left: 55%; animation-delay: -8s; }
+        .project-icon:nth-child(4) { left: 75%; animation-delay: -12s; }
+        .project-icon:nth-child(5) { left: 25%; animation-delay: -16s; }
+        .project-icon:nth-child(6) { left: 65%; animation-delay: -20s; }
         
         @keyframes float-icons {
             0% {
-                transform: translateY(100vh) rotate(0deg);
+                transform: translateY(100vh);
                 opacity: 0;
             }
-            10% {
-                opacity: 1;
-            }
-            90% {
+            10%, 90% {
                 opacity: 1;
             }
             100% {
-                transform: translateY(-100px) rotate(360deg);
+                transform: translateY(-100px);
                 opacity: 0;
             }
         }
@@ -256,18 +199,19 @@
             border: 1px solid rgba(255, 255, 255, 0.2);
             border-radius: 20px;
             box-shadow: 0 15px 35px rgba(0,0,0,0.1);
-            transition: all 0.3s ease;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
             transform: translateY(0);
             animation: slideInUp 0.8s ease-out;
             width: 90%;
             max-width: 500px;
             margin: 0 auto;
+            will-change: transform;
         }
         
         @keyframes slideInUp {
             from {
                 opacity: 0;
-                transform: translateY(50px);
+                transform: translateY(30px);
             }
             to {
                 opacity: 1;
@@ -276,29 +220,27 @@
         }
         
         .card:hover {
-            transform: translateY(-8px) rotateX(5deg);
-            box-shadow: 0 25px 50px rgba(52, 152, 219, 0.2);
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(52, 152, 219, 0.2);
         }
         
         .card-header {
             padding: 1.5rem 1rem;
-            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 25%, #3498db 50%, #5dade2 75%, #2980b9 100%);
+            background: linear-gradient(135deg, var(--blue-dark) 0%, var(--blue-primary) 50%, var(--blue-secondary) 100%);
             border-bottom: none;
             border-top-left-radius: 20px;
             border-top-right-radius: 20px;
             position: relative;
             overflow: hidden;
-            animation: headerPulse 4s ease-in-out infinite;
+            animation: headerPulse 6s ease-in-out infinite;
         }
         
         @keyframes headerPulse {
             0%, 100% { 
-                background: linear-gradient(135deg, #1e3c72 0%, #2a5298 25%, #3498db 50%, #5dade2 75%, #2980b9 100%);
                 box-shadow: 0 0 20px rgba(52, 152, 219, 0.3);
             }
             50% { 
-                background: linear-gradient(135deg, #2980b9 0%, #3498db 25%, #5dade2 50%, #85c1e9 75%, #1e3c72 100%);
-                box-shadow: 0 0 30px rgba(52, 152, 219, 0.6);
+                box-shadow: 0 0 25px rgba(52, 152, 219, 0.5);
             }
         }
         
@@ -309,9 +251,9 @@
             left: -50%;
             width: 200%;
             height: 200%;
-            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.2), transparent);
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.15), transparent);
             transform: rotate(45deg);
-            animation: blueShimmer 3s linear infinite;
+            animation: blueShimmer 4s linear infinite;
         }
         
         @keyframes blueShimmer {
@@ -332,7 +274,7 @@
         }
         
         .bg-success { 
-            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 25%, #3498db 50%, #5dade2 75%, #2980b9 100%) !important;
+            background: linear-gradient(135deg, var(--blue-dark) 0%, var(--blue-primary) 50%, var(--blue-secondary) 100%) !important;
         }
         
         .text-white { 
@@ -381,14 +323,14 @@
             top: -0.5rem;
             left: 0.75rem;
             font-size: 0.875rem;
-            color: #3498db;
+            color: var(--blue-primary);
             font-weight: 600;
-            animation: labelBounce 0.5s ease;
+            animation: labelBounce 0.4s ease;
         }
         
         @keyframes labelBounce {
             0% { transform: translateY(0) scale(1); }
-            50% { transform: translateY(-5px) scale(1.05); }
+            50% { transform: translateY(-3px) scale(1.02); }
             100% { transform: translateY(0) scale(1); }
         }
         
@@ -403,26 +345,21 @@
             border: 2px solid #e9ecef;
             border-radius: 12px;
             transition: all 0.3s ease;
+            will-change: border-color, box-shadow;
         }
         
         .form-control:focus {
-            border-color: #3498db;
+            border-color: var(--blue-primary);
             outline: 0;
-            box-shadow: 0 0 0 0.25rem rgba(52, 152, 219, 0.25), 0 0 20px rgba(52, 152, 219, 0.4);
-            transform: translateY(-2px);
-            animation: inputGlow 2s ease-in-out infinite;
+            box-shadow: 0 0 0 0.25rem rgba(52, 152, 219, 0.25);
+            transform: translateY(-1px);
             background-color: rgba(255, 255, 255, 1);
         }
         
-        @keyframes inputGlow {
-            0%, 100% { box-shadow: 0 0 0 0.25rem rgba(52, 152, 219, 0.25), 0 0 20px rgba(52, 152, 219, 0.4); }
-            50% { box-shadow: 0 0 0 0.25rem rgba(52, 152, 219, 0.4), 0 0 30px rgba(52, 152, 219, 0.6); }
-        }
-        
         .form-control:hover:not(:focus) {
-            border-color: #5dade2;
+            border-color: var(--blue-light);
             transform: translateY(-1px);
-            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.2);
+            box-shadow: 0 3px 10px rgba(52, 152, 219, 0.15);
         }
         
         .btn {
@@ -441,6 +378,7 @@
             transition: all 0.3s ease;
             position: relative;
             overflow: hidden;
+            will-change: transform;
         }
         
         .btn::before {
@@ -451,7 +389,7 @@
             width: 100%;
             height: 100%;
             background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-            transition: left 0.5s;
+            transition: left 0.4s ease;
         }
         
         .btn:hover::before {
@@ -460,28 +398,21 @@
         
         .btn-success {
             color: #fff;
-            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 25%, #3498db 50%, #5dade2 75%, #2980b9 100%);
+            background: linear-gradient(135deg, var(--blue-dark) 0%, var(--blue-primary) 50%, var(--blue-secondary) 100%);
             background-size: 200% 200%;
             box-shadow: 0 4px 15px rgba(52, 152, 219, 0.4);
-            animation: buttonGradient 3s ease infinite;
+            animation: buttonGradient 4s ease infinite;
         }
         
         @keyframes buttonGradient {
-            0% { background-position: 0% 50%; }
+            0%, 100% { background-position: 0% 50%; }
             50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
         }
         
         .btn-success:hover {
             color: #fff;
-            transform: translateY(-3px) scale(1.02);
-            box-shadow: 0 12px 35px rgba(52, 152, 219, 0.7);
-            animation: buttonHover 0.6s ease infinite;
-        }
-        
-        @keyframes buttonHover {
-            0%, 100% { box-shadow: 0 12px 35px rgba(52, 152, 219, 0.7); }
-            50% { box-shadow: 0 15px 40px rgba(52, 152, 219, 0.8); }
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 8px 25px rgba(52, 152, 219, 0.6);
         }
         
         .btn-success:active {
@@ -508,7 +439,7 @@
         @keyframes slideInDown {
             from {
                 opacity: 0;
-                transform: translateY(-20px);
+                transform: translateY(-15px);
             }
             to {
                 opacity: 1;
@@ -535,7 +466,7 @@
         }
         
         a { 
-            color: #3498db; 
+            color: var(--blue-primary); 
             text-decoration: none;
             font-weight: 600;
             transition: all 0.3s ease;
@@ -549,15 +480,14 @@
             height: 2px;
             bottom: -2px;
             left: 50%;
-            background: linear-gradient(90deg, #3498db, #5dade2);
+            background: linear-gradient(90deg, var(--blue-primary), var(--blue-light));
             transition: all 0.3s ease;
         }
         
         a:hover {
-            color: #2980b9;
+            color: var(--blue-secondary);
             text-decoration: none;
             transform: translateY(-1px);
-            text-shadow: 0 2px 8px rgba(52, 152, 219, 0.3);
         }
         
         a:hover::before {
@@ -592,50 +522,42 @@
             top: 0;
             left: 0;
             height: 100%;
-            width: 0%;
+            width: var(--strength-width);
             border-radius: 3px;
             transition: all 0.4s ease;
         }
         
         .strength-weak::after { 
             background: linear-gradient(90deg, #dc3545, #e57373);
-            animation: strengthPulse 2s ease infinite;
         }
         
         .strength-medium::after { 
             background: linear-gradient(90deg, #ffc107, #ffeb3b);
-            animation: strengthPulse 1.5s ease infinite;
         }
         
         .strength-strong::after { 
-            background: linear-gradient(90deg, #3498db, #5dade2);
-            animation: strengthPulse 1s ease infinite;
-        }
-        
-        @keyframes strengthPulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.7; }
+            background: linear-gradient(90deg, var(--blue-primary), var(--blue-light));
         }
         
         .email-valid {
-            border-color: #3498db !important;
-            box-shadow: 0 0 10px rgba(52, 152, 219, 0.3);
+            border-color: var(--blue-primary) !important;
+            box-shadow: 0 0 8px rgba(52, 152, 219, 0.3);
         }
         
         .email-invalid {
             border-color: #dc3545 !important;
-            box-shadow: 0 0 10px rgba(220, 53, 69, 0.3);
-            animation: shake 0.5s ease-in-out;
+            box-shadow: 0 0 8px rgba(220, 53, 69, 0.3);
+            animation: shake 0.4s ease-in-out;
         }
         
         @keyframes shake {
             0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-5px); }
-            75% { transform: translateX(5px); }
+            25% { transform: translateX(-3px); }
+            75% { transform: translateX(3px); }
         }
         
         .text-success {
-            color: #3498db !important;
+            color: var(--blue-primary) !important;
         }
         
         .text-danger {
@@ -673,10 +595,19 @@
             100% { transform: rotate(360deg); }
         }
         
-        /* Enhanced Responsive Design for All Devices */
+        /* Enhanced Responsive Design */
         
         /* Extra Small Devices (Portrait Phones, less than 576px) */
         @media (max-width: 575.98px) {
+            body {
+                background-attachment: scroll;
+                animation-duration: 15s;
+            }
+            
+            body::before {
+                animation-duration: 20s;
+            }
+            
             .container {
                 padding: 0 10px;
             }
@@ -720,31 +651,26 @@
             }
             
             .project-icon {
-                font-size: 18px;
+                font-size: 16px;
             }
             
-            body {
-                background-attachment: scroll;
-            }
-            
-            /* Reduce animations for better performance on mobile */
             .card:hover {
-                transform: translateY(-3px);
+                transform: translateY(-2px);
             }
             
+            /* Reduce background complexity on mobile */
             body::after {
-                background-size: 
-                    40px 40px,
-                    40px 40px,
-                    120px 80px,
-                    100px 60px,
-                    140px 90px,
-                    110px 70px;
+                background-size: 40px 40px;
+                animation-duration: 30s;
             }
         }
         
         /* Small Devices (Landscape Phones, 576px and up) */
         @media (min-width: 576px) and (max-width: 767.98px) {
+            body {
+                background-attachment: scroll;
+            }
+            
             .card {
                 margin: 0 auto;
                 max-width: 500px;
@@ -756,11 +682,7 @@
             }
             
             .project-icon {
-                font-size: 20px;
-            }
-            
-            body {
-                background-attachment: scroll;
+                font-size: 18px;
             }
         }
         
@@ -781,7 +703,7 @@
             }
             
             .project-icon {
-                font-size: 22px;
+                font-size: 20px;
             }
         }
         
@@ -793,7 +715,7 @@
             }
             
             .project-icon {
-                font-size: 24px;
+                font-size: 22px;
             }
         }
         
@@ -813,17 +735,7 @@
             }
             
             .project-icon {
-                font-size: 26px;
-            }
-            
-            body::after {
-                background-size: 
-                    100px 100px,
-                    100px 100px,
-                    240px 140px,
-                    200px 120px,
-                    260px 160px,
-                    220px 130px;
+                font-size: 24px;
             }
         }
         
@@ -841,7 +753,6 @@
                 padding: 1rem;
             }
             
-            /* Reduce floating elements for landscape */
             .project-icons {
                 display: none;
             }
@@ -869,17 +780,14 @@
     </style>
 </head>
 <body>
-    <!-- Project Management Floating Icons -->
-    <div class="project-icons">
+    <!-- Optimized Project Management Floating Icons (fewer elements) -->
+    <div class="project-icons" id="projectIcons">
         <div class="project-icon">📋</div>
         <div class="project-icon">📊</div>
         <div class="project-icon">⏰</div>
         <div class="project-icon">🎯</div>
         <div class="project-icon">📈</div>
         <div class="project-icon">💼</div>
-        <div class="project-icon">🗂️</div>
-        <div class="project-icon">✅</div>
-        <div class="project-icon">📅</div>
     </div>
     
     <!-- Flash Messages -->
@@ -898,7 +806,7 @@
     <div class="container">
         <div class="row justify-content-center mt-5">
             <div class="col-md-6 col-lg-5">
-                <div class="card">
+                <div class="card" id="mainCard">
                     <div class="card-header text-center bg-success text-white">
                         <h4><i class="bi bi-person-plus me-2"></i>Create Project Account</h4>
                         <small style="opacity: 0.9;">Join our project management platform</small>
@@ -943,86 +851,117 @@
     </div>
     
     <script>
-        // Enhanced responsive JavaScript for all devices
-        function handleResponsiveFeatures() {
-            const isMobile = window.innerWidth <= 767;
-            const isTablet = window.innerWidth >= 768 && window.innerWidth <= 1024;
-            const isLandscape = window.innerHeight < window.innerWidth && window.innerHeight < 500;
-            
-            // Adjust animations based on device
-            if (isMobile) {
-                // Reduce complex animations on mobile for better performance
-                document.body.style.animationDuration = '15s';
-                
-                // Disable parallax on mobile to prevent iOS scroll issues
-                document.removeEventListener('mousemove', handleParallax);
-            }
-            
-            // Handle landscape mode
-            if (isLandscape && isMobile) {
-                document.querySelector('.mt-5').style.marginTop = '1rem';
-                document.querySelector('.card-body').style.padding = '1.5rem 1rem';
-            }
-            
-            // Optimize floating elements for device performance
-            const projectIcons = document.querySelectorAll('.project-icon');
-            if (isMobile) {
-                projectIcons.forEach(icon => {
-                    icon.style.animationDuration = '20s';
-                });
+        // Performance optimized JavaScript with throttling and debouncing
+        let animationFrameId = null;
+        let isVisible = true;
+        let mouseMoveThrottle = null;
+        
+        // Throttle function for better performance
+        function throttle(func, limit) {
+            let inThrottle;
+            return function() {
+                const args = arguments;
+                const context = this;
+                if (!inThrottle) {
+                    func.apply(context, args);
+                    inThrottle = true;
+                    setTimeout(() => inThrottle = false, limit);
+                }
             }
         }
         
-        // Store parallax handler
-        function handleParallax(e) {
+        // Debounce function for input events
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+        
+        // Optimized responsive features
+        const handleResponsiveFeatures = throttle(() => {
+            const isMobile = window.innerWidth <= 767;
+            const projectIcons = document.getElementById('projectIcons');
+            
+            if (isMobile) {
+                // Reduce animations on mobile
+                document.body.style.animationDuration = '15s';
+                if (projectIcons) {
+                    projectIcons.style.display = 'none';
+                }
+                // Remove parallax on mobile
+                document.removeEventListener('mousemove', handleParallax);
+            } else {
+                if (projectIcons) {
+                    projectIcons.style.display = 'block';
+                }
+                // Add parallax on desktop
+                document.addEventListener('mousemove', handleParallax);
+            }
+        }, 100);
+        
+        // Optimized parallax handler with throttling
+        const handleParallax = throttle((e) => {
+            if (window.innerWidth <= 767) return; // Skip on mobile
+            
             const mouseX = e.clientX / window.innerWidth;
             const mouseY = e.clientY / window.innerHeight;
             
-            document.body.style.backgroundPosition = `${mouseX * 30}px ${mouseY * 30}px`;
+            // Use requestAnimationFrame for smooth animation
+            if (animationFrameId) {
+                cancelAnimationFrame(animationFrameId);
+            }
             
-            // Add dynamic blue tint based on mouse position
-            const blueIntensity = 0.1 + (mouseX * mouseY) * 0.1;
-            document.body.style.filter = `sepia(20%) saturate(120%) hue-rotate(200deg) brightness(${1 + blueIntensity * 0.2})`;
-        }
+            animationFrameId = requestAnimationFrame(() => {
+                document.body.style.backgroundPosition = `${mouseX * 20}px ${mouseY * 20}px`;
+            });
+        }, 16); // ~60fps
         
-        // Touch-friendly interactions for mobile devices
+        // Optimized touch interactions
         function initTouchInteractions() {
             const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
             
             if (isTouchDevice) {
-                // Add touch-friendly button interactions
-                document.querySelectorAll('.btn').forEach(btn => {
+                // Cache DOM elements
+                const buttons = document.querySelectorAll('.btn');
+                const inputs = document.querySelectorAll('.form-control');
+                
+                buttons.forEach(btn => {
                     btn.addEventListener('touchstart', function() {
-                        this.style.transform = 'scale(0.95)';
-                    });
+                        this.style.transform = 'scale(0.98)';
+                    }, { passive: true });
                     
                     btn.addEventListener('touchend', function() {
                         setTimeout(() => {
                             this.style.transform = '';
                         }, 100);
-                    });
+                    }, { passive: true });
                 });
                 
-                // Enhance form input experience on touch devices
-                document.querySelectorAll('.form-control').forEach(input => {
+                inputs.forEach(input => {
                     input.addEventListener('touchstart', function() {
-                        this.style.borderColor = '#3498db';
-                    });
+                        this.style.borderColor = 'var(--blue-primary)';
+                    }, { passive: true });
                 });
                 
-                // Add haptic feedback for supported devices
+                // Add haptic feedback if supported
                 if ('vibrate' in navigator) {
-                    document.querySelectorAll('.btn').forEach(element => {
+                    buttons.forEach(element => {
                         element.addEventListener('touchstart', () => {
-                            navigator.vibrate(10); // Subtle haptic feedback
-                        });
+                            navigator.vibrate(8);
+                        }, { passive: true });
                     });
                 }
             }
         }
         
-        // Responsive font sizing
-        function adjustFontSizes() {
+        // Optimized font sizing
+        const adjustFontSizes = throttle(() => {
             const screenWidth = window.innerWidth;
             const rootElement = document.documentElement;
             
@@ -1030,66 +969,66 @@
                 rootElement.style.fontSize = '14px';
             } else if (screenWidth < 768) {
                 rootElement.style.fontSize = '15px';
-            } else if (screenWidth < 992) {
-                rootElement.style.fontSize = '16px';
             } else {
                 rootElement.style.fontSize = '16px';
             }
-        }
+        }, 100);
         
-        // Handle orientation change
+        // Handle orientation change with delay
         function handleOrientationChange() {
             setTimeout(() => {
                 handleResponsiveFeatures();
                 adjustFontSizes();
-                
-                // Force repaint to fix potential layout issues
-                document.body.style.display = 'none';
-                document.body.offsetHeight; // Trigger reflow
-                document.body.style.display = '';
-            }, 100);
+            }, 150);
         }
         
-        // Optimize project element creation for different devices
+        // Optimized project element creation (reduced frequency)
+        let elementCreationTimeout = null;
+        
         function createProjectElements() {
-            const isMobile = window.innerWidth <= 767;
-            const isTablet = window.innerWidth >= 768 && window.innerWidth <= 1024;
+            if (!isVisible || window.innerWidth <= 767) return;
             
-            const projectTerms = isMobile 
-                ? ['TEAM', 'GOALS', 'SPRINT', 'TASKS'] // Fewer elements on mobile
-                : isTablet
-                ? ['TEAM', 'GOALS', 'SPRINT', 'TASKS', 'AGILE', 'SCRUM'] // Medium amount on tablet
-                : ['TEAM', 'GOALS', 'SPRINT', 'TASKS', 'AGILE', 'SCRUM', 'KANBAN', 'MILESTONE']; // Full set on desktop
+            // Clear existing timeout
+            if (elementCreationTimeout) {
+                clearTimeout(elementCreationTimeout);
+            }
             
-            projectTerms.forEach((term, index) => {
-                setTimeout(() => {
+            const projectTerms = ['TEAM', 'GOALS', 'SPRINT', 'TASKS', 'AGILE'];
+            const maxElements = 3; // Limit concurrent elements
+            
+            projectTerms.slice(0, maxElements).forEach((term, index) => {
+                elementCreationTimeout = setTimeout(() => {
+                    if (!isVisible) return;
+                    
                     const element = document.createElement('div');
                     element.textContent = term;
+                    element.className = 'floating-text';
                     element.style.cssText = `
                         position: fixed;
-                        font-size: ${isMobile ? '10px' : isTablet ? '11px' : '12px'};
+                        font-size: 11px;
                         font-weight: 600;
-                        color: rgba(52, 152, 219, ${isMobile ? '0.15' : '0.2'});
+                        color: rgba(52, 152, 219, 0.2);
                         pointer-events: none;
                         z-index: 0;
-                        left: ${Math.random() * 100}%;
+                        left: ${Math.random() * 80 + 10}%;
                         top: 100vh;
-                        animation: floatText ${isMobile ? '25s' : '20s'} linear infinite;
-                        animation-delay: ${index * (isMobile ? 3 : 2)}s;
+                        animation: floatText 20s linear infinite;
+                        will-change: transform;
                     `;
                     
                     document.body.appendChild(element);
                     
+                    // Clean up element
                     setTimeout(() => {
                         if (element.parentNode) {
                             element.remove();
                         }
-                    }, isMobile ? 25000 : 20000);
-                }, index * (isMobile ? 1500 : 1000));
+                    }, 20000);
+                }, index * 4000);
             });
         }
         
-        // Add floating text animation
+        // Add optimized floating text animation
         const floatTextStyle = document.createElement('style');
         floatTextStyle.textContent = `
             @keyframes floatText {
@@ -1098,55 +1037,66 @@
                     opacity: 0;
                 }
                 10% {
-                    opacity: 1;
-                }
-                50% {
-                    opacity: 0.6;
+                    opacity: 0.8;
                 }
                 90% {
-                    opacity: 0.3;
+                    opacity: 0.2;
                 }
                 100% {
-                    transform: translateY(-100vh) rotate(180deg);
+                    transform: translateY(-100vh) rotate(90deg);
                     opacity: 0;
                 }
             }
         `;
         document.head.appendChild(floatTextStyle);
         
+        // Main initialization
         document.addEventListener('DOMContentLoaded', function() {
-            // Initialize responsive features
-            handleResponsiveFeatures();
-            adjustFontSizes();
-            initTouchInteractions();
-            
+            // Cache DOM elements for better performance
             const form = document.getElementById('registerForm');
             const passwordField = document.getElementById('password');
             const strengthIndicator = document.getElementById('passwordStrength');
             const submitBtn = document.getElementById('submitBtn');
             const btnText = document.getElementById('btnText');
+            const emailField = document.getElementById('email');
+            const emailHelp = document.getElementById('email-help');
+            const mainCard = document.getElementById('mainCard');
             
-            // Enhanced input interactions
-            document.querySelectorAll('.form-control').forEach(input => {
-                input.addEventListener('focus', function() {
-                    this.parentElement.style.transform = 'translateY(-2px)';
-                    this.parentElement.style.filter = 'drop-shadow(0 8px 16px rgba(52, 152, 219, 0.2))';
-                });
-                
-                input.addEventListener('blur', function() {
-                    this.parentElement.style.transform = 'translateY(0)';
-                    this.parentElement.style.filter = 'none';
-                });
-                
-                input.addEventListener('input', function() {
-                    if (this.value) {
-                        this.style.borderColor = '#3498db';
-                        this.style.boxShadow = '0 0 10px rgba(52, 152, 219, 0.3)';
+            // Initialize features
+            handleResponsiveFeatures();
+            adjustFontSizes();
+            initTouchInteractions();
+            
+            // Optimized input interactions with event delegation
+            const inputContainer = document.querySelector('.card-body');
+            
+            inputContainer.addEventListener('focusin', function(e) {
+                if (e.target.classList.contains('form-control')) {
+                    const inputGroup = e.target.parentElement;
+                    inputGroup.style.transform = 'translateY(-1px)';
+                    inputGroup.style.filter = 'drop-shadow(0 4px 8px rgba(52, 152, 219, 0.15))';
+                }
+            });
+            
+            inputContainer.addEventListener('focusout', function(e) {
+                if (e.target.classList.contains('form-control')) {
+                    const inputGroup = e.target.parentElement;
+                    inputGroup.style.transform = 'translateY(0)';
+                    inputGroup.style.filter = 'none';
+                }
+            });
+            
+            // Optimized input styling
+            inputContainer.addEventListener('input', function(e) {
+                if (e.target.classList.contains('form-control')) {
+                    if (e.target.value) {
+                        e.target.style.borderColor = 'var(--blue-primary)';
+                        e.target.style.boxShadow = '0 0 8px rgba(52, 152, 219, 0.2)';
                     } else {
-                        this.style.borderColor = '';
-                        this.style.boxShadow = '';
+                        e.target.style.borderColor = '';
+                        e.target.style.boxShadow = '';
                     }
-                });
+                }
             });
             
             // Email validation function
@@ -1155,35 +1105,31 @@
                 return emailRegex.test(email.trim());
             }
             
-            // Real-time email validation
-            const emailField = document.getElementById('email');
-            const emailHelp = document.getElementById('email-help');
-            
-            emailField.addEventListener('input', function() {
-                const email = this.value.trim();
+            // Debounced email validation
+            const debouncedEmailValidation = debounce(function() {
+                const email = emailField.value.trim();
                 if (email.length === 0) {
-                    // Reset to default state
-                    this.classList.remove('email-valid', 'email-invalid');
+                    emailField.classList.remove('email-valid', 'email-invalid');
                     emailHelp.textContent = 'Enter a valid email address';
                     emailHelp.className = 'text-muted';
                 } else if (validateEmail(email)) {
-                    // Valid email
-                    this.classList.remove('email-invalid');
-                    this.classList.add('email-valid');
+                    emailField.classList.remove('email-invalid');
+                    emailField.classList.add('email-valid');
                     emailHelp.textContent = 'Email looks good!';
                     emailHelp.className = 'text-success';
                 } else {
-                    // Invalid email
-                    this.classList.remove('email-valid');
-                    this.classList.add('email-invalid');
+                    emailField.classList.remove('email-valid');
+                    emailField.classList.add('email-invalid');
                     emailHelp.textContent = 'Please enter a valid email address';
                     emailHelp.className = 'text-danger';
                 }
-            });
+            }, 300);
             
-            // Enhanced password strength checker
-            passwordField.addEventListener('input', function() {
-                const password = this.value;
+            emailField.addEventListener('input', debouncedEmailValidation);
+            
+            // Optimized password strength checker
+            const debouncedPasswordCheck = debounce(function() {
+                const password = passwordField.value;
                 let strength = 0;
                 
                 if (password.length >= 6) strength++;
@@ -1192,18 +1138,9 @@
                 if (password.match(/[^\\w\\s]/)) strength++;
                 
                 const strengthPercentage = (strength * 25);
-                strengthIndicator.style.setProperty('--strength-width', strengthPercentage + '%');
                 
-                // Update the ::after pseudo-element width
-                strengthIndicator.querySelector('::after') || (() => {
-                    const style = document.createElement('style');
-                    style.textContent = `
-                        #passwordStrength::after {
-                            width: ${strengthPercentage}% !important;
-                        }
-                    `;
-                    document.head.appendChild(style);
-                })();
+                // Update CSS custom property
+                document.documentElement.style.setProperty('--strength-width', strengthPercentage + '%');
                 
                 if (strength < 2) {
                     strengthIndicator.className = 'password-strength strength-weak';
@@ -1212,30 +1149,35 @@
                 } else {
                     strengthIndicator.className = 'password-strength strength-strong';
                 }
-                
-                // Update strength bar width via CSS custom property
-                document.documentElement.style.setProperty('--strength-width', strengthPercentage + '%');
-            });
+            }, 200);
             
-            // Enhanced form validation
+            passwordField.addEventListener('input', debouncedPasswordCheck);
+            
+            // Optimized form validation
             form.addEventListener('submit', function(e) {
                 const fullName = document.getElementById('full_name').value;
-                const email = document.getElementById('email').value;
-                const password = document.getElementById('password').value;
+                const email = emailField.value;
+                const password = passwordField.value;
                 const orgName = document.getElementById('organization_name').value;
                 
                 if (!fullName || !email || !password || !orgName) {
                     e.preventDefault();
                     
-                    // Shake animation for empty fields
-                    [fullName, email, password, orgName].forEach((value, index) => {
-                        const fieldIds = ['full_name', 'email', 'password', 'organization_name'];
-                        if (!value) {
-                            const field = document.getElementById(fieldIds[index]);
-                            field.style.animation = 'shake 0.5s ease-in-out';
+                    // Optimized shake animation for empty fields
+                    const fields = [
+                        { value: fullName, id: 'full_name' },
+                        { value: email, id: 'email' },
+                        { value: password, id: 'password' },
+                        { value: orgName, id: 'organization_name' }
+                    ];
+                    
+                    fields.forEach(field => {
+                        if (!field.value) {
+                            const element = document.getElementById(field.id);
+                            element.style.animation = 'shake 0.4s ease-in-out';
                             setTimeout(() => {
-                                field.style.animation = '';
-                            }, 500);
+                                element.style.animation = '';
+                            }, 400);
                         }
                     });
                     
@@ -1245,22 +1187,20 @@
                 
                 if (password.length < 6) {
                     e.preventDefault();
-                    passwordField.style.animation = 'shake 0.5s ease-in-out';
+                    passwordField.style.animation = 'shake 0.4s ease-in-out';
                     setTimeout(() => {
                         passwordField.style.animation = '';
-                    }, 500);
+                    }, 400);
                     alert('Password must be at least 6 characters long');
                     return;
                 }
                 
-                // Email validation - more comprehensive regex
-                const emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
-                if (!emailRegex.test(email.trim())) {
+                if (!validateEmail(email.trim())) {
                     e.preventDefault();
-                    emailField.style.animation = 'shake 0.5s ease-in-out';
+                    emailField.style.animation = 'shake 0.4s ease-in-out';
                     setTimeout(() => {
                         emailField.style.animation = '';
-                    }, 500);
+                    }, 400);
                     alert('Please enter a valid email address');
                     return;
                 }
@@ -1270,21 +1210,21 @@
                 btnText.textContent = 'Creating Account...';
                 submitBtn.disabled = true;
                 
-                // Optional: Remove loading state if form submission fails (for client-side validation)
+                // Timeout for loading state
                 setTimeout(() => {
                     if (submitBtn.classList.contains('btn-loading')) {
                         submitBtn.classList.remove('btn-loading');
                         btnText.textContent = 'Create Account';
                         submitBtn.disabled = false;
                     }
-                }, 10000); // 10 second timeout
+                }, 10000);
             });
             
             // Auto-hide flash messages
             const flashMessage = document.getElementById('flash-message');
             if (flashMessage) {
                 setTimeout(function() {
-                    flashMessage.style.transform = 'translateY(-20px)';
+                    flashMessage.style.transform = 'translateY(-15px)';
                     flashMessage.style.opacity = '0';
                     setTimeout(function() {
                         flashMessage.remove();
@@ -1292,57 +1232,92 @@
                 }, 5000);
             }
             
-            // Enhanced parallax effect with blue tint (desktop only)
+            // Optimized card hover effect
             if (window.innerWidth > 767) {
-                document.addEventListener('mousemove', handleParallax);
+                mainCard.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateY(-8px)';
+                    this.style.boxShadow = '0 20px 40px rgba(52, 152, 219, 0.25)';
+                });
+                
+                mainCard.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateY(0)';
+                    this.style.boxShadow = '0 15px 35px rgba(0,0,0,0.1)';
+                });
             }
             
-            // Enhanced card hover effect
-            document.querySelector('.card').addEventListener('mouseenter', function() {
-                if (window.innerWidth > 767) {
-                    this.style.transform = 'translateY(-12px) rotateX(8deg)';
-                    this.style.boxShadow = '0 25px 50px rgba(52, 152, 219, 0.3)';
-                } else {
-                    this.style.transform = 'translateY(-5px)';
-                    this.style.boxShadow = '0 15px 30px rgba(52, 152, 219, 0.2)';
-                }
-            });
-            
-            document.querySelector('.card').addEventListener('mouseleave', function() {
-                this.style.transform = 'translateY(0) rotateX(0deg)';
-                this.style.boxShadow = '0 15px 35px rgba(0,0,0,0.1)';
-            });
-            
-            // Start creating project management elements
+            // Start creating project elements (less frequent)
             createProjectElements();
             
-            // Recreate elements periodically (adjusted for device)
-            const interval = window.innerWidth <= 767 ? 35000 : 25000;
-            setInterval(createProjectElements, interval);
+            // Recreate elements less frequently
+            const interval = window.innerWidth <= 767 ? 45000 : 30000;
+            setInterval(() => {
+                if (isVisible && window.innerWidth > 767) {
+                    createProjectElements();
+                }
+            }, interval);
         });
         
-        // Handle window resize and orientation change
+        // Optimized event listeners
         window.addEventListener('resize', handleResponsiveFeatures);
         window.addEventListener('orientationchange', handleOrientationChange);
         
-        // Handle visibility change to pause animations when tab is not active
+        // Visibility change handler for performance
         document.addEventListener('visibilitychange', function() {
+            isVisible = !document.hidden;
+            
             if (document.hidden) {
-                // Pause heavy animations when tab is not visible
+                // Pause animations when tab is not visible
                 document.body.style.animationPlayState = 'paused';
+                
+                // Cancel any pending animation frames
+                if (animationFrameId) {
+                    cancelAnimationFrame(animationFrameId);
+                    animationFrameId = null;
+                }
+                
+                // Clear timeouts
+                if (elementCreationTimeout) {
+                    clearTimeout(elementCreationTimeout);
+                    elementCreationTimeout = null;
+                }
             } else {
                 document.body.style.animationPlayState = 'running';
             }
         });
         
-        // Add dynamic strength bar width via CSS
-        const strengthStyle = document.createElement('style');
-        strengthStyle.textContent = `
-            .password-strength::after {
-                width: var(--strength-width, 0%);
+        // Cleanup floating elements on page unload
+        window.addEventListener('beforeunload', function() {
+            const floatingElements = document.querySelectorAll('.floating-text');
+            floatingElements.forEach(el => el.remove());
+            
+            if (animationFrameId) {
+                cancelAnimationFrame(animationFrameId);
             }
-        `;
-        document.head.appendChild(strengthStyle);
+            
+            if (elementCreationTimeout) {
+                clearTimeout(elementCreationTimeout);
+            }
+        });
+        
+        // Intersection Observer for performance optimization
+        if ('IntersectionObserver' in window) {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.target.id === 'mainCard') {
+                        if (entry.isIntersecting) {
+                            entry.target.style.animationPlayState = 'running';
+                        } else {
+                            entry.target.style.animationPlayState = 'paused';
+                        }
+                    }
+                });
+            }, { threshold: 0.1 });
+            
+            const mainCard = document.getElementById('mainCard');
+            if (mainCard) {
+                observer.observe(mainCard);
+            }
+        }
     </script>
 </body>
 </html>

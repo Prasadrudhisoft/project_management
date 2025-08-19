@@ -6,7 +6,7 @@
     <title>Login - Project Manager</title>
     
     <style>
-        /* Bootstrap CSS embedded */
+        /* Optimized CSS with hardware acceleration and performance improvements */
         * {
             box-sizing: border-box;
         }
@@ -15,41 +15,34 @@
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
             line-height: 1.6;
             color: #212529;
-            background: linear-gradient(45deg, #1e3c72, #2a5298, #3498db, #5dade2, #85c1e9, #aed6f1, #0066cc);
-            background-size: 400% 400%;
+            background: linear-gradient(45deg, #1e3c72, #2a5298, #3498db, #5dade2);
+            background-size: 300% 300%;
             background-attachment: fixed;
-            animation: blueGradientShift 10s ease infinite;
+            animation: blueGradientShift 8s ease infinite;
             margin: 0;
             padding: 0;
             min-height: 100vh;
             position: relative;
             overflow-x: hidden;
+            /* Hardware acceleration */
+            transform: translateZ(0);
+            -webkit-transform: translateZ(0);
+            will-change: background-position;
         }
         
         @keyframes blueGradientShift {
             0% { 
                 background-position: 0% 50%;
-                filter: brightness(1) saturate(1);
-            }
-            25% { 
-                background-position: 100% 50%;
-                filter: brightness(1.1) saturate(1.2);
             }
             50% { 
-                background-position: 100% 100%;
-                filter: brightness(0.9) saturate(1.3);
-            }
-            75% { 
-                background-position: 50% 100%;
-                filter: brightness(1.05) saturate(1.1);
+                background-position: 100% 50%;
             }
             100% { 
                 background-position: 0% 50%;
-                filter: brightness(1) saturate(1);
             }
         }
         
-        /* Animated background particles with blue theme */
+        /* Optimized background particles - reduced complexity */
         body::before {
             content: '';
             position: fixed;
@@ -57,18 +50,17 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background-image: 
-                radial-gradient(circle at 20% 80%, rgba(30, 60, 114, 0.4) 0%, transparent 60%),
-                radial-gradient(circle at 80% 20%, rgba(52, 152, 219, 0.5) 0%, transparent 55%),
-                radial-gradient(circle at 40% 40%, rgba(93, 173, 226, 0.4) 0%, transparent 50%),
-                radial-gradient(circle at 60% 60%, rgba(133, 193, 233, 0.3) 0%, transparent 65%),
-                radial-gradient(circle at 90% 10%, rgba(174, 214, 241, 0.4) 0%, transparent 50%),
-                radial-gradient(circle at 10% 90%, rgba(0, 102, 204, 0.3) 0%, transparent 70%);
-            animation: blueFloat 12s ease-in-out infinite;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(30, 60, 114, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(52, 152, 219, 0.4) 0%, transparent 45%),
+                radial-gradient(circle at 40% 40%, rgba(93, 173, 226, 0.3) 0%, transparent 40%);
+            animation: blueFloat 10s ease-in-out infinite;
             pointer-events: none;
+            transform: translateZ(0);
+            will-change: transform, opacity;
         }
         
-        /* Project Management themed background elements */
+        /* Simplified project grid background */
         body::after {
             content: '';
             position: fixed;
@@ -76,57 +68,35 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background-image: 
-                /* Kanban Board */
-                linear-gradient(90deg, rgba(52, 152, 219, 0.1) 1px, transparent 1px),
-                linear-gradient(rgba(52, 152, 219, 0.1) 1px, transparent 1px),
-                /* Task Cards */
-                radial-gradient(circle at 15% 25%, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.08) 30%, transparent 50%),
-                radial-gradient(circle at 85% 35%, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.06) 25%, transparent 40%),
-                radial-gradient(circle at 25% 75%, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 35%, transparent 55%),
-                radial-gradient(circle at 75% 85%, rgba(255, 255, 255, 0.13) 0%, rgba(255, 255, 255, 0.07) 28%, transparent 45%);
-            background-size: 
-                80px 80px,
-                80px 80px,
-                200px 120px,
-                180px 100px,
-                220px 140px,
-                190px 110px;
-            background-position:
-                0 0,
-                0 0,
-                0 0,
-                100px 50px,
-                50px 200px,
-                150px 300px;
-            animation: projectGrid 20s linear infinite;
+            background: 
+                linear-gradient(90deg, rgba(52, 152, 219, 0.08) 1px, transparent 1px),
+                linear-gradient(rgba(52, 152, 219, 0.08) 1px, transparent 1px);
+            background-size: 60px 60px;
+            animation: projectGrid 15s linear infinite;
             pointer-events: none;
-            opacity: 0.6;
+            opacity: 0.5;
             z-index: 0;
+            transform: translateZ(0);
+            will-change: background-position;
         }
         
         @keyframes projectGrid {
-            0% { 
-                background-position:
-                    0 0,
-                    0 0,
-                    0 0,
-                    100px 50px,
-                    50px 200px,
-                    150px 300px;
+            0% { background-position: 0 0; }
+            100% { background-position: 60px 60px; }
+        }
+        
+        @keyframes blueFloat {
+            0%, 100% { 
+                opacity: 0.6; 
+                transform: translateZ(0) scale(1);
             }
-            100% { 
-                background-position:
-                    80px 80px,
-                    80px 80px,
-                    200px 120px,
-                    300px 170px,
-                    270px 340px,
-                    370px 430px;
+            50% { 
+                opacity: 0.9; 
+                transform: translateZ(0) scale(1.05);
             }
         }
         
-        /* Floating project icons */
+        /* Optimized floating icons - reduced and simplified */
         .project-icons {
             position: fixed;
             top: 0;
@@ -136,29 +106,28 @@
             pointer-events: none;
             z-index: 0;
             overflow: hidden;
+            transform: translateZ(0);
         }
         
         .project-icon {
             position: absolute;
-            font-size: 24px;
-            color: rgba(52, 152, 219, 0.3);
-            animation: float-icons 15s linear infinite;
+            font-size: 20px;
+            color: rgba(52, 152, 219, 0.25);
+            animation: float-icons 12s linear infinite;
             opacity: 0;
+            transform: translateZ(0);
+            will-change: transform, opacity;
         }
         
         .project-icon:nth-child(1) { left: 10%; animation-delay: 0s; }
-        .project-icon:nth-child(2) { left: 20%; animation-delay: -2s; }
-        .project-icon:nth-child(3) { left: 30%; animation-delay: -4s; }
-        .project-icon:nth-child(4) { left: 40%; animation-delay: -6s; }
-        .project-icon:nth-child(5) { left: 50%; animation-delay: -8s; }
-        .project-icon:nth-child(6) { left: 60%; animation-delay: -10s; }
-        .project-icon:nth-child(7) { left: 70%; animation-delay: -12s; }
-        .project-icon:nth-child(8) { left: 80%; animation-delay: -14s; }
-        .project-icon:nth-child(9) { left: 90%; animation-delay: -16s; }
+        .project-icon:nth-child(2) { left: 30%; animation-delay: -3s; }
+        .project-icon:nth-child(3) { left: 50%; animation-delay: -6s; }
+        .project-icon:nth-child(4) { left: 70%; animation-delay: -9s; }
+        .project-icon:nth-child(5) { left: 90%; animation-delay: -12s; }
         
         @keyframes float-icons {
             0% {
-                transform: translateY(100vh) rotate(0deg);
+                transform: translateY(100vh) translateZ(0);
                 opacity: 0;
             }
             10% {
@@ -168,42 +137,9 @@
                 opacity: 1;
             }
             100% {
-                transform: translateY(-100px) rotate(360deg);
+                transform: translateY(-100px) translateZ(0);
                 opacity: 0;
             }
-        }
-        
-        @keyframes blueFloat {
-            0%, 100% { 
-                opacity: 0.7; 
-                transform: translateY(0px) scale(1) rotate(0deg);
-                filter: hue-rotate(0deg) blur(0px);
-            }
-            20% { 
-                opacity: 1; 
-                transform: translateY(-25px) scale(1.15) rotate(72deg);
-                filter: hue-rotate(15deg) blur(1px);
-            }
-            40% { 
-                opacity: 0.8; 
-                transform: translateY(-15px) scale(1.08) rotate(144deg);
-                filter: hue-rotate(30deg) blur(2px);
-            }
-            60% { 
-                opacity: 0.9; 
-                transform: translateY(-30px) scale(1.12) rotate(216deg);
-                filter: hue-rotate(20deg) blur(1px);
-            }
-            80% { 
-                opacity: 1; 
-                transform: translateY(-20px) scale(1.1) rotate(288deg);
-                filter: hue-rotate(10deg) blur(0.5px);
-            }
-        }
-        
-        @keyframes float {
-            0%, 100% { opacity: 0.7; transform: translateY(0px) scale(1); }
-            50% { opacity: 1; transform: translateY(-10px) scale(1.1); }
         }
         
         .container {
@@ -258,28 +194,30 @@
         
         .card {
             background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(20px);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.2);
             border-radius: 20px;
             box-shadow: 0 15px 35px rgba(0,0,0,0.1);
-            transition: all 0.3s ease;
-            transform: translateY(0);
-            animation: slideInUp 0.8s ease-out;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s ease;
+            transform: translateZ(0);
+            animation: slideInUp 0.6s ease-out;
+            will-change: transform, box-shadow;
         }
         
         @keyframes slideInUp {
             from {
                 opacity: 0;
-                transform: translateY(50px);
+                transform: translateY(30px) translateZ(0);
             }
             to {
                 opacity: 1;
-                transform: translateY(0);
+                transform: translateY(0) translateZ(0);
             }
         }
         
         .card:hover {
-            transform: translateY(-5px);
+            transform: translateY(-5px) translateZ(0);
             box-shadow: 0 25px 50px rgba(0,0,0,0.15);
         }
         
@@ -289,24 +227,13 @@
         
         .card-header {
             padding: 1.5rem 1rem;
-            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 25%, #3498db 50%, #5dade2 75%, #2980b9 100%);
+            background: linear-gradient(135deg, #1e3c72 0%, #3498db 50%, #2980b9 100%);
             border-bottom: none;
             border-top-left-radius: 20px;
             border-top-right-radius: 20px;
             position: relative;
             overflow: hidden;
-            animation: headerPulse 4s ease-in-out infinite;
-        }
-        
-        @keyframes headerPulse {
-            0%, 100% { 
-                background: linear-gradient(135deg, #1e3c72 0%, #2a5298 25%, #3498db 50%, #5dade2 75%, #2980b9 100%);
-                box-shadow: 0 0 20px rgba(52, 152, 219, 0.3);
-            }
-            50% { 
-                background: linear-gradient(135deg, #2980b9 0%, #3498db 25%, #5dade2 50%, #85c1e9 75%, #1e3c72 100%);
-                box-shadow: 0 0 30px rgba(52, 152, 219, 0.6);
-            }
+            transform: translateZ(0);
         }
         
         .card-header::before {
@@ -316,14 +243,15 @@
             left: -50%;
             width: 200%;
             height: 200%;
-            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.2), transparent);
-            transform: rotate(45deg);
-            animation: blueShimmer 3s linear infinite;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.15), transparent);
+            transform: translateX(-100%) translateY(-100%) rotate(45deg) translateZ(0);
+            animation: blueShimmer 2s linear infinite;
+            will-change: transform;
         }
         
         @keyframes blueShimmer {
-            0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
-            100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+            0% { transform: translateX(-100%) translateY(-100%) rotate(45deg) translateZ(0); }
+            100% { transform: translateX(100%) translateY(100%) rotate(45deg) translateZ(0); }
         }
         
         .card-body {
@@ -339,7 +267,7 @@
         }
         
         .bg-primary {
-            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 25%, #3498db 50%, #5dade2 75%, #2980b9 100%) !important;
+            background: linear-gradient(135deg, #1e3c72 0%, #3498db 50%, #2980b9 100%) !important;
         }
         
         .text-white {
@@ -377,8 +305,10 @@
             background-color: rgba(255, 255, 255, 0.9);
             border: 2px solid #e9ecef;
             border-radius: 12px;
-            transition: all 0.3s ease;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
             position: relative;
+            transform: translateZ(0);
+            will-change: border-color, box-shadow, transform;
         }
         
         .form-control:focus {
@@ -386,20 +316,13 @@
             background-color: rgba(255, 255, 255, 1);
             border-color: #3498db;
             outline: 0;
-            box-shadow: 0 0 0 0.25rem rgba(52, 152, 219, 0.25), 0 0 20px rgba(52, 152, 219, 0.4);
-            transform: translateY(-2px);
-            animation: inputGlow 2s ease-in-out infinite;
-        }
-        
-        @keyframes inputGlow {
-            0%, 100% { box-shadow: 0 0 0 0.25rem rgba(52, 152, 219, 0.25), 0 0 20px rgba(52, 152, 219, 0.4); }
-            50% { box-shadow: 0 0 0 0.25rem rgba(52, 152, 219, 0.4), 0 0 30px rgba(52, 152, 219, 0.6); }
+            box-shadow: 0 0 0 0.25rem rgba(52, 152, 219, 0.25);
+            transform: translateY(-1px) translateZ(0);
         }
         
         .form-control:hover:not(:focus) {
             border-color: #5dade2;
-            transform: translateY(-1px);
-            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.2);
+            transform: translateY(-1px) translateZ(0);
         }
         
         .input-group {
@@ -414,10 +337,12 @@
             color: #6c757d;
             font-size: 1rem;
             pointer-events: none;
-            transition: all 0.3s ease;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
             background: rgba(255, 255, 255, 0.9);
             padding: 0 0.5rem;
             border-radius: 4px;
+            transform: translateZ(0);
+            will-change: transform, font-size, color;
         }
         
         .form-control:focus + .floating-label,
@@ -427,13 +352,7 @@
             font-size: 0.875rem;
             color: #3498db;
             font-weight: 600;
-            animation: labelBounce 0.5s ease;
-        }
-        
-        @keyframes labelBounce {
-            0% { transform: translateY(0) scale(1); }
-            50% { transform: translateY(-5px) scale(1.05); }
-            100% { transform: translateY(0) scale(1); }
+            transform: translateZ(0);
         }
         
         .btn {
@@ -449,9 +368,11 @@
             padding: 0.75rem 2rem;
             font-size: 1rem;
             border-radius: 12px;
-            transition: all 0.3s ease;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
             position: relative;
             overflow: hidden;
+            transform: translateZ(0);
+            will-change: transform, box-shadow;
         }
         
         .btn::before {
@@ -462,7 +383,8 @@
             width: 100%;
             height: 100%;
             background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-            transition: left 0.5s;
+            transition: left 0.4s ease;
+            transform: translateZ(0);
         }
         
         .btn:hover::before {
@@ -471,55 +393,27 @@
         
         .btn-primary {
             color: #fff;
-            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 25%, #3498db 50%, #5dade2 75%, #2980b9 100%);
-            background-size: 200% 200%;
+            background: linear-gradient(135deg, #1e3c72 0%, #3498db 50%, #2980b9 100%);
             box-shadow: 0 4px 15px rgba(52, 152, 219, 0.4);
-            animation: buttonGradient 3s ease infinite;
-        }
-        
-        @keyframes buttonGradient {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
         }
         
         .btn-primary:hover {
-            transform: translateY(-3px) scale(1.02);
-            box-shadow: 0 12px 35px rgba(52, 152, 219, 0.7);
-            animation: buttonHover 0.6s ease infinite;
-        }
-        
-        @keyframes buttonHover {
-            0%, 100% { box-shadow: 0 12px 35px rgba(52, 152, 219, 0.7); }
-            50% { box-shadow: 0 15px 40px rgba(52, 152, 219, 0.8); }
+            transform: translateY(-2px) translateZ(0);
+            box-shadow: 0 8px 25px rgba(52, 152, 219, 0.6);
         }
         
         .btn-primary:active {
-            transform: translateY(-1px) scale(1.01);
-            animation: buttonPress 0.2s ease;
-        }
-        
-        @keyframes buttonPress {
-            0% { transform: translateY(-3px) scale(1.02); }
-            100% { transform: translateY(-1px) scale(1.01); }
+            transform: translateY(-1px) translateZ(0);
         }
         
         .btn-secondary {
             color: #fff;
-            background: linear-gradient(135deg, #2c3e50 0%, #34495e 25%, #5d6d7e 50%, #85929e 75%, #566573 100%);
-            background-size: 200% 200%;
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 50%, #5d6d7e 100%);
             box-shadow: 0 4px 15px rgba(52, 73, 94, 0.4);
-            animation: secondaryButtonGradient 4s ease infinite;
-        }
-        
-        @keyframes secondaryButtonGradient {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
         }
         
         .btn-secondary:hover {
-            transform: translateY(-2px);
+            transform: translateY(-2px) translateZ(0);
             box-shadow: 0 8px 25px rgba(52, 73, 94, 0.6);
         }
         
@@ -533,18 +427,20 @@
             margin-bottom: 1rem;
             border: none;
             border-radius: 12px;
-            animation: slideInDown 0.5s ease;
+            animation: slideInDown 0.4s ease;
             backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            transform: translateZ(0);
         }
         
         @keyframes slideInDown {
             from {
                 opacity: 0;
-                transform: translateY(-20px);
+                transform: translateY(-20px) translateZ(0);
             }
             to {
                 opacity: 1;
-                transform: translateY(0);
+                transform: translateY(0) translateZ(0);
             }
         }
         
@@ -570,7 +466,7 @@
             color: #3498db;
             text-decoration: none;
             font-weight: 600;
-            transition: all 0.3s ease;
+            transition: all 0.2s ease;
             position: relative;
         }
         
@@ -582,14 +478,13 @@
             bottom: -2px;
             left: 50%;
             background: linear-gradient(90deg, #3498db, #5dade2);
-            transition: all 0.3s ease;
+            transition: all 0.2s ease;
         }
         
         a:hover {
             color: #2980b9;
             text-decoration: none;
             transform: translateY(-1px);
-            text-shadow: 0 2px 8px rgba(52, 152, 219, 0.3);
         }
         
         a:hover::before {
@@ -618,16 +513,17 @@
             cursor: pointer;
             padding: 0.75rem;
             border-radius: 8px;
-            transition: all 0.2s ease;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
             margin-bottom: 0.5rem;
             border: 1px solid transparent;
+            transform: translateZ(0);
+            will-change: transform, background-color, border-color;
         }
         
         .demo-item:hover {
             background: linear-gradient(135deg, rgba(52, 152, 219, 0.15), rgba(93, 173, 226, 0.1));
             border-color: rgba(52, 152, 219, 0.4);
-            transform: translateX(8px) scale(1.02);
-            box-shadow: 0 5px 20px rgba(52, 152, 219, 0.2);
+            transform: translateX(5px) translateZ(0);
         }
         
         /* Loading animation */
@@ -645,32 +541,54 @@
             border: 2px solid transparent;
             border-top-color: #ffffff;
             border-radius: 50%;
-            animation: spin 1s linear infinite;
+            animation: spin 0.8s linear infinite;
             top: 0;
             left: 0;
             bottom: 0;
             right: 0;
+            transform: translateZ(0);
         }
         
         @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            0% { transform: rotate(0deg) translateZ(0); }
+            100% { transform: rotate(360deg) translateZ(0); }
         }
         
         /* Success animation */
         .success-animation {
-            animation: pulse 0.6s ease-in-out;
+            animation: pulse 0.5s cubic-bezier(0.4, 0, 0.2, 1);
         }
         
         @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-            100% { transform: scale(1); }
+            0% { transform: scale(1) translateZ(0); }
+            50% { transform: scale(1.03) translateZ(0); }
+            100% { transform: scale(1) translateZ(0); }
         }
         
-        /* Enhanced Responsive Design for All Devices */
+        /* Shake animation */
+        @keyframes shake {
+            0%, 100% { transform: translateX(0) translateZ(0); }
+            25% { transform: translateX(-5px) translateZ(0); border-color: #e74c3c !important; }
+            75% { transform: translateX(5px) translateZ(0); border-color: #e74c3c !important; }
+        }
         
-        /* Extra Small Devices (Portrait Phones, less than 576px) */
+        /* Back to home button enhancement */
+        .back-home {
+            animation: fadeInDown 0.8s cubic-bezier(0.4, 0, 0.2, 1) 0.2s both;
+        }
+        
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px) translateZ(0);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) translateZ(0);
+            }
+        }
+        
+        /* Enhanced Responsive Design */
         @media (max-width: 575.98px) {
             .container {
                 padding: 0 10px;
@@ -700,13 +618,9 @@
                 font-size: 1.1rem;
             }
             
-            .card-header small {
-                font-size: 0.75rem;
-            }
-            
             .form-control {
                 padding: 0.6rem 0.8rem;
-                font-size: 16px; /* Prevents zoom on iOS */
+                font-size: 16px;
             }
             
             .floating-label {
@@ -719,35 +633,21 @@
                 font-size: 0.95rem;
             }
             
-            .mt-3 {
-                margin-top: 0.75rem;
-            }
-            
             .project-icon {
-                font-size: 18px;
+                font-size: 16px;
             }
             
-            body {
-                background-attachment: scroll;
-            }
-            
-            /* Reduce animations for better performance on mobile */
-            .card:hover {
-                transform: translateY(-3px);
-            }
-            
+            /* Reduce animations on mobile */
+            body::before,
             body::after {
-                background-size: 
-                    40px 40px,
-                    40px 40px,
-                    120px 80px,
-                    100px 60px,
-                    140px 90px,
-                    110px 70px;
+                animation-duration: 15s;
+            }
+            
+            .project-icons {
+                display: none;
             }
         }
         
-        /* Small Devices (Landscape Phones, 576px and up) */
         @media (min-width: 576px) and (max-width: 767.98px) {
             .col-md-6, .col-lg-4 {
                 flex: 0 0 100%;
@@ -762,19 +662,14 @@
             }
             
             .form-control {
-                font-size: 16px; /* Prevents zoom on iOS */
+                font-size: 16px;
             }
             
             .project-icon {
-                font-size: 20px;
-            }
-            
-            body {
-                background-attachment: scroll;
+                font-size: 18px;
             }
         }
         
-        /* Medium Devices (Tablets, 768px and up) */
         @media (min-width: 768px) and (max-width: 991.98px) {
             .col-md-6 {
                 flex: 0 0 75%;
@@ -791,11 +686,10 @@
             }
             
             .project-icon {
-                font-size: 22px;
+                font-size: 20px;
             }
         }
         
-        /* Large Devices (Desktops, 992px and up) */
         @media (min-width: 992px) and (max-width: 1199.98px) {
             .col-lg-4 {
                 flex: 0 0 40%;
@@ -803,11 +697,10 @@
             }
             
             .project-icon {
-                font-size: 24px;
+                font-size: 22px;
             }
         }
         
-        /* Extra Large Devices (Large Desktops, 1200px and up) */
         @media (min-width: 1200px) {
             .col-lg-4 {
                 flex: 0 0 33.333333%;
@@ -823,64 +716,7 @@
             }
             
             .project-icon {
-                font-size: 26px;
-            }
-            
-            body::after {
-                background-size: 
-                    100px 100px,
-                    100px 100px,
-                    240px 140px,
-                    200px 120px,
-                    260px 160px,
-                    220px 130px;
-            }
-        }
-        
-        /* Ultra Wide Screens (1400px and up) */
-        @media (min-width: 1400px) {
-            .container {
-                max-width: 1600px;
-            }
-            
-            .project-icon {
-                font-size: 28px;
-            }
-        }
-        
-        /* Landscape orientation adjustments */
-        @media (orientation: landscape) and (max-height: 500px) {
-            .mt-3 {
-                margin-top: 0.5rem;
-            }
-            
-            .card-body {
-                padding: 1.5rem;
-            }
-            
-            .card-header {
-                padding: 1rem;
-            }
-            
-            /* Reduce floating elements for landscape */
-            .project-icons {
-                display: none;
-            }
-            
-            body::before,
-            body::after {
-                animation-duration: 30s;
-            }
-        }
-        
-        /* High DPI displays */
-        @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
-            .card {
-                border-width: 0.5px;
-            }
-            
-            .form-control {
-                border-width: 1.5px;
+                font-size: 24px;
             }
         }
         
@@ -900,10 +736,6 @@
             .floating-label {
                 color: #adb5bd;
                 background: rgba(30, 30, 30, 0.9);
-            }
-            
-            .card-footer {
-                background: linear-gradient(135deg, rgba(30, 60, 114, 0.2), rgba(52, 152, 219, 0.1));
             }
         }
         
@@ -926,54 +758,16 @@
                 animation: none;
             }
         }
-        
-        /* Print styles */
-        @media print {
-            body {
-                background: white;
-            }
-            
-            .project-icons,
-            body::before,
-            body::after {
-                display: none;
-            }
-            
-            .card {
-                box-shadow: none;
-                border: 2px solid #000;
-            }
-        }
-        
-        /* Back to home button enhancement */
-        .back-home {
-            animation: fadeInDown 1s ease 0.3s both;
-        }
-        
-        @keyframes fadeInDown {
-            from {
-                opacity: 0;
-                transform: translateY(-30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
     </style>
 </head>
 <body>
-    <!-- Project Management Floating Icons -->
+    <!-- Optimized Project Management Floating Icons -->
     <div class="project-icons">
         <div class="project-icon">📋</div>
         <div class="project-icon">📊</div>
         <div class="project-icon">⏰</div>
         <div class="project-icon">🎯</div>
         <div class="project-icon">📈</div>
-        <div class="project-icon">💼</div>
-        <div class="project-icon">🗂️</div>
-        <div class="project-icon">✅</div>
-        <div class="project-icon">📅</div>
     </div>
     
     <!-- Flash Messages -->
@@ -1024,29 +818,17 @@
                     </div>
                 </div>
                 
-                <!-- Demo Credentials -->
-                <!-- <div class="card mt-3">
-                    <div class="card-header">
-                        <h6 class="mb-0">Demo Credentials (Click to use)</h6>
-                    </div>
-                    <div class="card-body">
-                        <div class="demo-item" onclick="fillCredentials('admin@techcorp.com', 'admin')">
-                            <strong>Admin:</strong> admin@techcorp.com / admin
-                        </div>
-                        <div class="demo-item" onclick="fillCredentials('manager1@techcorp.com', 'manager')">
-                            <strong>Manager:</strong> manager1@techcorp.com / manager
-                        </div>
-                        <div class="demo-item" onclick="fillCredentials('dev1@techcorp.com', 'member')">
-                            <strong>Developer:</strong> dev1@techcorp.com / member
-                        </div> -->
-                    </div>
-                </div>
+                
             </div>
         </div>
     </div>
     
     <script>
-        // Auto-hide flash messages after 5 seconds with smooth animation
+        // Performance optimization variables
+        let isAnimating = false;
+        let animationFrame;
+        
+        // Optimized auto-hide flash messages
         document.addEventListener('DOMContentLoaded', function() {
             const flashMessage = document.getElementById('flash-message');
             if (flashMessage) {
@@ -1058,9 +840,12 @@
                     }, 300);
                 }, 5000);
             }
+            
+            // Initialize optimized features
+            initializeOptimizedFeatures();
         });
         
-        // Fill demo credentials with enhanced animation
+        // Optimized credentials filling with smooth animation
         function fillCredentials(email, password) {
             const emailField = document.getElementById('email');
             const passwordField = document.getElementById('password');
@@ -1069,35 +854,40 @@
             emailField.value = '';
             passwordField.value = '';
             
-            // Animate typing effect
+            // Use requestAnimationFrame for smooth animation
             let emailIndex = 0;
             let passwordIndex = 0;
             
-            const typeEmail = setInterval(() => {
-                emailField.value += email[emailIndex];
-                emailIndex++;
-                if (emailIndex >= email.length) {
-                    clearInterval(typeEmail);
-                    // Start typing password
-                    const typePassword = setInterval(() => {
-                        passwordField.value += password[passwordIndex];
-                        passwordIndex++;
-                        if (passwordIndex >= password.length) {
-                            clearInterval(typePassword);
-                            // Final animation
-                            emailField.classList.add('success-animation');
-                            passwordField.classList.add('success-animation');
-                            setTimeout(() => {
-                                emailField.classList.remove('success-animation');
-                                passwordField.classList.remove('success-animation');
-                            }, 600);
-                        }
-                    }, 100);
+            function typeEmail() {
+                if (emailIndex < email.length) {
+                    emailField.value += email[emailIndex];
+                    emailIndex++;
+                    setTimeout(typeEmail, 40);
+                } else {
+                    typePassword();
                 }
-            }, 50);
+            }
+            
+            function typePassword() {
+                if (passwordIndex < password.length) {
+                    passwordField.value += password[passwordIndex];
+                    passwordIndex++;
+                    setTimeout(typePassword, 80);
+                } else {
+                    // Final animation
+                    emailField.classList.add('success-animation');
+                    passwordField.classList.add('success-animation');
+                    setTimeout(() => {
+                        emailField.classList.remove('success-animation');
+                        passwordField.classList.remove('success-animation');
+                    }, 500);
+                }
+            }
+            
+            typeEmail();
         }
         
-        // Enhanced form validation with better UX
+        // Optimized form validation with better performance
         document.getElementById('loginForm').addEventListener('submit', function(e) {
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
@@ -1107,18 +897,20 @@
             if (!email || !password) {
                 e.preventDefault();
                 
-                // Shake animation for empty fields
+                // Optimized shake animation for empty fields
                 if (!email) {
-                    document.getElementById('email').style.animation = 'shake 0.5s ease-in-out';
+                    const emailField = document.getElementById('email');
+                    emailField.style.animation = 'shake 0.4s ease-in-out';
                     setTimeout(() => {
-                        document.getElementById('email').style.animation = '';
-                    }, 500);
+                        emailField.style.animation = '';
+                    }, 400);
                 }
                 if (!password) {
-                    document.getElementById('password').style.animation = 'shake 0.5s ease-in-out';
+                    const passwordField = document.getElementById('password');
+                    passwordField.style.animation = 'shake 0.4s ease-in-out';
                     setTimeout(() => {
-                        document.getElementById('password').style.animation = '';
-                    }, 500);
+                        passwordField.style.animation = '';
+                    }, 400);
                 }
                 
                 return;
@@ -1129,107 +921,343 @@
             btnText.textContent = 'Logging in...';
             submitBtn.disabled = true;
             
-            // Optional: Remove loading state if form submission fails (for client-side validation)
+            // Remove loading state if form submission fails (timeout)
             setTimeout(() => {
                 if (submitBtn.classList.contains('btn-loading')) {
                     submitBtn.classList.remove('btn-loading');
                     btnText.textContent = 'Login';
                     submitBtn.disabled = false;
                 }
-            }, 10000); // 10 second timeout
+            }, 10000);
         });
         
-        // Enhanced input interactions with blue theme
-        document.querySelectorAll('.form-control').forEach(input => {
-            input.addEventListener('focus', function() {
-                this.parentElement.style.transform = 'translateY(-2px)';
-                this.parentElement.style.filter = 'drop-shadow(0 8px 16px rgba(52, 152, 219, 0.2))';
+        // Optimized input interactions with throttled events
+        function initializeOptimizedFeatures() {
+            const formControls = document.querySelectorAll('.form-control');
+            
+            // Use passive event listeners for better performance
+            formControls.forEach(input => {
+                input.addEventListener('focus', function() {
+                    if (!isAnimating) {
+                        isAnimating = true;
+                        this.parentElement.style.transform = 'translateY(-1px)';
+                        setTimeout(() => isAnimating = false, 200);
+                    }
+                }, { passive: true });
+                
+                input.addEventListener('blur', function() {
+                    this.parentElement.style.transform = 'translateY(0)';
+                }, { passive: true });
+                
+                // Throttled input event
+                let inputTimeout;
+                input.addEventListener('input', function() {
+                    clearTimeout(inputTimeout);
+                    inputTimeout = setTimeout(() => {
+                        if (this.value) {
+                            this.style.borderColor = '#3498db';
+                        } else {
+                            this.style.borderColor = '';
+                        }
+                    }, 100);
+                }, { passive: true });
             });
             
-            input.addEventListener('blur', function() {
-                this.parentElement.style.transform = 'translateY(0)';
-                this.parentElement.style.filter = 'none';
-            });
-            
-            input.addEventListener('input', function() {
-                if (this.value) {
-                    this.style.borderColor = '#3498db';
-                    this.style.boxShadow = '0 0 10px rgba(52, 152, 219, 0.3)';
-                } else {
-                    this.style.borderColor = '';
-                    this.style.boxShadow = '';
-                }
-            });
-        });
-        
-        // Add shake animation for validation errors
-        const style = document.createElement('style');
-        style.textContent = `
-            @keyframes shake {
-                0%, 100% { transform: translateX(0); }
-                25% { transform: translateX(-8px); border-color: #e74c3c !important; }
-                75% { transform: translateX(8px); border-color: #e74c3c !important; }
+            // Optimized card hover effects for desktop only
+            if (window.innerWidth > 767) {
+                const card = document.querySelector('.card');
+                let hoverTimeout;
+                
+                card.addEventListener('mouseenter', function() {
+                    clearTimeout(hoverTimeout);
+                    this.style.transform = 'translateY(-5px)';
+                    this.style.boxShadow = '0 25px 50px rgba(52, 152, 219, 0.2)';
+                }, { passive: true });
+                
+                card.addEventListener('mouseleave', function() {
+                    hoverTimeout = setTimeout(() => {
+                        this.style.transform = 'translateY(0)';
+                        this.style.boxShadow = '0 15px 35px rgba(0,0,0,0.1)';
+                    }, 50);
+                }, { passive: true });
             }
-        `;
-        document.head.appendChild(style);
-        
-        // Enhanced parallax effect with blue tint (desktop only)
-        if (window.innerWidth > 767) {
-            document.addEventListener('mousemove', handleParallax);
+            
+            // Initialize button animations
+            initializeButtonAnimations();
         }
         
-        // Enhanced card hover effect with blue glow
-        document.querySelector('.card').addEventListener('mouseenter', function() {
-            if (window.innerWidth > 767) {
-                this.style.transform = 'translateY(-12px) rotateX(8deg)';
-                this.style.boxShadow = '0 25px 50px rgba(52, 152, 219, 0.3)';
-            } else {
-                this.style.transform = 'translateY(-5px)';
-                this.style.boxShadow = '0 15px 30px rgba(52, 152, 219, 0.2)';
-            }
-        });
-        
-        document.querySelector('.card').addEventListener('mouseleave', function() {
-            this.style.transform = 'translateY(0) rotateX(0deg)';
-            this.style.boxShadow = '0 15px 35px rgba(0,0,0,0.1)';
-        });
-        
-        // Add pulsing effect to buttons on page load
-        document.addEventListener('DOMContentLoaded', function() {
-            // Initialize responsive features
-            handleResponsiveFeatures();
-            adjustFontSizes();
-            initTouchInteractions();
-            
+        // Optimized button animations
+        function initializeButtonAnimations() {
             const buttons = document.querySelectorAll('.btn');
             buttons.forEach((button, index) => {
                 setTimeout(() => {
-                    button.style.animation = `pulse 1s ease-in-out`;
+                    button.style.animation = `pulse 0.6s cubic-bezier(0.4, 0, 0.2, 1)`;
                     setTimeout(() => {
                         button.style.animation = '';
-                    }, 1000);
-                }, index * 200);
+                    }, 600);
+                }, index * 150);
+            });
+        }
+        
+        // Optimized resize handler with throttling
+        let resizeTimeout;
+        window.addEventListener('resize', function() {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(handleResize, 250);
+        }, { passive: true });
+        
+        function handleResize() {
+            // Re-initialize features on significant size changes
+            if (window.innerWidth <= 767) {
+                // Disable heavy animations on mobile
+                document.documentElement.style.setProperty('--animation-duration', '0.2s');
+            } else {
+                document.documentElement.style.setProperty('--animation-duration', '0.3s');
+            }
+        }
+        
+        // Optimized orientation change handler
+        window.addEventListener('orientationchange', function() {
+            setTimeout(() => {
+                handleResize();
+            }, 300);
+        }, { passive: true });
+        
+        // Performance optimization: Pause animations when tab is not visible
+        document.addEventListener('visibilitychange', function() {
+            const body = document.body;
+            if (document.hidden) {
+                body.style.animationPlayState = 'paused';
+                // Pause CSS animations
+                const style = document.createElement('style');
+                style.id = 'pause-animations';
+                style.textContent = '*, *::before, *::after { animation-play-state: paused !important; }';
+                document.head.appendChild(style);
+            } else {
+                body.style.animationPlayState = 'running';
+                // Resume CSS animations
+                const pauseStyle = document.getElementById('pause-animations');
+                if (pauseStyle) {
+                    pauseStyle.remove();
+                }
+            }
+        }, { passive: true });
+        
+        // Optimized intersection observer for animations
+        if ('IntersectionObserver' in window) {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                    }
+                });
+            }, {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
             });
             
-            // Start creating project management elements
-            createProjectElements();
+            // Observe elements that should animate when in view
+            document.querySelectorAll('.card, .btn').forEach(el => {
+                observer.observe(el);
+            });
+        }
+        
+        // Optimized scroll performance
+        let ticking = false;
+        
+        function updateScrollEffects() {
+            // Add scroll-based effects here if needed
+            ticking = false;
+        }
+        
+        window.addEventListener('scroll', function() {
+            if (!ticking) {
+                requestAnimationFrame(updateScrollEffects);
+                ticking = true;
+            }
+        }, { passive: true });
+        
+        // Memory management - cleanup on page unload
+        window.addEventListener('beforeunload', function() {
+            // Clear any running timeouts/intervals
+            clearTimeout(resizeTimeout);
+            if (animationFrame) {
+                cancelAnimationFrame(animationFrame);
+            }
+        }, { passive: true });
+        
+        // Preload critical resources
+        const preloadLink = document.createElement('link');
+        preloadLink.rel = 'preload';
+        preloadLink.as = 'font';
+        preloadLink.type = 'font/woff2';
+        preloadLink.crossOrigin = 'anonymous';
+        document.head.appendChild(preloadLink);
+        
+        // Service Worker registration for better caching (optional)
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                // Register service worker if available
+                // navigator.serviceWorker.register('/sw.js');
+            });
+        }
+        
+        // Enhanced input validation with visual feedback
+        function validateInput(input) {
+            const value = input.value.trim();
+            const inputGroup = input.parentElement;
             
-            // Recreate elements periodically (adjusted for device)
-            const interval = window.innerWidth <= 767 ? 35000 : 25000;
-            setInterval(createProjectElements, interval);
+            if (input.type === 'email') {
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (value && !emailRegex.test(value)) {
+                    input.style.borderColor = '#e74c3c';
+                    return false;
+                } else if (value && emailRegex.test(value)) {
+                    input.style.borderColor = '#27ae60';
+                    return true;
+                }
+            }
+            
+            if (input.type === 'password') {
+                if (value && value.length < 3) {
+                    input.style.borderColor = '#f39c12';
+                    return false;
+                } else if (value && value.length >= 3) {
+                    input.style.borderColor = '#27ae60';
+                    return true;
+                }
+            }
+            
+            // Reset border color if empty
+            if (!value) {
+                input.style.borderColor = '';
+            }
+            
+            return true;
+        }
+        
+        // Add real-time validation
+        document.querySelectorAll('.form-control').forEach(input => {
+            input.addEventListener('input', function() {
+                validateInput(this);
+            });
+            
+            input.addEventListener('blur', function() {
+                validateInput(this);
+            });
         });
         
-        // Handle window resize and orientation change
-        window.addEventListener('resize', handleResponsiveFeatures);
-        window.addEventListener('orientationchange', handleOrientationChange);
+        // Keyboard navigation enhancement
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                const activeElement = document.activeElement;
+                if (activeElement.tagName === 'INPUT') {
+                    const form = activeElement.closest('form');
+                    const inputs = form.querySelectorAll('input[required]');
+                    const currentIndex = Array.from(inputs).indexOf(activeElement);
+                    
+                    if (currentIndex < inputs.length - 1) {
+                        e.preventDefault();
+                        inputs[currentIndex + 1].focus();
+                    } else {
+                        form.querySelector('button[type="submit"]').focus();
+                    }
+                }
+            }
+        });
         
-        // Handle visibility change to pause animations when tab is not active
-        document.addEventListener('visibilitychange', function() {
-            if (document.hidden) {
-                // Pause heavy animations when tab is not visible
-                document.body.style.animationPlayState = 'paused';
-            } else {
-                document.body.style.animationPlayState = 'running';
+        // Enhanced accessibility
+        function improveAccessibility() {
+            // Add proper ARIA labels
+            document.querySelectorAll('.floating-label').forEach(label => {
+                const input = label.previousElementSibling;
+                if (input) {
+                    input.setAttribute('aria-label', label.textContent);
+                }
+            });
+            
+            // Add focus indicators for keyboard navigation
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Tab') {
+                    document.body.classList.add('keyboard-nav');
+                }
+            });
+            
+            document.addEventListener('mousedown', function() {
+                document.body.classList.remove('keyboard-nav');
+            });
+        }
+        
+        // Call accessibility improvements after DOM load
+        document.addEventListener('DOMContentLoaded', improveAccessibility);
+        
+        // Progressive enhancement for modern browsers
+        if ('CSS' in window && CSS.supports('backdrop-filter', 'blur(10px)')) {
+            document.body.classList.add('backdrop-filter-support');
+        }
+        
+        // Touch device optimizations
+        if ('ontouchstart' in window) {
+            document.body.classList.add('touch-device');
+            
+            // Add touch-friendly hover effects
+            document.querySelectorAll('.btn, .demo-item').forEach(element => {
+                element.addEventListener('touchstart', function() {
+                    this.classList.add('touch-active');
+                }, { passive: true });
+                
+                element.addEventListener('touchend', function() {
+                    setTimeout(() => {
+                        this.classList.remove('touch-active');
+                    }, 150);
+                }, { passive: true });
+            });
+        }
+        
+        // Performance monitoring (optional)
+        if ('PerformanceObserver' in window) {
+            const observer = new PerformanceObserver((list) => {
+                for (const entry of list.getEntries()) {
+                    if (entry.entryType === 'measure') {
+                        console.log(`${entry.name}: ${entry.duration}ms`);
+                    }
+                }
+            });
+            observer.observe({ entryTypes: ['measure'] });
+        }
+        
+        // Error handling for animations
+        window.addEventListener('error', function(e) {
+            if (e.message.includes('animation') || e.message.includes('transform')) {
+                console.warn('Animation error detected, falling back to basic styles');
+                document.body.classList.add('no-animations');
+            }
+        });
+        
+        // Final initialization
+        document.addEventListener('DOMContentLoaded', function() {
+            // Mark page as fully loaded for CSS
+            document.body.classList.add('loaded');
+            
+            // Smooth scroll behavior
+            if ('scrollBehavior' in document.documentElement.style) {
+                document.documentElement.style.scrollBehavior = 'smooth';
+            }
+            
+            // Initialize theme detection
+            if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                document.body.classList.add('dark-theme');
+            }
+            
+            // Listen for theme changes
+            if (window.matchMedia) {
+                window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function(e) {
+                    if (e.matches) {
+                        document.body.classList.add('dark-theme');
+                    } else {
+                        document.body.classList.remove('dark-theme');
+                    }
+                });
             }
         });
     </script>
