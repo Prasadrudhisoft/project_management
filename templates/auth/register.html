@@ -502,6 +502,10 @@
             vertical-align: -0.125em;
         }
         
+        .bi-house::before {
+            content: "🏠";
+        }
+        
         .bi-person-plus::before { 
             content: "+"; 
         }
@@ -777,6 +781,33 @@
                 animation: none;
             }
         }
+        
+        /* Back to home button enhancement */
+        .back-home {
+            animation: fadeInDown 0.8s cubic-bezier(0.4, 0, 0.2, 1) 0.2s both;
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px) translateZ(0);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) translateZ(0);
+            }
+        }
+
+        .btn-secondary {
+            color: #fff;
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 50%, #5d6d7e 100%);
+            box-shadow: 0 4px 15px rgba(52, 73, 94, 0.4);
+        }
+        
+        .btn-secondary:hover {
+            transform: translateY(-2px) translateZ(0);
+            box-shadow: 0 8px 25px rgba(52, 73, 94, 0.6);
+        }
     </style>
 </head>
 <body>
@@ -806,6 +837,12 @@
     <div class="container">
         <div class="row justify-content-center mt-5">
             <div class="col-md-6 col-lg-5">
+                <!-- Back to Home Button -->
+                <div class="text-center mb-3 back-home">
+                    <a href="{{ url_for('landing') }}" class="btn btn-secondary">
+                        <i class="bi bi-house me-2"></i>Back to Home
+                    </a>
+                </div>
                 <div class="card" id="mainCard">
                     <div class="card-header text-center bg-success text-white">
                         <h4><i class="bi bi-person-plus me-2"></i>Create Project Account</h4>
