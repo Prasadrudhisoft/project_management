@@ -18,7 +18,7 @@
             --primary-dark: #1d4ed8;
             --primary-light: #dbeafe;
             --secondary-color: #64748b;
-            --accent-color: #10b981;
+            --accent-color: #3b82f6;
             --warning-color: #f59e0b;
             --danger-color: #ef4444;
             --dark-color: #1e293b;
@@ -94,7 +94,7 @@
         .floating-element.square {
             width: 25px;
             height: 25px;
-            background: var(--warning-color);
+            background: var(--primary-dark);
             transform: rotate(45deg);
         }
 
@@ -110,7 +110,7 @@
             left: 0;
             width: 100%;
             height: 120%;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
             z-index: -2;
             will-change: transform;
         }
@@ -528,7 +528,7 @@
         .section-title {
             font-size: 3rem;
             font-weight: 800;
-            color: rgb(17, 3, 3);
+            color: var(--gray-900);
             margin-bottom: 1.5rem;
             position: relative;
             display: inline-block;
@@ -548,7 +548,7 @@
 
         .section-subtitle {
             font-size: 1.4rem;
-            color: rgb(130, 48, 184);
+            color: var(--gray-600);
             max-width: 700px;
             margin: 0 auto;
             line-height: 1.7;
@@ -615,24 +615,24 @@
             box-shadow: 0 10px 25px rgba(59, 130, 246, 0.3);
         }
         .feature-icon.green { 
-            background: linear-gradient(135deg, #10b981, #059669);
-            box-shadow: 0 10px 25px rgba(16, 185, 129, 0.3);
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            box-shadow: 0 10px 25px rgba(37, 99, 235, 0.3);
         }
         .feature-icon.purple { 
-            background: linear-gradient(135deg, #8b5cf6, #7c3aed);
-            box-shadow: 0 10px 25px rgba(139, 92, 246, 0.3);
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            box-shadow: 0 10px 25px rgba(59, 130, 246, 0.3);
         }
         .feature-icon.orange { 
-            background: linear-gradient(135deg, #f59e0b, #d97706);
-            box-shadow: 0 10px 25px rgba(245, 158, 11, 0.3);
+            background: linear-gradient(135deg, #1d4ed8, #2563eb);
+            box-shadow: 0 10px 25px rgba(29, 78, 216, 0.3);
         }
         .feature-icon.red { 
-            background: linear-gradient(135deg, #ef4444, #dc2626);
-            box-shadow: 0 10px 25px rgba(239, 68, 68, 0.3);
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            box-shadow: 0 10px 25px rgba(59, 130, 246, 0.3);
         }
         .feature-icon.indigo { 
-            background: linear-gradient(135deg, #6366f1, #4f46e5);
-            box-shadow: 0 10px 25px rgba(99, 102, 241, 0.3);
+            background: linear-gradient(135deg, #2563eb, #3b82f6);
+            box-shadow: 0 10px 25px rgba(37, 99, 235, 0.3);
         }
 
         .feature-title {
@@ -737,11 +737,11 @@
             background-clip: text;
             font-weight: 900;
             font-size: 2.2rem;
-            text-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
+            text-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
         }
 
         .about-hero {
-            background: linear-gradient(135deg, rgba(37, 99, 235, 0.1), rgba(16, 185, 129, 0.1));
+            background: linear-gradient(135deg, rgba(37, 99, 235, 0.1), rgba(59, 130, 246, 0.1));
             padding: 4rem;
             border-radius: 25px;
             text-align: center;
@@ -753,7 +753,7 @@
 
         .about-hero:hover {
             transform: scale(1.02);
-            background: linear-gradient(135deg, rgba(37, 99, 235, 0.15), rgba(16, 185, 129, 0.15));
+            background: linear-gradient(135deg, rgba(37, 99, 235, 0.15), rgba(59, 130, 246, 0.15));
         }
 
         .about-hero h2 {
@@ -862,6 +862,33 @@
         .footer-links a:hover {
             color: var(--primary-color);
             transform: translateX(5px);
+        }
+
+        .social-links {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .social-link {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 45px;
+            height: 45px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            color: var(--gray-400);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            font-size: 1.2rem;
+        }
+
+        .social-link:hover {
+            background: var(--primary-color);
+            color: white;
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 10px 25px rgba(37, 99, 235, 0.3);
         }
 
         .footer-bottom {
@@ -1132,6 +1159,10 @@
             .floating-element {
                 display: none;
             }
+
+            .social-links {
+                justify-content: center;
+            }
         }
 
         @media (max-width: 480px) {
@@ -1225,7 +1256,6 @@
             
             <nav class="nav-menu" id="navMenu">
                 <li><a href="#features" class="nav-link">Features</a></li>
-                <!-- <li><a href="#pricing" class="nav-link">Pricing</a></li> -->
                 <li><a href="#about" class="nav-link">About</a></li>
                 <li><a href="#contact" class="nav-link">Contact</a></li>
             </nav>
@@ -1439,10 +1469,6 @@
                     <i class="fas fa-rocket"></i>
                     Start Your Free Trial
                 </a>
-                <!-- <a href="/contact" class="btn btn-secondary btn-hero magnetic" style="color: white; border-color: rgba(255,255,255,0.3);">
-                    <i class="fas fa-phone"></i>
-                    Contact Sales
-                </a> -->
             </div>
         </div>
     </section>
@@ -1456,16 +1482,14 @@
                     <p>Empowering teams to achieve more through intelligent project management solutions.</p>
                     <div style="margin-top: 1.5rem;">
                         <a href="mailto:support@RUDHISOFT.com" style="color: var(--gray-400); font-size: 1.1rem;">
-                            <i class="fas fa-envelope"></i> support@RUDHISOFT.com
+                            <i class="fas fa-envelope"></i> rudhisoft@gmail.com
                         </a>
                     </div>
                 </div>
-                
                 <div class="footer-section">
                     <h3>Product</h3>
                     <ul class="footer-links">
                         <li><a href="#features">Features</a></li>
-                        <!-- <li><a href="#pricing">Pricing</a></li> -->
                         <li><a href="#security">Security</a></li>
                         <li><a href="#integrations">Integrations</a></li>
                     </ul>
@@ -1482,12 +1506,20 @@
                 </div>
                 
                 <div class="footer-section">
-                    <h3>Support</h3>
+                    <h3>Contact Us</h3>
                     <ul class="footer-links">
-                        <li><a href="#help">Help Center</a></li>
-                        <li><a href="#docs">Documentation</a></li>
-                        <li><a href="#community">Community</a></li>
-                        <li><a href="#contact">Contact Us</a></li>
+                      <div class="social-links">
+                        <a href="https://www.instagram.com/rudhisoftpvtltd/" target="_blank" class="social-link">
+                            <i class="fab fa-instagram"></i>
+                        </a>
+                        <a href="https://www.facebook.com/people/Rudhisoft-Private-Limited/61574642781304/#" target="_blank" class="social-link">
+                            <i class="fab fa-facebook-f"></i>
+                        </a>
+                        <a href="https://www.linkedin.com/company/rudhisoft-private-limited/posts/?feedView=all" target="_blank" class="social-link">
+                            <i class="fab fa-linkedin-in"></i>
+                        </a>
+                    </div>
+                        <li><a href="mailto:rudhisoft@gmail.com">Email Support</a></li>
                     </ul>
                 </div>
             </div>
@@ -1952,9 +1984,9 @@
                     
                     hero.style.background = `
                         radial-gradient(circle at ${mouseX}% ${mouseY}%, 
-                        rgba(102, 126, 234, 0.8) 0%, 
-                        rgba(118, 75, 162, 0.8) 50%, 
-                        rgba(102, 126, 234, 0.6) 100%)
+                        rgba(37, 99, 235, 0.8) 0%, 
+                        rgba(29, 78, 216, 0.8) 50%, 
+                        rgba(37, 99, 235, 0.6) 100%)
                     `;
                 });
             }
@@ -2048,4 +2080,3 @@
     </script>
 </body>
 </html>
-        
