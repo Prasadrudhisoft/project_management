@@ -680,12 +680,29 @@ def edit_user(id):
         flash('Access denied. Managers cannot edit admin users.', 'error')
         return redirect(url_for('users'))
     
+    # Prevent managers from editing other managers
+    if current_user['role'] == 'manager' and user['role'] == 'manager' and user['id'] != session['user_id']:
+        flash('Access denied. Managers cannot edit other managers.', 'error')
+        return redirect(url_for('users'))
+    
     if request.method == 'POST':
-        # Prevent managers from setting admin role
+        # Get the requested role
         requested_role = request.form['role']
-        if current_user['role'] == 'manager' and requested_role == 'admin':
-            flash('Access denied. Managers cannot assign admin role.', 'error')
-            return render_template('users/edit.html', user=user, current_user_role=current_user['role'])
+        
+        # Role change validation for managers
+        if current_user['role'] == 'manager':
+            # Prevent managers from setting admin role
+            if requested_role == 'admin':
+                flash('Access denied. Managers cannot assign admin role.', 'error')
+                return render_template('users/edit.html', user=user, current_user_role=current_user['role'])
+            # Prevent managers from changing other managers' roles
+            if user['role'] == 'manager' and user['id'] != session['user_id']:
+                flash('Access denied. Managers cannot change the role of other managers.', 'error')
+                return render_template('users/edit.html', user=user, current_user_role=current_user['role'])
+            # Prevent managers from promoting users to managers
+            if requested_role == 'manager' and user['role'] != 'manager':
+                flash('Access denied. Managers cannot promote users to manager role.', 'error')
+                return render_template('users/edit.html', user=user, current_user_role=current_user['role'])
         
         data = {
             'full_name': request.form['full_name'],
