@@ -461,12 +461,15 @@ def new_task():
             'created_by': session['user_id']
         }
         
-        task_id = db.create_task(data)
-        if task_id:
-            flash('Task created successfully!', 'success')
-            return redirect(url_for('view_task', id=task_id))
-        else:
-            flash('Failed to create task.', 'error')
+        try:
+            task_id = db.create_task(data)
+            if task_id:
+                flash('Task created successfully!', 'success')
+                return redirect(url_for('view_task', id=task_id))
+            else:
+                flash('Failed to create task.', 'error')
+        except ValueError as e:
+            flash(str(e), 'error')
     
     # Get projects based on user role
     user_role = session.get('user_role')
@@ -482,12 +485,18 @@ def new_task():
     milestones = []
     users = []  # Will be loaded via AJAX based on project selection
     
+    selected_project = None
     if request.args.get('project_id'):
         project_id = request.args.get('project_id')
         milestones = db.get_project_milestones(project_id)
         users = db.get_project_assignable_members(project_id,user_role)
+        selected_project = db.get_project_by_id(project_id)
     
-    return render_template('tasks/new.html', projects=projects, users=users, milestones=milestones)
+    return render_template('tasks/new.html', 
+                         projects=projects, 
+                         users=users, 
+                         milestones=milestones,
+                         selected_project=selected_project)
 
 @app.route('/tasks/<int:id>')
 @login_required
@@ -857,6 +866,11 @@ def new_milestone(project_id):
     if not project or project['organization_id'] != session['organization_id']:
         flash('Project not found.', 'error')
         return redirect(url_for('projects'))
+        
+    # Format dates for display
+    if project['start_date'] and project['end_date']:
+        project['formatted_start_date'] = project['start_date'].strftime('%Y-%m-%d')
+        project['formatted_end_date'] = project['end_date'].strftime('%Y-%m-%d')
     
     if request.method == 'POST':
         data = {
@@ -867,12 +881,15 @@ def new_milestone(project_id):
             'created_by': session['user_id']
         }
         
-        milestone_id = db.create_milestone(data)
-        if milestone_id:
-            flash('Milestone created successfully!', 'success')
-            return redirect(url_for('view_project', id=project_id))
-        else:
-            flash('Failed to create milestone.', 'error')
+        try:
+            milestone_id = db.create_milestone(data)
+            if milestone_id:
+                flash('Milestone created successfully!', 'success')
+                return redirect(url_for('view_project', id=project_id))
+            else:
+                flash('Failed to create milestone.', 'error')
+        except ValueError as e:
+            flash(str(e), 'error')
     
     return render_template('milestones/new.html', project=project)
 

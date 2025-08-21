@@ -16,6 +16,33 @@ class DatabaseHelper:
         except Exception as e:
             logger.error(f"Database connection failed: {e}")
             return None
+            
+    def validate_date_within_project(self, cursor, project_id, date_to_check):
+        """Validate if a date falls within project start and end dates"""
+        cursor.execute("""
+            SELECT id, name, start_date, end_date 
+            FROM projects 
+            WHERE id = %s
+        """, (project_id,))
+        project = cursor.fetchone()
+        
+        if not project:
+            return (False, None, None, None, "Project not found")
+        
+        project_id, project_name, project_start, project_end = project
+        
+        if not date_to_check:
+            return (True, project_name, project_start, project_end, None)  # Allow null dates
+            
+        if not project_start or not project_end:
+            return (True, project_name, project_start, project_end, None)  # Allow any date if project dates are not set
+            
+        date_to_check = datetime.strptime(date_to_check, '%Y-%m-%d').date() if isinstance(date_to_check, str) else date_to_check
+        
+        is_valid = project_start <= date_to_check <= project_end
+        message = None if is_valid else f"Due date must be between {project_start.strftime('%Y-%m-%d')} and {project_end.strftime('%Y-%m-%d')}"
+        
+        return (is_valid, project_name, project_start, project_end, message)
     
     def init_database(self):
         """Initialize database and create tables"""
@@ -1184,6 +1211,12 @@ class DatabaseHelper:
         
         try:
             cursor = conn.cursor()
+            
+            # Validate due date is within project dates
+            is_valid, project_name, project_start, project_end, error_msg = self.validate_date_within_project(cursor, data['project_id'], data['due_date'])
+            if not is_valid:
+                raise ValueError(f"Due date must be within project '{project_name}' date range ({project_start.strftime('%Y-%m-%d')} to {project_end.strftime('%Y-%m-%d')})")
+            
             cursor.execute("""
                 INSERT INTO tasks (project_id, milestone_id, title, description, assigned_to, priority, due_date, created_by) 
                 VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
@@ -1433,6 +1466,12 @@ class DatabaseHelper:
         
         try:
             cursor = conn.cursor()
+            
+            # Validate due date is within project dates
+            is_valid, project_name, project_start, project_end, error_msg = self.validate_date_within_project(cursor, data['project_id'], data['due_date'])
+            if not is_valid:
+                raise ValueError(f"Due date must be within project '{project_name}' date range ({project_start.strftime('%Y-%m-%d')} to {project_end.strftime('%Y-%m-%d')})")
+            
             cursor.execute("""
                 INSERT INTO milestones (project_id, name, description, due_date, created_by) 
                 VALUES (%s, %s, %s, %s, %s)
