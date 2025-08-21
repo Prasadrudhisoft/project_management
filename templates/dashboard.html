@@ -4,348 +4,583 @@
 
 {% block extra_css %}
 <style>
-        /* Dashboard-specific styles with modern enhancements */
-        
-        /* CSS Variables for Theme Colors */
-        :root {
-            --admin-primary: #0d6efd;
-            --admin-secondary: #6c757d;
-            --admin-success: #198754;
-            --admin-info: #0dcaf0;
-            --admin-warning: #ffc107;
-            --admin-danger: #dc3545;
-            --admin-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            --shadow-light: 0 2px 8px rgba(0, 0, 0, 0.08);
-            --shadow-medium: 0 4px 12px rgba(0, 0, 0, 0.12);
-            --border-radius: 12px;
-            --transition-fast: all 0.3s ease;
+    /* Dashboard-specific responsive styles */
+    
+    /* CSS Variables for Dashboard Theme */
+    :root {
+        --dashboard-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        --stat-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        --card-hover-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    }
+    
+    /* Page Animations */
+    @keyframes slideInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
         }
-        
-        /* Layout - Don't override navbar container */
-        .main-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 15px;
+        to {
+            opacity: 1;
+            transform: translateY(0);
         }
-        
-        /* Only target main content containers, not navbar */
-        .container-fluid:not(.navbar .container-fluid) {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 15px;
+    }
+    
+    @keyframes fadeInScale {
+        from {
+            opacity: 0;
+            transform: scale(0.95);
         }
-        
-        /* Page Animations */
-        @keyframes slideInUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+        to {
+            opacity: 1;
+            transform: scale(1);
         }
-        
-        @keyframes fadeInScale {
-            from {
-                opacity: 0;
-                transform: scale(0.95);
-            }
-            to {
-                opacity: 1;
-                transform: scale(1);
-            }
-        }
-        
-        @keyframes pulse {
-            0% { box-shadow: 0 0 0 0 rgba(13, 110, 253, 0.4); }
-            70% { box-shadow: 0 0 0 10px rgba(13, 110, 253, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(13, 110, 253, 0); }
-        }
-        
-        /* Apply animations to page sections */
-        .row {
-            animation: slideInUp 0.6s ease-out;
-        }
-        
-        .row:nth-child(2) { animation-delay: 0.1s; }
-        .row:nth-child(3) { animation-delay: 0.2s; }
-        .row:nth-child(4) { animation-delay: 0.3s; }
-        
-        .mt-4 { margin-top: 2rem; }
-        .mb-3 { margin-bottom: 1rem; }
-        .mb-4 { margin-bottom: 2rem; }
-        .me-1 { margin-right: 0.25rem; }
-        .me-2 { margin-right: 0.5rem; }
-        .p-3 { padding: 1rem; }
-        
-        /* Enhanced Cards with Animations */
-        .card {
-            background-color: #fff;
-            border: none;
-            border-radius: var(--border-radius);
-            box-shadow: var(--shadow-light);
-            margin-bottom: 1.5rem;
-            transition: var(--transition-fast);
-            position: relative;
-            overflow: hidden;
-            animation: fadeInScale 0.6s ease-out;
-        }
-        
-        .card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
-            transition: left 0.5s;
-        }
-        
-        .card:hover {
-            transform: translateY(-4px);
-            box-shadow: var(--shadow-medium);
-        }
-        
-        .card:hover::before {
-            left: 100%;
-        }
-        
-        /* Animated Stat Cards */
-        .bg-gradient-primary {
-            background: linear-gradient(135deg, var(--admin-primary) 0%, #667eea 100%);
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .bg-gradient-primary::after {
-            content: '';
-            position: absolute;
-            top: -50%;
-            right: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
-            animation: pulse 3s ease-in-out infinite;
-        }
-        
-        .card-header {
-            padding: 1rem;
-            background-color: rgba(0,0,0,.03);
-            border-bottom: 1px solid rgba(0,0,0,.125);
-            border-top-left-radius: 0.5rem;
-            border-top-right-radius: 0.5rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .card-body {
-            padding: 1.5rem;
-        }
-        
-        .card-body.p-3 {
-            padding: 1rem;
-        }
-        
-        /* Stat Cards */
-        .bg-primary { background-color: #0d6efd !important; color: white; }
-        .bg-success { background-color: #198754 !important; color: white; }
-        .bg-info { background-color: #0dcaf0 !important; color: white; }
-        .bg-warning { background-color: #ffc107 !important; color: #212529; }
-        
-        .stat-card {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            height: 100%;
-        }
-        
-        .stat-number {
-            font-size: 2rem;
-            font-weight: bold;
-            margin: 0;
-        }
-        
-        .stat-label {
-            font-size: 0.9rem;
-            margin: 0;
-            opacity: 0.9;
+    }
+    
+    @keyframes pulse {
+        0% { box-shadow: 0 0 0 0 rgba(13, 110, 253, 0.4); }
+        70% { box-shadow: 0 0 0 10px rgba(13, 110, 253, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(13, 110, 253, 0); }
+    }
+    
+    /* Apply animations to dashboard sections */
+    .dashboard-section {
+        animation: slideInUp 0.6s ease-out;
+    }
+    
+    .dashboard-section:nth-child(2) { animation-delay: 0.1s; }
+    .dashboard-section:nth-child(3) { animation-delay: 0.2s; }
+    .dashboard-section:nth-child(4) { animation-delay: 0.3s; }
+    .dashboard-section:nth-child(5) { animation-delay: 0.4s; }
+    
+    /* Enhanced Dashboard Cards */
+    .dashboard-card {
+        background: white;
+        border: none;
+        border-radius: 16px;
+        box-shadow: var(--shadow-sm);
+        margin-bottom: 1.5rem;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+        animation: fadeInScale 0.6s ease-out;
+    }
+    
+    .dashboard-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+        transition: left 0.5s;
+        z-index: 1;
+    }
+    
+    .dashboard-card:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--card-hover-shadow);
+    }
+    
+    .dashboard-card:hover::before {
+        left: 100%;
+    }
+    
+    /* Stat Cards with Enhanced Gradients */
+    .stat-card {
+        position: relative;
+        overflow: hidden;
+        color: white;
+        border-radius: 16px;
+        box-shadow: var(--stat-shadow);
+    }
+    
+    .stat-card::after {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+        animation: pulse 3s ease-in-out infinite;
+        pointer-events: none;
+    }
+    
+    .stat-card-content {
+        position: relative;
+        z-index: 2;
+        padding: 1.5rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .stat-info h3 {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin: 0;
+        line-height: 1;
+    }
+    
+    .stat-info p {
+        font-size: 1rem;
+        margin: 0.5rem 0 0 0;
+        opacity: 0.9;
+        font-weight: 500;
+    }
+    
+    .stat-icon {
+        font-size: 3.5rem;
+        opacity: 0.3;
+        transition: all 0.3s ease;
+    }
+    
+    .stat-card:hover .stat-icon {
+        opacity: 0.5;
+        transform: scale(1.1);
+    }
+    
+    /* Gradient backgrounds for stat cards */
+    .bg-gradient-primary {
+        background: linear-gradient(135deg, #0d6efd 0%, #667eea 100%);
+    }
+    
+    .bg-gradient-success {
+        background: linear-gradient(135deg, #198754 0%, #20c997 100%);
+    }
+    
+    .bg-gradient-info {
+        background: linear-gradient(135deg, #0dcaf0 0%, #0077ff 100%);
+    }
+    
+    .bg-gradient-warning {
+        background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%);
+        color: #212529 !important;
+    }
+    
+    .bg-gradient-warning .stat-icon,
+    .bg-gradient-warning .stat-info {
+        color: #212529 !important;
+    }
+    
+    /* Table Enhancements */
+    .dashboard-table {
+        font-size: 0.9rem;
+    }
+    
+    .dashboard-table .avatar-circle {
+        margin-right: 0.75rem;
+        flex-shrink: 0;
+    }
+    
+    .task-item, .project-item {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+    
+    .item-content h6 {
+        margin: 0 0 0.25rem 0;
+        font-size: 0.95rem;
+        font-weight: 600;
+    }
+    
+    .item-content small {
+        color: var(--gray-500);
+        font-size: 0.8rem;
+    }
+    
+    .item-badges {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+        align-items: center;
+    }
+    
+    /* Alert Enhancements */
+    .dashboard-alert {
+        border-radius: 12px;
+        border: none;
+        box-shadow: var(--shadow-sm);
+        margin-bottom: 1.5rem;
+    }
+    
+    .alert-info {
+        background: linear-gradient(135deg, #e1f5fe 0%, #b3e5fc 100%);
+        color: #0d47a1;
+        border-left: 4px solid #2196f3;
+    }
+    
+    .alert-warning {
+        background: linear-gradient(135deg, #fff8e1 0%, #ffecb3 100%);
+        color: #e65100;
+        border-left: 4px solid #ff9800;
+    }
+    
+    .task-due-card, .overdue-card {
+        background: white;
+        border: 1px solid var(--gray-200);
+        border-radius: 12px;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        transition: all 0.3s ease;
+        box-shadow: var(--shadow-sm);
+    }
+    
+    .task-due-card:hover, .overdue-card:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+    }
+    
+    .task-due-card h6, .overdue-card h6 {
+        margin: 0 0 0.5rem 0;
+        font-weight: 600;
+    }
+    
+    /* Quick Actions Section */
+    .quick-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+    }
+    
+    .quick-actions .btn {
+        flex: 1;
+        min-width: 140px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1rem;
+        font-weight: 500;
+        white-space: nowrap;
+    }
+    
+    /* Empty State Styling */
+    .empty-state {
+        text-align: center;
+        padding: 3rem 1rem;
+        color: var(--gray-500);
+    }
+    
+    .empty-state i {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+        color: var(--gray-400);
+    }
+    
+    .empty-state p {
+        font-size: 1.1rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    /* Badge Priority Colors */
+    .badge-priority-high {
+        background: linear-gradient(135deg, #dc3545, #c82333);
+        color: white;
+    }
+    
+    .badge-priority-medium {
+        background: linear-gradient(135deg, #ffc107, #e0a800);
+        color: #212529;
+    }
+    
+    .badge-priority-low {
+        background: linear-gradient(135deg, #6c757d, #5a6268);
+        color: white;
+    }
+    
+    /* Status Badges */
+    .badge.bg-success {
+        background: linear-gradient(135deg, #28a745, #20c997) !important;
+    }
+    
+    .badge.bg-primary {
+        background: linear-gradient(135deg, #007bff, #6610f2) !important;
+    }
+    
+    .badge.bg-secondary {
+        background: linear-gradient(135deg, #6c757d, #5a6268) !important;
+    }
+    
+    /* Responsive Design */
+    
+    /* Large screens */
+    @media (min-width: 1200px) {
+        .stat-info h3 {
+            font-size: 3rem;
         }
         
         .stat-icon {
-            font-size: 3rem;
-            opacity: 0.3;
+            font-size: 4rem;
         }
         
-        /* Badges */
-        .badge {
-            display: inline-block;
-            padding: 0.35em 0.65em;
-            font-size: 0.75em;
-            font-weight: 700;
-            line-height: 1;
+        .stat-card-content {
+            padding: 2rem;
+        }
+    }
+    
+    /* Medium screens */
+    @media (max-width: 991.98px) {
+        .dashboard-card .card-header {
+            flex-direction: column;
+            align-items: flex-start !important;
+            gap: 1rem;
+        }
+        
+        .dashboard-card .card-header h5 {
+            margin-bottom: 0;
+        }
+        
+        .dashboard-card .card-header .btn {
+            width: auto;
+            min-width: 120px;
+        }
+        
+        .quick-actions {
+            flex-direction: column;
+        }
+        
+        .quick-actions .btn {
+            width: 100%;
+            min-width: unset;
+        }
+        
+        .item-badges {
+            justify-content: flex-start;
+            margin-top: 0.5rem;
+        }
+    }
+    
+    /* Small screens */
+    @media (max-width: 767.98px) {
+        .stat-card-content {
+            padding: 1.25rem;
+            flex-direction: column;
             text-align: center;
-            white-space: nowrap;
-            vertical-align: baseline;
-            border-radius: 0.375rem;
+            gap: 1rem;
         }
         
-        /* Priority badges */
-        .badge-priority-high { background-color: #dc3545; color: white; }
-        .badge-priority-medium { background-color: #ffc107; color: #212529; }
-        .badge-priority-low { background-color: #6c757d; color: white; }
-        
-        /* Mobile Responsive Improvements */
-        @media (max-width: 768px) {
-            .stat-card {
-                text-align: center;
-                flex-direction: column;
-                gap: 0.5rem;
-            }
-            
-            .stat-icon {
-                font-size: 2rem;
-            }
-            
-            /* Mobile card headers */
-            .card-header {
-                flex-direction: column;
-                align-items: flex-start !important;
-                gap: 0.75rem;
-            }
-            
-            .card-header h5 {
-                margin-bottom: 0;
-            }
-            
-            /* Mobile buttons */
-            .card-header .btn {
-                width: auto;
-                min-width: 120px;
-            }
-            
-            /* Mobile quick actions */
-            .d-flex.flex-wrap.gap-2 {
-                flex-direction: column;
-            }
-            
-            .d-flex.flex-wrap.gap-2 .btn {
-                width: 100%;
-                margin-bottom: 0.5rem;
-            }
+        .stat-info h3 {
+            font-size: 2rem;
         }
         
-        @media (max-width: 576px) {
-            /* Extra small screens */
-            .container-fluid {
-                padding-left: 10px;
-                padding-right: 10px;
-            }
-            
-            h1 {
-                font-size: 1.75rem;
-            }
-            
-            .stat-number {
-                font-size: 1.5rem;
-            }
-            
-            .table-responsive {
-                font-size: 0.875rem;
-            }
-            
-            .badge {
-                font-size: 0.7rem;
-                padding: 0.25rem 0.5rem;
-            }
-            
-            /* Mobile task due cards */
-            .alert .row [class*='col-'] {
-                margin-bottom: 0.75rem;
-            }
+        .stat-icon {
+            font-size: 2.5rem;
+            opacity: 0.4;
         }
+        
+        .dashboard-table {
+            font-size: 0.85rem;
+        }
+        
+        .task-item, .project-item {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.5rem;
+        }
+        
+        .item-content {
+            width: 100%;
+        }
+        
+        .item-badges {
+            justify-content: flex-start;
+            width: 100%;
+        }
+        
+        .empty-state {
+            padding: 2rem 1rem;
+        }
+        
+        .empty-state i {
+            font-size: 3rem;
+        }
+        
+        .task-due-card, .overdue-card {
+            padding: 0.875rem;
+        }
+        
+        .dashboard-alert .row > [class*='col-'] {
+            margin-bottom: 1rem;
+        }
+        
+        .dashboard-alert .row > [class*='col-']:last-child {
+            margin-bottom: 0;
+        }
+    }
+    
+    /* Extra small screens */
+    @media (max-width: 575.98px) {
+        .dashboard-section h1 {
+            font-size: 1.5rem;
+        }
+        
+        .stat-card-content {
+            padding: 1rem;
+        }
+        
+        .stat-info h3 {
+            font-size: 1.75rem;
+        }
+        
+        .stat-info p {
+            font-size: 0.9rem;
+        }
+        
+        .stat-icon {
+            font-size: 2rem;
+        }
+        
+        .dashboard-card .card-body {
+            padding: 1rem;
+        }
+        
+        .dashboard-card .card-header {
+            padding: 1rem;
+        }
+        
+        .dashboard-table {
+            font-size: 0.8rem;
+        }
+        
+        .item-content h6 {
+            font-size: 0.9rem;
+        }
+        
+        .item-content small {
+            font-size: 0.75rem;
+        }
+        
+        .badge {
+            font-size: 0.7rem;
+            padding: 0.25em 0.5em;
+        }
+        
+        .empty-state {
+            padding: 1.5rem 0.5rem;
+        }
+        
+        .empty-state p {
+            font-size: 1rem;
+        }
+        
+        .alert {
+            padding: 1rem;
+        }
+        
+        .task-due-card, .overdue-card {
+            padding: 0.75rem;
+        }
+    }
+    
+    /* Ultra small screens */
+    @media (max-width: 359.98px) {
+        .stat-info h3 {
+            font-size: 1.5rem;
+        }
+        
+        .stat-info p {
+            font-size: 0.8rem;
+        }
+        
+        .item-content h6 {
+            font-size: 0.85rem;
+        }
+        
+        .quick-actions .btn {
+            font-size: 0.8rem;
+            padding: 0.625rem 0.875rem;
+        }
+    }
+    
+    /* Print styles */
+    @media print {
+        .dashboard-card, .stat-card {
+            break-inside: avoid;
+            box-shadow: none !important;
+        }
+        
+        .btn {
+            display: none !important;
+        }
+        
+        .navbar {
+            display: none !important;
+        }
+    }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="row">
+<div class="row dashboard-section">
     <div class="col-12">
-        <h1 class="mb-4"><i class="fas fa-tachometer-alt me-2"></i>Admin Dashboard</h1>
+        <h1 class="mb-3"><i class="fas fa-tachometer-alt me-2"></i>Admin Dashboard</h1>
         <p class="text-muted mb-4">Welcome back, {{ session.user_name }}! Here's your project overview.</p>
     </div>
 </div>
 
 <!-- Stats Cards -->
-<div class="row mb-4">
+<div class="row dashboard-section mb-4">
     <div class="col-lg-3 col-md-6 mb-3">
-        <div class="card bg-gradient-primary text-white">
-            <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <h3 class="mb-1">{{ stats.projects_total }}</h3>
-                        <p class="mb-0 opacity-75">Total Projects</p>
-                    </div>
-                    <div class="text-white-50">
-                        <i class="fas fa-folder fa-2x"></i>
-                    </div>
+        <div class="stat-card bg-gradient-primary dashboard-card">
+            <div class="stat-card-content">
+                <div class="stat-info">
+                    <h3>{{ stats.projects_total }}</h3>
+                    <p>Total Projects</p>
+                </div>
+                <div class="stat-icon">
+                    <i class="fas fa-folder"></i>
                 </div>
             </div>
         </div>
     </div>
     <div class="col-lg-3 col-md-6 mb-3">
-        <div class="card bg-success text-white">
-            <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <h3 class="mb-1">{{ stats.projects_active }}</h3>
-                        <p class="mb-0 opacity-75">Active Projects</p>
-                    </div>
-                    <div class="text-white-50">
-                        <i class="fas fa-play-circle fa-2x"></i>
-                    </div>
+        <div class="stat-card bg-gradient-success dashboard-card">
+            <div class="stat-card-content">
+                <div class="stat-info">
+                    <h3>{{ stats.projects_active }}</h3>
+                    <p>Active Projects</p>
+                </div>
+                <div class="stat-icon">
+                    <i class="fas fa-play-circle"></i>
                 </div>
             </div>
         </div>
     </div>
     <div class="col-lg-3 col-md-6 mb-3">
-        <div class="card bg-info text-white">
-            <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <h3 class="mb-1">{{ stats.tasks_completed }}</h3>
-                        <p class="mb-0 opacity-75">Completed Tasks</p>
-                    </div>
-                    <div class="text-white-50">
-                        <i class="fas fa-check-circle fa-2x"></i>
-                    </div>
+        <div class="stat-card bg-gradient-info dashboard-card">
+            <div class="stat-card-content">
+                <div class="stat-info">
+                    <h3>{{ stats.tasks_completed }}</h3>
+                    <p>Completed Tasks</p>
+                </div>
+                <div class="stat-icon">
+                    <i class="fas fa-check-circle"></i>
                 </div>
             </div>
         </div>
     </div>
     <div class="col-lg-3 col-md-6 mb-3">
-        <div class="card bg-warning text-dark">
-            <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <h3 class="mb-1">{{ stats.overdue_tasks }}</h3>
-                        <p class="mb-0 opacity-75">Overdue Tasks</p>
-                    </div>
-                    <div class="text-dark-50">
-                        <i class="fas fa-exclamation-triangle fa-2x"></i>
-                    </div>
+        <div class="stat-card bg-gradient-warning dashboard-card">
+            <div class="stat-card-content">
+                <div class="stat-info">
+                    <h3>{{ stats.overdue_tasks }}</h3>
+                    <p>Overdue Tasks</p>
+                </div>
+                <div class="stat-icon">
+                    <i class="fas fa-exclamation-triangle"></i>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-<div class="row">
+<div class="row dashboard-section">
     <!-- Recent Projects -->
     <div class="col-xl-6 mb-4">
-        <div class="card">
+        <div class="dashboard-card">
             <div class="card-header">
                 <h5 class="mb-0"><i class="fas fa-folder me-2"></i>Recent Projects</h5>
                 <a href="{{ url_for('projects') }}" class="btn btn-sm btn-outline-primary">View All</a>
@@ -353,17 +588,17 @@
             <div class="card-body">
                 {% if recent_projects %}
                     <div class="table-responsive">
-                        <table class="table table-hover mb-0">
+                        <table class="table table-hover mb-0 dashboard-table">
                             <tbody>
                                 {% for project in recent_projects %}
                                 <tr>
                                     <td>
-                                        <div class="d-flex align-items-center">
-                                            <div class="avatar-circle me-3">
+                                        <div class="project-item">
+                                            <div class="avatar-circle">
                                                 {{ project.name[0].upper() }}
                                             </div>
-                                            <div>
-                                                <h6 class="mb-0">
+                                            <div class="item-content">
+                                                <h6>
                                                     <a href="{{ url_for('view_project', id=project.id) }}" class="text-decoration-none">
                                                         {{ project.name }}
                                                     </a>
@@ -385,9 +620,9 @@
                         </table>
                     </div>
                 {% else %}
-                    <div class="text-center py-5">
-                        <i class="fas fa-folder fa-3x text-muted mb-3"></i>
-                        <p class="text-muted">No projects found.</p>
+                    <div class="empty-state">
+                        <i class="fas fa-folder"></i>
+                        <p>No projects found.</p>
                         <a href="{{ url_for('new_project') }}" class="btn btn-primary">
                             <i class="fas fa-plus me-1"></i>Create New Project
                         </a>
@@ -399,7 +634,7 @@
 
     <!-- Recent Tasks -->
     <div class="col-xl-6 mb-4">
-        <div class="card">
+        <div class="dashboard-card">
             <div class="card-header">
                 <h5 class="mb-0"><i class="fas fa-tasks me-2"></i>My Recent Tasks</h5>
                 <a href="{{ url_for('tasks') }}" class="btn btn-sm btn-outline-primary">View All</a>
@@ -407,27 +642,29 @@
             <div class="card-body">
                 {% if recent_tasks %}
                     <div class="table-responsive">
-                        <table class="table table-hover mb-0">
+                        <table class="table table-hover mb-0 dashboard-table">
                             <tbody>
                                 {% for task in recent_tasks %}
                                 <tr>
                                     <td>
-                                        <h6 class="mb-1">
-                                            <a href="{{ url_for('view_task', id=task.id) }}" class="text-decoration-none">
-                                                {{ task.title }}
-                                            </a>
-                                        </h6>
-                                        <small class="text-muted">
-                                            {{ task.project_name }} • 
-                                            {% if task.due_date %}Due: {{ task.due_date.strftime('%m/%d/%Y') }}{% else %}No due date{% endif %}
-                                        </small>
-                                    </td>
-                                    <td class="text-end">
-                                        <div class="d-flex justify-content-end gap-1">
-                                            <span class="badge badge-priority-{{ task.priority }}">{{ task.priority.title() }}</span>
-                                            <span class="badge bg-{{ 'success' if task.status == 'completed' else 'primary' if task.status == 'in_progress' else 'secondary' }}">
-                                                {{ task.status.replace('_', ' ').title() }}
-                                            </span>
+                                        <div class="task-item">
+                                            <div class="item-content">
+                                                <h6>
+                                                    <a href="{{ url_for('view_task', id=task.id) }}" class="text-decoration-none">
+                                                        {{ task.title }}
+                                                    </a>
+                                                </h6>
+                                                <small class="text-muted">
+                                                    {{ task.project_name }} • 
+                                                    {% if task.due_date %}Due: {{ task.due_date.strftime('%m/%d/%Y') }}{% else %}No due date{% endif %}
+                                                </small>
+                                            </div>
+                                            <div class="item-badges">
+                                                <span class="badge badge-priority-{{ task.priority }}">{{ task.priority.title() }}</span>
+                                                <span class="badge bg-{{ 'success' if task.status == 'completed' else 'primary' if task.status == 'in_progress' else 'secondary' }}">
+                                                    {{ task.status.replace('_', ' ').title() }}
+                                                </span>
+                                            </div>
                                         </div>
                                     </td>
                                 </tr>
@@ -436,9 +673,9 @@
                         </table>
                     </div>
                 {% else %}
-                    <div class="text-center py-5">
-                        <i class="fas fa-tasks fa-3x text-muted mb-3"></i>
-                        <p class="text-muted">No tasks assigned to you.</p>
+                    <div class="empty-state">
+                        <i class="fas fa-tasks"></i>
+                        <p>No tasks assigned to you.</p>
                         <a href="{{ url_for('new_task') }}" class="btn btn-success">
                             <i class="fas fa-plus me-1"></i>Create New Task
                         </a>
@@ -451,38 +688,36 @@
 
 <!-- Tasks Due Soon Notification -->
 {% if tasks_due_soon %}
-<div class="row">
+<div class="row dashboard-section">
     <div class="col-12">
-        <div class="alert alert-info">
+        <div class="alert alert-info dashboard-alert">
             <h5 class="alert-heading">
                 <i class="fas fa-bell me-2"></i>Tasks Due Soon ({{ tasks_due_soon|length }})
             </h5>
             <p class="mb-3">You have {{ tasks_due_soon|length }} task{{ 's' if tasks_due_soon|length > 1 else '' }} due within the next 7 days:</p>
             <div class="row">
                 {% for task in tasks_due_soon[:3] %}
-                <div class="col-md-4 mb-2">
-                    <div class="card border-info">
-                        <div class="card-body p-3">
-                            <h6 class="card-title mb-1">
-                                <a href="{{ url_for('view_task', id=task.id) }}" class="text-decoration-none text-primary">
-                                    {{ task.title }}
-                                </a>
-                                {% if task.days_until_due == 0 %}
-                                <span class="badge bg-danger ms-2">Due Today</span>
-                                {% elif task.days_until_due == 1 %}
-                                <span class="badge bg-warning ms-2">Due Tomorrow</span>
-                                {% else %}
-                                <span class="badge bg-info ms-2">{{ task.days_until_due }} days</span>
-                                {% endif %}
-                            </h6>
-                            <small class="text-muted">{{ task.project_name }}</small><br>
-                            <small class="text-info fw-bold">
-                                <i class="fas fa-calendar-alt me-1"></i>Due: {{ task.due_date.strftime('%B %d, %Y') }}
-                            </small>
-                            {% if task.assigned_to_name %}
-                            <br><small class="text-muted">Assigned: {{ task.assigned_to_name }}</small>
+                <div class="col-lg-4 col-md-6 mb-3">
+                    <div class="task-due-card">
+                        <h6 class="card-title">
+                            <a href="{{ url_for('view_task', id=task.id) }}" class="text-decoration-none text-primary">
+                                {{ task.title }}
+                            </a>
+                            {% if task.days_until_due == 0 %}
+                            <span class="badge bg-danger ms-2">Due Today</span>
+                            {% elif task.days_until_due == 1 %}
+                            <span class="badge bg-warning ms-2">Due Tomorrow</span>
+                            {% else %}
+                            <span class="badge bg-info ms-2">{{ task.days_until_due }} days</span>
                             {% endif %}
-                        </div>
+                        </h6>
+                        <small class="text-muted d-block">{{ task.project_name }}</small>
+                        <small class="text-info fw-bold d-block">
+                            <i class="fas fa-calendar-alt me-1"></i>Due: {{ task.due_date.strftime('%B %d, %Y') }}
+                        </small>
+                        {% if task.assigned_to_name %}
+                        <small class="text-muted d-block">Assigned: {{ task.assigned_to_name }}</small>
+                        {% endif %}
                     </div>
                 </div>
                 {% endfor %}
@@ -498,31 +733,29 @@
 
 <!-- Overdue Tasks Alert -->
 {% if overdue_tasks %}
-<div class="row">
+<div class="row dashboard-section">
     <div class="col-12">
-        <div class="alert alert-warning">
+        <div class="alert alert-warning dashboard-alert">
             <h5 class="alert-heading">
                 <i class="fas fa-exclamation-triangle me-2"></i>Attention: Overdue Tasks ({{ overdue_tasks|length }})
             </h5>
             <p class="mb-3">You have {{ overdue_tasks|length }} overdue task{{ 's' if overdue_tasks|length > 1 else '' }} that require immediate attention:</p>
             <div class="row">
                 {% for task in overdue_tasks[:3] %}
-                <div class="col-md-4 mb-2">
-                    <div class="card border-warning">
-                        <div class="card-body p-3">
-                            <h6 class="card-title mb-1">
-                                <a href="{{ url_for('view_task', id=task.id) }}" class="text-decoration-none text-danger">
-                                    {{ task.title }}
-                                </a>
-                            </h6>
-                            <small class="text-muted">{{ task.project_name }}</small><br>
-                            <small class="text-danger fw-bold">
-                                <i class="fas fa-calendar-times me-1"></i>Due: {{ task.due_date.strftime('%B %d, %Y') }}
-                            </small>
-                            {% if task.assigned_to_name %}
-                            <br><small class="text-muted">Assigned: {{ task.assigned_to_name }}</small>
-                            {% endif %}
-                        </div>
+                <div class="col-lg-4 col-md-6 mb-3">
+                    <div class="overdue-card border-warning">
+                        <h6 class="card-title">
+                            <a href="{{ url_for('view_task', id=task.id) }}" class="text-decoration-none text-danger">
+                                {{ task.title }}
+                            </a>
+                        </h6>
+                        <small class="text-muted d-block">{{ task.project_name }}</small>
+                        <small class="text-danger fw-bold d-block">
+                            <i class="fas fa-calendar-times me-1"></i>Due: {{ task.due_date.strftime('%B %d, %Y') }}
+                        </small>
+                        {% if task.assigned_to_name %}
+                        <small class="text-muted d-block">Assigned: {{ task.assigned_to_name }}</small>
+                        {% endif %}
                     </div>
                 </div>
                 {% endfor %}
@@ -538,26 +771,30 @@
 
 <!-- Quick Actions -->
 {% if session.user_role in ['admin', 'manager'] %}
-<div class="row">
+<div class="row dashboard-section">
     <div class="col-12">
-        <div class="card">
+        <div class="dashboard-card">
             <div class="card-header">
                 <h5 class="mb-0"><i class="fas fa-bolt me-2"></i>Quick Actions</h5>
             </div>
             <div class="card-body">
-                <div class="d-flex flex-wrap gap-2">
+                <div class="quick-actions">
                     <a href="{{ url_for('new_project') }}" class="btn btn-primary">
-                        <i class="fas fa-plus me-1"></i>New Project
+                        <i class="fas fa-plus"></i>
+                        <span>New Project</span>
                     </a>
                     <a href="{{ url_for('new_task') }}" class="btn btn-success">
-                        <i class="fas fa-plus me-1"></i>New Task
+                        <i class="fas fa-plus"></i>
+                        <span>New Task</span>
                     </a>
                     <a href="{{ url_for('new_message') }}" class="btn btn-info">
-                        <i class="fas fa-envelope me-1"></i>Send Message
+                        <i class="fas fa-envelope"></i>
+                        <span>Send Message</span>
                     </a>
                     {% if session.user_role == 'admin' %}
                     <a href="{{ url_for('users') }}" class="btn btn-warning">
-                        <i class="fas fa-users me-1"></i>Manage Users
+                        <i class="fas fa-users"></i>
+                        <span>Manage Users</span>
                     </a>
                     {% endif %}
                 </div>
@@ -566,4 +803,106 @@
     </div>
 </div>
 {% endif %}
-{% endblock %}
+
+<script>
+// Dashboard-specific JavaScript for enhanced interactivity
+document.addEventListener('DOMContentLoaded', function() {
+    // Add loading states for quick action buttons
+    const quickActionBtns = document.querySelectorAll('.quick-actions .btn');
+    quickActionBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+            const originalText = this.innerHTML;
+            this.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Loading...';
+            this.disabled = true;
+            
+            // Re-enable button after navigation (fallback)
+            setTimeout(() => {
+                this.innerHTML = originalText;
+                this.disabled = false;
+            }, 3000);
+        });
+    });
+    
+    // Auto-refresh stats every 30 seconds
+    setInterval(function() {
+        // Only refresh if page is visible
+        if (!document.hidden) {
+            fetch(window.location.href + '?ajax=1')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.stats) {
+                        // Update stat numbers with animation
+                        updateStatWithAnimation('projects_total', data.stats.projects_total);
+                        updateStatWithAnimation('projects_active', data.stats.projects_active);
+                        updateStatWithAnimation('tasks_completed', data.stats.tasks_completed);
+                        updateStatWithAnimation('overdue_tasks', data.stats.overdue_tasks);
+                    }
+                })
+                .catch(error => console.log('Stats refresh failed:', error));
+        }
+    }, 30000);
+    
+    // Function to update stats with animation
+    function updateStatWithAnimation(statName, newValue) {
+        const elements = document.querySelectorAll('.stat-info h3');
+        elements.forEach(el => {
+            const parent = el.closest('.stat-card');
+            if (parent && parent.classList.contains('bg-gradient-primary') && statName === 'projects_total') {
+                animateValue(el, parseInt(el.textContent), newValue, 1000);
+            } else if (parent && parent.classList.contains('bg-gradient-success') && statName === 'projects_active') {
+                animateValue(el, parseInt(el.textContent), newValue, 1000);
+            } else if (parent && parent.classList.contains('bg-gradient-info') && statName === 'tasks_completed') {
+                animateValue(el, parseInt(el.textContent), newValue, 1000);
+            } else if (parent && parent.classList.contains('bg-gradient-warning') && statName === 'overdue_tasks') {
+                animateValue(el, parseInt(el.textContent), newValue, 1000);
+            }
+        });
+    }
+    
+    // Animate number changes
+    function animateValue(element, start, end, duration) {
+        if (start === end) return;
+        
+        const range = end - start;
+        const increment = end > start ? 1 : -1;
+        const stepTime = Math.abs(Math.floor(duration / range));
+        
+        let current = start;
+        const timer = setInterval(function() {
+            current += increment;
+            element.textContent = current;
+            if (current === end) {
+                clearInterval(timer);
+            }
+        }, stepTime);
+    }
+    
+    // Add hover effects to cards
+    const cards = document.querySelectorAll('.dashboard-card');
+    cards.forEach(card => {
+        card.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-4px)';
+        });
+        
+        card.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0)';
+        });
+    });
+    
+    // Mobile touch interactions
+    if ('ontouchstart' in window) {
+        cards.forEach(card => {
+            card.addEventListener('touchstart', function() {
+                this.style.transform = 'translateY(-2px)';
+            });
+            
+            card.addEventListener('touchend', function() {
+                setTimeout(() => {
+                    this.style.transform = 'translateY(0)';
+                }, 150);
+            });
+        });
+    }
+});
+</script>
+{% endblock %},   
