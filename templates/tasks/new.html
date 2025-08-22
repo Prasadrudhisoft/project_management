@@ -260,6 +260,15 @@
             </div>
             <div class="card-body">
                 <form method="POST" id="taskForm">
+                    <!-- Project Due Date Info -->
+                    <div class="form-group" id="projectDueDateInfo" style="display: none;">
+                        <div class="alert alert-info">
+                            <i class="bi bi-calendar-event me-2"></i>
+                            <strong>Project Due Date:</strong> <span id="projectDueDate"></span>
+                            <small class="d-block mt-1 text-muted">Tasks cannot be created after the project due date.</small>
+                        </div>
+                    </div>
+
                     <div class="form-group">
                         <label for="title" class="form-label">Task Title *</label>
                         <input type="text" class="form-control" id="title" name="title" required 
@@ -279,7 +288,9 @@
                                 <select class="form-select" id="project_id" name="project_id" required>
                                     <option value="">Select a project</option>
                                     {% for project in projects %}
-                                        <option value="{{ project.id }}" {{ 'selected' if request.args.get('project_id') == project.id|string }}>
+                                        <option value="{{ project.id }}" 
+                                                {{ 'selected' if request.args.get('project_id') == project.id|string }}
+                                                {% if project.end_date %}data-end-date="{{ project.end_date.strftime('%Y-%m-%d') }}"{% endif %}>
                                             {{ project.name }}
                                         </option>
                                     {% endfor %}
@@ -354,6 +365,9 @@
             const projectId = this.value;
             const milestoneSelect = document.getElementById('milestone_id');
             const assignedToSelect = document.getElementById('assigned_to');
+            const projectDueDateInfo = document.getElementById('projectDueDateInfo');
+            const projectDueDateSpan = document.getElementById('projectDueDate');
+            const taskDueDateInput = document.getElementById('due_date');
             
             // Clear current milestones
             milestoneSelect.innerHTML = '<option value="">No milestone</option>';
@@ -361,7 +375,38 @@
             // Clear current team members
             assignedToSelect.innerHTML = '<option value="">Unassigned</option>';
             
+            // Hide project due date info initially
+            projectDueDateInfo.style.display = 'none';
+            
             if (projectId) {
+                // Fetch project details including due date
+                fetch(`/api/project/${projectId}`)
+                    .then(response => response.json())
+                    .then(project => {
+                        if (project.end_date) {
+                            const projectDueDate = new Date(project.end_date);
+                            const formattedDate = projectDueDate.toLocaleDateString('en-US', {
+                                year: 'numeric',
+                                month: 'long',
+                                day: 'numeric'
+                            });
+                            projectDueDateSpan.innerHTML = `Project Due Date: ${formattedDate}`;
+                            projectDueDateInfo.style.display = 'block';
+                            
+                            // Only set project due date as max if no milestone is selected
+                            const selectedMilestone = document.getElementById('milestone_id').value;
+                            if (!selectedMilestone) {
+                                taskDueDateInput.max = project.end_date;
+                            }
+                        } else {
+                            projectDueDateInfo.style.display = 'none';
+                            taskDueDateInput.max = '';
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error loading project details:', error);
+                    });
+
                 // Fetch milestones for the selected project
                 fetch(`/api/project/${projectId}/milestones`)
                     .then(response => response.json())
@@ -370,8 +415,19 @@
                             const option = document.createElement('option');
                             option.value = milestone.id;
                             option.textContent = milestone.name;
+                            // Add milestone due date as data attribute
+                            if (milestone.due_date) {
+                                option.setAttribute('data-milestone-due-date', milestone.due_date);
+                            }
                             milestoneSelect.appendChild(option);
                         });
+                        
+                        // After loading milestones, check if one is already selected and apply constraints
+                        const currentMilestoneId = milestoneSelect.value;
+                        if (currentMilestoneId) {
+                            // Trigger the milestone change event to apply constraints
+                            milestoneSelect.dispatchEvent(new Event('change'));
+                        }
                     })
                     .catch(error => {
                         console.error('Error loading milestones:', error);
@@ -404,7 +460,99 @@
         if (projectId) {
             document.getElementById('project_id').value = projectId;
             document.getElementById('project_id').dispatchEvent(new Event('change'));
+            
+            // Set task due date maximum to project due date if available
+            const selectedProject = Array.from(document.getElementById('project_id').options).find(option => option.value === projectId);
+            if (selectedProject && selectedProject.dataset.endDate) {
+                const projectEndDate = selectedProject.dataset.endDate;
+                const dueDateInput = document.getElementById('due_date');
+                const todayObj = new Date();
+                todayObj.setHours(0, 0, 0, 0);
+                const projectEndDateObj = new Date(projectEndDate);
+                projectEndDateObj.setHours(0, 0, 0, 0);
+
+                // Only set project due date as max if no milestone is selected
+                const selectedMilestone = document.getElementById('milestone_id').value;
+                if (!selectedMilestone) {
+                    if (projectEndDateObj >= todayObj) {
+                        dueDateInput.max = projectEndDate;
+                    } else {
+                        dueDateInput.max = today;
+                    }
+                }
+                
+                // Show project due date info
+                const projectDueDateInfo = document.getElementById('projectDueDateInfo');
+                const projectDueDateSpan = document.getElementById('projectDueDate');
+                projectDueDateSpan.innerHTML = `Project Due Date: ${projectEndDateObj.toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                })}`;
+                projectDueDateInfo.style.display = 'block';
+            }
         }
+
+        // Handle milestone selection to update task due date maximum
+        document.getElementById('milestone_id').addEventListener('change', function() {
+            const milestoneId = this.value;
+            const taskDueDateInput = document.getElementById('due_date');
+            const selectedMilestone = this.options[this.selectedIndex];
+            
+            if (milestoneId && selectedMilestone.dataset.milestoneDueDate) {
+                // Set task due date maximum to milestone due date
+                const milestoneDueDate = selectedMilestone.dataset.milestoneDueDate;
+                const todayObj = new Date();
+                todayObj.setHours(0, 0, 0, 0);
+                const milestoneDueDateObj = new Date(milestoneDueDate);
+                milestoneDueDateObj.setHours(0, 0, 0, 0);
+
+                if (milestoneDueDateObj >= todayObj) {
+                    taskDueDateInput.max = milestoneDueDate;
+                } else {
+                    taskDueDateInput.max = today;
+                }
+                
+                // Show info about milestone due date constraint
+                const projectDueDateInfo = document.getElementById('projectDueDateInfo');
+                const projectDueDateSpan = document.getElementById('projectDueDate');
+                projectDueDateSpan.innerHTML = `Milestone Due Date: ${milestoneDueDateObj.toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                })}`;
+                projectDueDateInfo.style.display = 'block';
+            } else {
+                // Reset to project due date if no milestone selected
+                const projectId = document.getElementById('project_id').value;
+                if (projectId) {
+                    const selectedProject = Array.from(document.getElementById('project_id').options).find(option => option.value === projectId);
+                    if (selectedProject && selectedProject.dataset.endDate) {
+                        const projectEndDate = selectedProject.dataset.endDate;
+                        const todayObj = new Date();
+                        todayObj.setHours(0, 0, 0, 0);
+                        const projectEndDateObj = new Date(projectEndDate);
+                        projectEndDateObj.setHours(0, 0, 0, 0);
+
+                        if (projectEndDateObj >= todayObj) {
+                            taskDueDateInput.max = projectEndDate;
+                        } else {
+                            taskDueDateInput.max = today;
+                        }
+                        
+                        // Reset info to show project due date
+                        const projectDueDateInfo = document.getElementById('projectDueDateInfo');
+                        const projectDueDateSpan = document.getElementById('projectDueDate');
+                        projectDueDateSpan.innerHTML = `Project Due Date: ${projectEndDateObj.toLocaleDateString('en-US', {
+                            year: 'numeric',
+                            month: 'long',
+                            day: 'numeric'
+                        })}`;
+                        projectDueDateInfo.style.display = 'block';
+                    }
+                }
+            }
+        });
     </script>
 </body>
 </html>

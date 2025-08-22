@@ -12,6 +12,20 @@
                     <small class="text-muted">Project: {{ project.name }}</small>
                 </div>
                 <div class="card-body">
+                    <!-- Project Due Date Info -->
+                    <div class="form-group mb-3">
+                        <div class="alert alert-info">
+                            <i class="bi bi-calendar-event me-2"></i>
+                            <strong>Project Due Date:</strong> 
+                            {% if project.end_date %}
+                                {{ project.end_date.strftime('%B %d, %Y') }}
+                            {% else %}
+                                <span class="text-muted">No due date set</span>
+                            {% endif %}
+                            <small class="d-block mt-1 text-muted">Milestone due dates cannot exceed the project due date.</small>
+                        </div>
+                    </div>
+
                     <form method="POST">
                         <div class="form-group mb-3">
                             <label for="name" class="form-label">Milestone Name *</label>
@@ -94,4 +108,48 @@
         </div>
     </div>
 </div>
+
+<script>
+    // Set minimum date to today
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('due_date').min = today;
+
+    // Set milestone due date maximum to project due date if available
+    {% if project.end_date %}
+        const projectEndDate = "{{ project.end_date.strftime('%Y-%m-%d') }}";
+        const dueDateInput = document.getElementById('due_date');
+        const todayObj = new Date();
+        todayObj.setHours(0, 0, 0, 0);
+        const projectEndDateObj = new Date(projectEndDate);
+        projectEndDateObj.setHours(0, 0, 0, 0);
+
+        if (projectEndDateObj >= todayObj) {
+            dueDateInput.max = projectEndDate;
+        } else {
+            dueDateInput.max = today;
+        }
+    {% endif %}
+
+    // Add validation to prevent milestone due date from exceeding project due date
+    document.getElementById('due_date').addEventListener('change', function() {
+        const selectedDate = new Date(this.value);
+        {% if project.end_date %}
+            const projectEndDate = new Date("{{ project.end_date.strftime('%Y-%m-%d') }}");
+            
+            if (selectedDate > projectEndDate) {
+                alert('Milestone due date cannot exceed the project due date (' + projectEndDate.toLocaleDateString() + ').');
+                this.value = projectEndDate.toISOString().split('T')[0];
+            }
+        {% endif %}
+        
+        // Also check if date is in the past
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        if (selectedDate < today) {
+            alert('Milestone due date cannot be in the past.');
+            this.value = today.toISOString().split('T')[0];
+        }
+    });
+</script>
+
 {% endblock %}

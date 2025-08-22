@@ -785,11 +785,34 @@ def add_task_comment(task_id):
     return redirect(url_for('view_task', id=task_id))
 
 ########################## API Routes for AJAX
+@app.route('/api/project/<int:project_id>')
+@login_required
+def api_project_details(project_id):
+    """Get project details for AJAX requests"""
+    project = db.get_project_by_id(project_id)
+    if not project or project['organization_id'] != session['organization_id']:
+        return jsonify({'error': 'Project not found'}), 404
+    
+    return jsonify({
+        'id': project['id'],
+        'name': project['name'],
+        'description': project['description'],
+        'status': project['status'],
+        'start_date': project['start_date'].strftime('%Y-%m-%d') if project['start_date'] else None,
+        'end_date': project['end_date'].strftime('%Y-%m-%d') if project['end_date'] else None,
+        'created_by': project['created_by'],
+        'created_at': project['created_at'].strftime('%Y-%m-%d') if project['created_at'] else None
+    })
+
 @app.route('/api/project/<int:project_id>/milestones')
 @login_required
 def api_project_milestones(project_id):
     milestones = db.get_project_milestones(project_id)
-    return jsonify([{'id': m['id'], 'name': m['name']} for m in milestones])
+    return jsonify([{
+        'id': m['id'], 
+        'name': m['name'],
+        'due_date': m['due_date'].strftime('%Y-%m-%d') if m['due_date'] else None
+    } for m in milestones])
 
 @app.route('/api/project/<int:project_id>/assignable-members')
 @login_required

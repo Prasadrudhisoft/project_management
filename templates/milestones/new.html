@@ -12,6 +12,20 @@
                     <small class="text-muted">Project: {{ project.name }}</small>
                 </div>
                 <div class="card-body">
+                    <!-- Project Due Date Info -->
+                    <div class="form-group mb-3" id="projectDueDateInfo">
+                        <div class="alert alert-info">
+                            <i class="bi bi-calendar-event me-2"></i>
+                            <strong>Project Due Date:</strong> 
+                            {% if project.end_date %}
+                                {{ project.end_date.strftime('%B %d, %Y') }}
+                            {% else %}
+                                <span class="text-muted">No due date set</span>
+                            {% endif %}
+                            <small class="d-block mt-1 text-muted">Milestones cannot be created after the project due date.</small>
+                        </div>
+                    </div>
+
                     <form method="POST">
                         <div class="form-group mb-3">
                             <label for="name" class="form-label">Milestone Name *</label>
@@ -49,5 +63,21 @@
     // Set minimum date to today
     const today = new Date().toISOString().split('T')[0];
     document.getElementById('due_date').min = today;
+
+    // Set milestone due date maximum to project due date if available
+    {% if project.end_date %}
+        const projectEndDate = "{{ project.end_date.strftime('%Y-%m-%d') }}";
+        const dueDateInput = document.getElementById('due_date');
+        const todayObj = new Date();
+        todayObj.setHours(0, 0, 0, 0);
+        const projectEndDateObj = new Date(projectEndDate);
+        projectEndDateObj.setHours(0, 0, 0, 0);
+
+        if (projectEndDateObj >= todayObj) {
+            dueDateInput.max = projectEndDate;
+        } else {
+            dueDateInput.max = today;
+        }
+    {% endif %}
 </script>
 {% endblock %}
