@@ -397,6 +397,9 @@ def tasks():
 @app.route('/tasks/all')
 @login_required
 def all_tasks():
+    if session.get('user_role') == 'member':
+        flash('Access denied.', 'error')
+        return redirect(url_for('dashboard'))
     # Get filter parameter
     creator_role = request.args.get('creator_role')
     
@@ -996,7 +999,7 @@ def project_visibility(id):
     members_only = [u for u in all_members if u['role'] == 'member']
     
     # Get current visible members
-    visible_members = db.get_project_visible_members(id)
+    visible_members = db.get_project_assigned_members(id)
     
     return render_template('projects/visibility.html', 
                          project=project, 

@@ -1610,57 +1610,35 @@ class DatabaseHelper:
             conn.close()
     
     def get_user_visible_projects(self, user_id, org_id):
-        """Get projects visible to user based on role and visibility settings"""
+        """Get projects visible to user based on role and assignment"""
         conn = self.get_connection()
         if not conn:
             return []
-        
+
         try:
             cursor = conn.cursor(pymysql.cursors.DictCursor)
-            
-            # Get user role
             cursor.execute("SELECT role FROM users WHERE id = %s", (user_id,))
             user = cursor.fetchone()
             if not user:
                 return []
-            
+
             # Admin and managers can see all projects
             if user['role'] in ['admin', 'manager']:
                 return self.get_organization_projects(org_id)
-            
-            # Members can see projects based on visibility
+
+            # Members see only projects they are assigned to
             cursor.execute("""
                 SELECT DISTINCT p.*, u.full_name as created_by_name,
                 COUNT(DISTINCT t.id) as task_count,
                 COUNT(DISTINCT CASE WHEN t.status = 'completed' THEN t.id END) as completed_tasks
-                FROM projects p 
-                JOIN users u ON p.created_by = u.id 
-                LEFT JOIN tasks t ON p.id = t.project_id 
-                LEFT JOIN project_visibility pv ON p.id = pv.project_id
-                WHERE p.organization_id = %s 
-                AND (p.visibility = 'all' OR (p.visibility = 'specific' AND pv.user_id = %s))
-                GROUP BY p.id 
+                FROM projects p
+                JOIN users u ON p.created_by = u.id
+                LEFT JOIN tasks t ON p.id = t.project_id
+                JOIN project_members pm ON pm.project_id = p.id AND pm.user_id = %s
+                WHERE p.organization_id = %s
+                GROUP BY p.id
                 ORDER BY p.created_at DESC
-            """, (org_id, user_id))
-            return cursor.fetchall()
-        finally:
-            conn.close()
-    
-    def get_project_visible_members(self, project_id):
-        """Get members who can see this project"""
-        conn = self.get_connection()
-        if not conn:
-            return []
-        
-        try:
-            cursor = conn.cursor(pymysql.cursors.DictCursor)
-            cursor.execute("""
-                SELECT u.id, u.full_name, u.email 
-                FROM project_visibility pv
-                JOIN users u ON pv.user_id = u.id
-                WHERE pv.project_id = %s
-                ORDER BY u.full_name
-            """, (project_id,))
+            """, (user_id, org_id))
             return cursor.fetchall()
         finally:
             conn.close()
@@ -2290,14 +2268,14 @@ class DatabaseHelper:
                 SELECT u.full_name, u.role,
                     COUNT(t.id) as assigned_tasks,
                     COUNT(CASE WHEN t.status = 'completed' THEN 1 END) as completed_tasks,
-                    ROUND(COUNT(CASE WHEN t.status = 'completed' THEN 1 END) * 100.0 / COUNT(t.id), 2) as completion_rate
+                    COUNT(CASE WHEN t.due_date < CURDATE() AND t.status != 'completed' THEN 1 END) as overdue_tasks
                 FROM users u
                 LEFT JOIN tasks t ON u.id = t.assigned_to
                 LEFT JOIN projects p ON t.project_id = p.id
                 WHERE u.organization_id = %s {date_filter.replace('t.created_at', 't.created_at')}
                 GROUP BY u.id, u.full_name, u.role
                 HAVING COUNT(t.id) > 0
-                ORDER BY completion_rate DESC, completed_tasks DESC
+                ORDER BY completed_tasks DESC, overdue_tasks ASC
                 LIMIT 10
             """, date_params)
             top_performers = cursor.fetchall()
