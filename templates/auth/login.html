@@ -311,6 +311,51 @@
             will-change: border-color, box-shadow, transform;
         }
         
+        /* Enhanced password input styling for better dot visibility */
+        input[type="password"] {
+            font-family: "Courier New", monospace !important;
+            letter-spacing: 0.2em !important;
+            font-size: 1.2rem !important;
+            font-weight: 900 !important;
+            color: #000000 !important;
+            text-shadow: 0 0 0 #000000 !important;
+            background-color: rgba(255, 255, 255, 1) !important;
+            position: relative;
+            z-index: 2;
+        }
+        
+        /* Webkit browsers - force visible password dots */
+        input[type="password"]::-webkit-input-placeholder {
+            color: #6c757d;
+            letter-spacing: normal;
+            font-weight: normal;
+            font-family: "Segoe UI", sans-serif;
+            font-size: 1rem;
+        }
+        
+        input[type="password"]::-moz-placeholder {
+            color: #6c757d;
+            letter-spacing: normal;
+            font-weight: normal;
+            font-family: "Segoe UI", sans-serif;
+            font-size: 1rem;
+        }
+        
+        input[type="password"]::placeholder {
+            color: #6c757d;
+            letter-spacing: normal;
+            font-weight: normal;
+            font-family: "Segoe UI", sans-serif;
+            font-size: 1rem;
+        }
+        
+        /* Force high contrast for password dots */
+        input[type="password"]:focus {
+            color: #000000 !important;
+            background-color: #ffffff !important;
+            text-shadow: none !important;
+        }
+        
         .form-control:focus {
             color: #212529;
             background-color: rgba(255, 255, 255, 1);
@@ -330,6 +375,61 @@
             margin-bottom: 1.5rem;
         }
         
+        /* Password input with icon styling */
+        .password-input-group {
+            position: relative;
+        }
+        
+        .password-input-group .form-control {
+            padding-right: 3rem;
+        }
+        
+        .password-toggle {
+            position: absolute;
+            right: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #6c757d;
+            cursor: pointer;
+            font-size: 1.1rem;
+            padding: 0.25rem;
+            border-radius: 50%;
+            width: 2rem;
+            height: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 4;
+        }
+        
+        .password-toggle:hover {
+            color: #3498db;
+            background-color: rgba(52, 152, 219, 0.1);
+            transform: translateY(-50%) scale(1.1);
+        }
+        
+        .password-toggle:active {
+            transform: translateY(-50%) scale(0.95);
+        }
+        
+        .password-toggle:focus {
+            outline: 2px solid rgba(52, 152, 219, 0.4);
+            outline-offset: 2px;
+        }
+        
+        /* Eye icon animations */
+        .password-toggle .eye-icon {
+            transition: all 0.2s ease;
+        }
+        
+        .password-toggle.password-visible .eye-icon {
+            transform: scale(1.1);
+            color: #3498db;
+        }
+        
         .floating-label {
             position: absolute;
             left: 1rem;
@@ -343,6 +443,7 @@
             border-radius: 4px;
             transform: translateZ(0);
             will-change: transform, font-size, color;
+            z-index: 1;
         }
         
         .form-control:focus + .floating-label,
@@ -353,6 +454,23 @@
             color: #3498db;
             font-weight: 600;
             transform: translateZ(0);
+            z-index: 3;
+        }
+        
+        /* Adjust floating label for password input */
+        .password-input-group .floating-label {
+            z-index: 1;
+        }
+        
+        .password-input-group .form-control:focus + .floating-label,
+        .password-input-group .form-control:not(:placeholder-shown) + .floating-label {
+            z-index: 3;
+        }
+        
+        /* Ensure password input has higher z-index than label */
+        .password-input-group .form-control {
+            position: relative;
+            z-index: 2;
         }
         
         .btn {
@@ -508,6 +626,14 @@
             content: "🏠";
         }
         
+        .bi-eye::before {
+            content: "👁";
+        }
+        
+        .bi-eye-slash::before {
+            content: "🙈";
+        }
+        
         /* Demo credentials styling */
         .demo-item {
             cursor: pointer;
@@ -623,6 +749,26 @@
                 font-size: 16px;
             }
             
+            /* Enhanced password input for mobile */
+            input[type="password"] {
+                font-size: 18px !important;
+                letter-spacing: 0.25em !important;
+                font-weight: 900 !important;
+                color: #000000 !important;
+                background-color: #ffffff !important;
+            }
+            
+            .password-input-group .form-control {
+                padding-right: 2.8rem;
+            }
+            
+            .password-toggle {
+                right: 0.8rem;
+                width: 1.8rem;
+                height: 1.8rem;
+                font-size: 1rem;
+            }
+            
             .floating-label {
                 font-size: 0.9rem;
                 left: 0.8rem;
@@ -663,6 +809,15 @@
             
             .form-control {
                 font-size: 16px;
+            }
+            
+            /* Enhanced password input for tablets */
+            input[type="password"] {
+                font-size: 18px !important;
+                letter-spacing: 0.2em !important;
+                font-weight: 900 !important;
+                color: #000000 !important;
+                background-color: #ffffff !important;
             }
             
             .project-icon {
@@ -733,9 +888,32 @@
                 border-color: #495057;
             }
             
+            /* Enhanced password dots visibility in dark mode */
+            input[type="password"] {
+                color: #ffffff !important;
+                background-color: rgba(60, 60, 60, 1) !important;
+                text-shadow: 0 0 1px rgba(255, 255, 255, 0.8) !important;
+                border-color: #6c757d !important;
+            }
+            
+            input[type="password"]:focus {
+                color: #ffffff !important;
+                background-color: rgba(70, 70, 70, 1) !important;
+                border-color: #3498db !important;
+            }
+            
             .floating-label {
                 color: #adb5bd;
                 background: rgba(30, 30, 30, 0.9);
+            }
+            
+            .password-toggle {
+                color: #adb5bd;
+            }
+            
+            .password-toggle:hover {
+                color: #3498db;
+                background-color: rgba(52, 152, 219, 0.2);
             }
         }
         
@@ -803,8 +981,11 @@
                                 <input type="email" class="form-control" id="email" name="email" placeholder=" " required>
                                 <label for="email" class="floating-label">Email Address</label>
                             </div>
-                            <div class="input-group">
+                            <div class="input-group password-input-group">
                                 <input type="password" class="form-control" id="password" name="password" placeholder=" " required>
+                                <button type="button" class="password-toggle" id="passwordToggle" aria-label="Toggle password visibility">
+                                    <span class="eye-icon bi bi-eye"></span>
+                                </button>
                                 <label for="password" class="floating-label">Password</label>
                             </div>
                             <button type="submit" class="btn btn-primary w-100" id="submitBtn">
@@ -828,6 +1009,60 @@
         let isAnimating = false;
         let animationFrame;
         
+        // Password visibility toggle functionality
+        function initializePasswordToggle() {
+            const passwordInput = document.getElementById('password');
+            const passwordToggle = document.getElementById('passwordToggle');
+            const eyeIcon = passwordToggle.querySelector('.eye-icon');
+            
+            passwordToggle.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                const isPassword = passwordInput.type === 'password';
+                
+                // Toggle input type
+                passwordInput.type = isPassword ? 'text' : 'password';
+                
+                // Toggle icon and styling
+                if (isPassword) {
+                    eyeIcon.className = 'eye-icon bi bi-eye-slash';
+                    passwordToggle.classList.add('password-visible');
+                    passwordToggle.setAttribute('aria-label', 'Hide password');
+                } else {
+                    eyeIcon.className = 'eye-icon bi bi-eye';
+                    passwordToggle.classList.remove('password-visible');
+                    passwordToggle.setAttribute('aria-label', 'Show password');
+                }
+                
+                // Add a subtle animation
+                passwordToggle.style.transform = 'translateY(-50%) scale(0.9)';
+                setTimeout(() => {
+                    passwordToggle.style.transform = 'translateY(-50%) scale(1)';
+                }, 100);
+                
+                // Keep focus on password input
+                passwordInput.focus();
+            });
+            
+            // Handle keyboard navigation for password toggle
+            passwordToggle.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    this.click();
+                }
+            });
+            
+            // Add hover effects for better UX
+            passwordToggle.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-50%) scale(1.1)';
+            });
+            
+            passwordToggle.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(-50%) scale(1)';
+            });
+        }
+        
         // Optimized auto-hide flash messages
         document.addEventListener('DOMContentLoaded', function() {
             const flashMessage = document.getElementById('flash-message');
@@ -843,6 +1078,7 @@
             
             // Initialize optimized features
             initializeOptimizedFeatures();
+            initializePasswordToggle();
         });
         
         // Optimized credentials filling with smooth animation
@@ -1118,7 +1354,7 @@
                 }
             }
             
-            if (input.type === 'password') {
+            if (input.type === 'password' || input.type === 'text' && input.id === 'password') {
                 if (value && value.length < 3) {
                     input.style.borderColor = '#f39c12';
                     return false;
@@ -1201,7 +1437,7 @@
             document.body.classList.add('touch-device');
             
             // Add touch-friendly hover effects
-            document.querySelectorAll('.btn, .demo-item').forEach(element => {
+            document.querySelectorAll('.btn, .demo-item, .password-toggle').forEach(element => {
                 element.addEventListener('touchstart', function() {
                     this.classList.add('touch-active');
                 }, { passive: true });
