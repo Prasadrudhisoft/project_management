@@ -591,17 +591,15 @@
                         <table class="table table-hover mb-0 dashboard-table">
                             <tbody>
                                 {% for project in recent_projects %}
-                                <tr>
+                                <tr style="cursor:pointer;" onclick="window.location='{{ url_for('view_project', id=project.id) }}'">
                                     <td>
                                         <div class="project-item">
                                             <div class="avatar-circle">
                                                 {{ project.name[0].upper() }}
                                             </div>
                                             <div class="item-content">
-                                                <h6>
-                                                    <a href="{{ url_for('view_project', id=project.id) }}" class="text-decoration-none">
-                                                        {{ project.name }}
-                                                    </a>
+                                                <h6 class="mb-1 text-primary">
+                                                    {{ project.name }}
                                                 </h6>
                                                 <small class="text-muted">
                                                     {{ project.created_by_name }} • {{ project.created_at.strftime('%B %d, %Y') }}
@@ -905,4 +903,4 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 </script>
-{% endblock %},   
+{% endblock %}
