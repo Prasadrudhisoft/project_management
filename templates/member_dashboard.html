@@ -667,6 +667,103 @@
                 margin-bottom: 0.75rem;
             }
         }
+
+        /* Advanced Responsiveness Enhancements for Member Dashboard */
+        /* Large desktops down */
+        @media (max-width: 1400px) {
+            .stat-number { font-size: 2.2rem; }
+            .stat-icon { font-size: 2.75rem; }
+        }
+
+        /* Desktops and tablets */
+        @media (max-width: 1200px) {
+            .stat-number { font-size: 2rem; }
+            .stat-icon { font-size: 2.25rem; }
+            .card-body { padding: 1.25rem; }
+            .card-header { gap: 0.5rem; }
+        }
+
+        /* Tablets */
+        @media (max-width: 992px) {
+            /* Reflow grid: two across where previously four */
+            .col-md-3, .col-md-4 { flex: 0 0 50%; max-width: 50%; }
+            .col-lg-8, .col-lg-4 { flex: 0 0 100%; max-width: 100%; }
+
+            .member-header { padding: 1.75rem 0; }
+
+            /* Make header actions wrap nicely */
+            .card-header { flex-wrap: wrap; }
+            .card-header .btn { margin-left: 0; }
+
+            /* Avoid horizontal scroll caused by long content */
+            .table th, .table td { word-break: break-word; overflow-wrap: anywhere; }
+            .table-responsive { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        }
+
+        /* Phones and small tablets */
+        @media (max-width: 768px) {
+            /* Stack all columns */
+            .col-md-3, .col-md-4, .col-md-6, .col-lg-4, .col-lg-8, .col-sm-6 {
+                flex: 0 0 100%;
+                max-width: 100%;
+                margin-bottom: 1rem;
+            }
+
+            /* Stat cards stack content */
+            .stat-card { text-align: center; flex-direction: column; gap: 0.5rem; }
+            .stat-icon { font-size: 1.8rem; margin-bottom: 0.25rem; }
+            .stat-number { font-size: 1.75rem; }
+
+            /* Compact card spacing */
+            .card-body { padding: 1rem; }
+            .card-header { padding: 0.875rem 1rem; }
+            .card-header h5 { margin-bottom: 0; }
+
+            /* Quick actions: vertical buttons */
+            .d-flex.flex-wrap.gap-2 { flex-direction: column; }
+            .d-flex.flex-wrap.gap-2 .btn { width: 100%; }
+
+            /* Make tables usable on small screens */
+            .table-responsive { font-size: 0.9rem; }
+            .table th, .table td { padding: 0.5rem; }
+            /* Let table scroll instead of squishing */
+            .table { min-width: 640px; }
+        }
+
+        /* Laptop-focused tweaks (e.g., 1024px widths) */
+        @media (max-width: 1100px) and (min-width: 993px) {
+            /* Use two-up layout to avoid tight four-up at ~1024px */
+            .col-md-3, .col-md-4 { flex: 0 0 50%; max-width: 50%; }
+            .col-lg-8, .col-lg-4 { flex: 0 0 100%; max-width: 100%; }
+            /* Ensure tables remain readable without forcing zoom */
+            .table { min-width: 0; width: 100%; }
+            .card-header { flex-wrap: wrap; gap: 0.5rem; }
+        }
+
+        /* Ultra-wide displays (WQHD/4K) */
+        @media (min-width: 1920px) {
+            /* Keep full width but with comfortable padding */
+            .container-fluid { max-width: 100% !important; padding-left: 24px; padding-right: 24px; }
+            .card-body { padding: 1.5rem; }
+            .stat-number { font-size: 2.4rem; }
+            .stat-icon { font-size: 3rem; }
+        }
+
+        @media (min-width: 2560px) {
+            .container-fluid { max-width: 100% !important; padding-left: 32px; padding-right: 32px; }
+            h1 { font-size: 2.8rem; }
+            .stat-number { font-size: 2.75rem; }
+            .stat-icon { font-size: 3.25rem; }
+            .table { font-size: 1rem; }
+        }
+
+        /* Fit-to-screen overrides */
+        .container-fluid { max-width: 100% !important; width: 100%; }
+
+        /* Utility helpers to avoid overflow and keep layout clean */
+        .truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .break-anywhere { overflow-wrap: anywhere; word-break: break-word; }
+        img, svg { max-width: 100%; height: auto; }
 </style>
 {% endblock %}
 

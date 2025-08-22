@@ -414,6 +414,15 @@
 
             .navbar-nav {
                 gap: 0.25rem;
+                flex-wrap: nowrap;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+
+            .navbar-nav::-webkit-scrollbar { height: 6px; }
+            .navbar-nav::-webkit-scrollbar-thumb {
+                background: rgba(255, 255, 255, 0.25);
+                border-radius: 4px;
             }
 
             .navbar-nav .nav-link {
@@ -421,6 +430,8 @@
                 margin: 0;
                 border-radius: 8px;
             }
+
+            .navbar-nav .nav-link span { white-space: nowrap; }
 
             .dropdown-menu {
                 position: static !important;
@@ -517,6 +528,21 @@
             .badge {
                 font-size: 0.7rem;
                 padding: 0.25em 0.5em;
+            }
+
+            /* Stack stat card content vertically on small screens */
+            .stat-card-content {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.5rem;
+            }
+
+            /* Ensure wide content scrolls instead of breaking layout */
+            .table {
+                display: block;
+                width: 100%;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
             }
 
             .alert {
@@ -776,7 +802,7 @@
                     <li class="nav-item">
                         <a class="nav-link position-relative" href="{{ url_for('notifications') }}"
                             id="notifications-link">
-                            <i class="fas fa-bell me-1"></i><i class="d-none d-xl-inline">Notifications</i>
+                            <i class="fas fa-bell me-1"></i><span class="d-lg-inline">Notifications</span>
                             <span class="badge bg-danger notification-count" id="notification-badge"
                             ></span>
                         </a>
