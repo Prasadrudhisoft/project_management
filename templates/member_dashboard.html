@@ -769,7 +769,7 @@
                     <div class="card-body" style="padding: 0;">
                         {% if recent_tasks %}
                             {% for task in recent_tasks %}
-                            <div class="task-item task-priority-{{ task.priority }}" style="cursor:pointer;" onclick="window.location='{{ url_for('view_task', id=task.id) }}'">
+                            <div class="task-item task-priority-{{ task.priority }}" style="cursor:pointer;" data-href="{{ url_for('view_task', id=task.id) }}" onclick="window.location=this.dataset.href;">
                                 <div>
                                     <h6 class="mb-0">{{ task.title }}</h6>
                                     <small class="text-muted">
