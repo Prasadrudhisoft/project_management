@@ -88,7 +88,7 @@
             color: white !important;
             display: flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: 1.5rem;
             text-decoration: none;
             margin-right: 1rem;
         }
@@ -124,6 +124,8 @@
             position: relative;
             white-space: nowrap;
             font-size: 0.9rem;
+            gap: 20px;
+            
         }
 
         .navbar-nav .nav-link:hover {
@@ -716,7 +718,7 @@
                     <i class="fas fa-project-diagram"></i>
                 </div>
                 <span class="d-none d-sm-inline">{{ app_config.APP_NAME or 'Project Manager' }}</span>
-                <span class="d-sm-none">{{ (app_config.APP_NAME or 'Project Manager')[:8] }}...</span>
+                <span class="d-sm-none">{{ (app_config.APP_NAME or 'Project Manager')[:20] }}</span>
             </a>
 
             {% if session.user_id %}
@@ -783,6 +785,13 @@
             <a class="nav-link position-relative" href="{{ url_for('messages') }}" id="messages-link">
                 <i class="bi bi-envelope me-1"></i><span class="d-lg-inline">Messages</span>
                 <span class="badge bg-danger message-count" id="message-badge" style="display: none;"></span>
+            </a>
+        </li>
+
+        <!-- Daily Reports -->
+        <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('daily_reports') }}">
+                <i class="bi bi-journal-text me-1"></i><span class="d-lg-inline">Daily Reports</span>
             </a>
         </li>
 

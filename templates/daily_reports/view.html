@@ -1,0 +1,187 @@
+{% extends "base.html" %}
+
+{% block title %}Daily Report - {{ report.work_title }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-2 px-md-3">
+    <div class="row justify-content-center">
+        <div class="col-12 col-lg-8 col-xl-6">
+            <!-- Back Button -->
+            <div class="mb-3">
+                <a href="{{ url_for('daily_reports') }}" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left me-2"></i>Back to Reports
+                </a>
+            </div>
+
+            <!-- Report Card -->
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div class="flex-grow-1">
+                            <h4 class="mb-1">{{ report.work_title }}</h4>
+                            <small class="opacity-75 d-block">
+                                <i class="bi bi-calendar me-1"></i>
+                                {{ report.report_date.strftime('%B %d, %Y') if report.report_date else 'No date' }}
+                            </small>
+                        </div>
+                        <div class="ms-3">
+                            <span class="badge bg-{{ 'success' if report.status == 'completed' else 'warning' if report.status == 'in_progress' else 'info' if report.status == 'pending' else 'danger' }} fs-6">
+                                {{ report.status.replace('_', ' ').title() }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card-body p-4">
+                    <!-- Report Details -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <strong class="text-muted">Submitted by:</strong>
+                                <div class="mt-1">
+                                    <span class="badge bg-secondary fs-6">{{ report.user_name }}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <strong class="text-muted">Submitted on:</strong>
+                                <div class="mt-1">
+                                    <span class="text-muted">
+                                        {{ report.created_at.strftime('%B %d, %Y at %I:%M %p') if report.created_at else 'Unknown time' }}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Project Information -->
+                    {% if report.project_name %}
+                    <div class="mb-4">
+                        <strong class="text-muted">Related Project:</strong>
+                        <div class="mt-2">
+                            <span class="badge bg-primary fs-6">{{ report.project_name }}</span>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Work Description -->
+                    {% if report.work_description %}
+                    <div class="mb-4">
+                        <strong class="text-muted">Work Description:</strong>
+                        <div class="mt-2 p-3 bg-light rounded">
+                            <p class="mb-0">{{ report.work_description }}</p>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Discussion/Notes -->
+                    {% if report.discussion %}
+                    <div class="mb-4">
+                        <strong class="text-muted">Discussion/Notes:</strong>
+                        <div class="mt-2 p-3 bg-light rounded">
+                            <p class="mb-0">{{ report.discussion }}</p>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Visibility Settings -->
+                    <div class="mb-4">
+                        <strong class="text-muted">Report Visibility:</strong>
+                        <div class="mt-2">
+                            {% if report.visible_to_manager %}
+                                <span class="badge bg-info me-2 fs-6">
+                                    <i class="bi bi-person-badge me-1"></i>Visible to Managers
+                                </span>
+                            {% endif %}
+                            {% if report.visible_to_admin %}
+                                <span class="badge bg-warning me-2 fs-6">
+                                    <i class="bi bi-shield-check me-1"></i>Visible to Admins
+                                </span>
+                            {% endif %}
+                            {% if not report.visible_to_manager and not report.visible_to_admin %}
+                                <span class="badge bg-secondary fs-6">
+                                    <i class="bi bi-eye-slash me-1"></i>Private Report
+                                </span>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Last Updated -->
+                    {% if report.updated_at and report.updated_at != report.created_at %}
+                    <div class="mb-4">
+                        <strong class="text-muted">Last Updated:</strong>
+                        <div class="mt-1">
+                            <span class="text-muted">
+                                {{ report.updated_at.strftime('%B %d, %Y at %I:%M %p') }}
+                            </span>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="d-flex justify-content-center gap-3 mt-4">
+                <a href="{{ url_for('daily_reports') }}" class="btn btn-outline-secondary">
+                    <i class="bi bi-list me-2"></i>All Reports
+                </a>
+                {% if report.user_id == session.user_id %}
+                <a href="{{ url_for('new_daily_report') }}" class="btn btn-primary">
+                    <i class="bi bi-plus me-2"></i>Submit New Report
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .card-body {
+        padding: 1.5rem !important;
+    }
+    
+    .badge.fs-6 {
+        font-size: 0.875rem !important;
+    }
+}
+
+/* Card hover effects */
+.card {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+}
+
+/* Status badge colors */
+.badge.bg-success {
+    background-color: #198754 !important;
+}
+
+.badge.bg-warning {
+    background-color: #ffc107 !important;
+    color: #000 !important;
+}
+
+.badge.bg-info {
+    background-color: #0dcaf0 !important;
+}
+
+.badge.bg-danger {
+    background-color: #dc3545 !important;
+}
+
+.badge.bg-primary {
+    background-color: #0d6efd !important;
+}
+
+.badge.bg-secondary {
+    background-color: #6c757d !important;
+}
+</style>
+{% endblock %}

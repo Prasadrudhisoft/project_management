@@ -2580,3 +2580,254 @@ class DatabaseHelper:
             return cursor.fetchall()
         finally:
             conn.close()
+
+    # Daily Report Methods
+    def create_daily_report(self, data):
+        """Create new daily report"""
+        conn = self.get_connection()
+        if not conn:
+            return None
+        
+        try:
+            cursor = conn.cursor()
+            cursor.execute("""
+                INSERT INTO daily_reports (user_id, organization_id, project_id, report_date, work_title, 
+                                         work_description, status, discussion, visible_to_manager, visible_to_admin) 
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            """, (data['user_id'], data['organization_id'], data.get('project_id'), data['report_date'], data['work_title'],
+                  data['work_description'], data['status'], data['discussion'], 
+                  data['visible_to_manager'], data['visible_to_admin']))
+            
+            report_id = cursor.lastrowid
+            conn.commit()
+            return report_id
+        except Exception as e:
+            conn.rollback()
+            logger.error(f"Error creating daily report: {e}")
+            return None
+        finally:
+            conn.close()
+    
+    def get_daily_reports_for_user(self, user_id, org_id):
+        """Get daily reports submitted by a specific user"""
+        conn = self.get_connection()
+        if not conn:
+            return []
+        
+        try:
+            cursor = conn.cursor(pymysql.cursors.DictCursor)
+            cursor.execute("""
+                SELECT dr.*, u.full_name as user_name, p.name as project_name
+                FROM daily_reports dr
+                JOIN users u ON dr.user_id = u.id
+                LEFT JOIN projects p ON dr.project_id = p.id
+                WHERE dr.user_id = %s AND dr.organization_id = %s
+                ORDER BY dr.report_date DESC, dr.created_at DESC
+            """, (user_id, org_id))
+            return cursor.fetchall()
+        finally:
+            conn.close()
+    
+    def get_daily_reports_for_managers(self, org_id):
+        """Get daily reports visible to managers and project team members"""
+        conn = self.get_connection()
+        if not conn:
+            return []
+        
+        try:
+            cursor = conn.cursor(pymysql.cursors.DictCursor)
+            cursor.execute("""
+                SELECT dr.*, u.full_name as user_name, p.name as project_name
+                FROM daily_reports dr
+                JOIN users u ON dr.user_id = u.id
+                LEFT JOIN projects p ON dr.project_id = p.id
+                WHERE dr.organization_id = %s AND dr.visible_to_manager = TRUE
+                ORDER BY dr.report_date DESC, dr.created_at DESC
+            """, (org_id,))
+            return cursor.fetchall()
+        finally:
+            conn.close()
+    
+    def get_daily_reports_for_admins(self, org_id):
+        """Get daily reports visible to admins"""
+        conn = self.get_connection()
+        if not conn:
+            return []
+        
+        try:
+            cursor = conn.cursor(pymysql.cursors.DictCursor)
+            cursor.execute("""
+                SELECT dr.*, u.full_name as user_name, p.name as project_name
+                FROM daily_reports dr
+                JOIN users u ON dr.user_id = u.id
+                LEFT JOIN projects p ON dr.project_id = p.id
+                WHERE dr.organization_id = %s AND dr.visible_to_admin = TRUE
+                ORDER BY dr.report_date DESC, dr.created_at DESC
+            """, (org_id,))
+            return cursor.fetchall()
+        finally:
+            conn.close()
+    
+    def get_daily_reports_by_date_range(self, org_id, start_date, end_date, user_role):
+        """Get daily reports within a date range based on user role"""
+        conn = self.get_connection()
+        if not conn:
+            return []
+        
+        try:
+            cursor = conn.cursor(pymysql.cursors.DictCursor)
+            
+            if user_role == 'admin':
+                # Admins can see all reports visible to them
+                cursor.execute("""
+                    SELECT dr.*, u.full_name as user_name, p.name as project_name
+                    FROM daily_reports dr
+                    JOIN users u ON dr.user_id = u.id
+                    LEFT JOIN projects p ON dr.project_id = p.id
+                    WHERE dr.organization_id = %s AND dr.visible_to_admin = TRUE 
+                          AND dr.report_date BETWEEN %s AND %s
+                    ORDER BY dr.report_date DESC, dr.created_at DESC
+                """, (org_id, start_date, end_date))
+            elif user_role == 'manager':
+                # Managers can see reports visible to them
+                cursor.execute("""
+                    SELECT dr.*, u.full_name as user_name, p.name as project_name
+                    FROM daily_reports dr
+                    JOIN users u ON dr.user_id = u.id
+                    LEFT JOIN projects p ON dr.project_id = p.id
+                    WHERE dr.organization_id = %s AND dr.visible_to_manager = TRUE 
+                          AND dr.report_date BETWEEN %s AND %s
+                    ORDER BY dr.report_date DESC, dr.created_at DESC
+                """, (org_id, start_date, end_date))
+            else:
+                # Regular members can only see their own reports
+                return []
+            
+            return cursor.fetchall()
+        finally:
+            conn.close()
+    
+    def get_user_projects(self, user_id, org_id):
+        """Get projects that a user is assigned to or can access"""
+        conn = self.get_connection()
+        if not conn:
+            return []
+        
+        try:
+            cursor = conn.cursor(pymysql.cursors.DictCursor)
+            cursor.execute("""
+                SELECT DISTINCT p.id, p.name, p.description, p.status
+                FROM projects p
+                LEFT JOIN project_members pm ON p.id = pm.project_id
+                WHERE p.organization_id = %s 
+                  AND (pm.user_id = %s OR p.created_by = %s OR p.assigned_manager_id = %s)
+                ORDER BY p.name
+            """, (org_id, user_id, user_id, user_id))
+            return cursor.fetchall()
+        finally:
+            conn.close()
+    
+    def get_daily_report_by_id(self, report_id, user_id, org_id, user_role):
+        """Get a specific daily report by ID with access control including project-based access"""
+        conn = self.get_connection()
+        if not conn:
+            return None
+        
+        try:
+            cursor = conn.cursor(pymysql.cursors.DictCursor)
+            
+            # Base query
+            query = """
+                SELECT dr.*, u.full_name as user_name, p.name as project_name
+                FROM daily_reports dr
+                JOIN users u ON dr.user_id = u.id
+                LEFT JOIN projects p ON dr.project_id = p.id
+                LEFT JOIN project_members pm ON dr.project_id = pm.project_id
+                WHERE dr.id = %s AND dr.organization_id = %s
+            """
+            params = [report_id, org_id]
+            
+            # Access control conditions
+            access_conditions = [
+                "dr.user_id = %s"  # Submitter always has access
+            ]
+            params.append(user_id)
+            
+            if user_role == 'admin':
+                access_conditions.append("dr.visible_to_admin = TRUE")
+            elif user_role == 'manager':
+                # Manager access: visible to manager AND (assigned manager OR team member)
+                access_conditions.append("""
+                    dr.visible_to_manager = TRUE AND (
+                        dr.project_id IS NULL 
+                        OR p.assigned_manager_id = %s 
+                        OR pm.user_id = %s
+                    )
+                """)
+                params.extend([user_id, user_id])
+            elif user_role == 'member':
+                # Member access: visible to manager AND team member
+                access_conditions.append("""
+                    dr.visible_to_manager = TRUE AND (
+                        dr.project_id IS NULL 
+                        OR pm.user_id = %s
+                    )
+                """)
+                params.append(user_id)
+            
+            query += " AND (" + " OR ".join(access_conditions) + ")"
+            
+            cursor.execute(query, tuple(params))
+            return cursor.fetchone()
+        finally:
+            conn.close()
+    
+    def get_daily_reports_for_user_role(self, user_id, org_id, user_role):
+        """Get daily reports based on user role and project access"""
+        conn = self.get_connection()
+        if not conn:
+            return []
+        
+        try:
+            cursor = conn.cursor(pymysql.cursors.DictCursor)
+            
+            if user_role == 'admin':
+                # Admins can see all reports visible to them
+                cursor.execute("""
+                    SELECT dr.*, u.full_name as user_name, p.name as project_name
+                    FROM daily_reports dr
+                    JOIN users u ON dr.user_id = u.id
+                    LEFT JOIN projects p ON dr.project_id = p.id
+                    WHERE dr.organization_id = %s AND dr.visible_to_admin = TRUE
+                    ORDER BY dr.report_date DESC, dr.created_at DESC
+                """, (org_id,))
+            elif user_role == 'manager':
+                # Managers can see reports visible to them, plus reports from projects they manage or are team members of
+                cursor.execute("""
+                    SELECT DISTINCT dr.*, u.full_name as user_name, p.name as project_name
+                    FROM daily_reports dr
+                    JOIN users u ON dr.user_id = u.id
+                    LEFT JOIN projects p ON dr.project_id = p.id
+                    LEFT JOIN project_members pm ON dr.project_id = pm.project_id AND pm.user_id = %s
+                    WHERE dr.organization_id = %s 
+                      AND (dr.visible_to_manager = TRUE 
+                           OR (dr.project_id IS NOT NULL AND (p.assigned_manager_id = %s OR pm.user_id IS NOT NULL)))
+                    ORDER BY dr.report_date DESC, dr.created_at DESC
+                """, (user_id, org_id, user_id))
+            else:
+                # Regular members can see their own reports, plus reports from projects they're assigned to
+                cursor.execute("""
+                    SELECT DISTINCT dr.*, u.full_name as user_name, p.name as project_name
+                    FROM daily_reports dr
+                    JOIN users u ON dr.user_id = u.id
+                    LEFT JOIN projects p ON dr.project_id = p.id
+                    LEFT JOIN project_members pm ON dr.project_id = pm.project_id
+                    WHERE dr.organization_id = %s 
+                      AND (dr.user_id = %s 
+                           OR (dr.visible_to_manager = TRUE AND dr.project_id IS NOT NULL AND pm.user_id = %s))
+                    ORDER BY dr.report_date DESC, dr.created_at DESC
+                """, (org_id, user_id, user_id))
+            
+            return cursor.fetchall()
+        finally:
+            conn.close()

@@ -1313,6 +1313,110 @@ def generate_notifications():
     
     return redirect(request.referrer or url_for('dashboard'))
 
+############################## Daily Report Routes
+@app.route('/daily-reports')
+@login_required
+def daily_reports():
+    """Show daily reports page based on user role and project access"""
+    user_role = session['user_role']
+    org_id = session['organization_id']
+    user_id = session['user_id']
+    
+    # Use the enhanced method that considers project access
+    reports = db.get_daily_reports_for_user_role(user_id, org_id, user_role)
+    
+    return render_template('daily_reports/list.html', reports=reports, user_role=user_role)
+
+@app.route('/daily-reports/new', methods=['GET', 'POST'])
+@login_required
+def new_daily_report():
+    """Create new daily report"""
+    if request.method == 'POST':
+        data = {
+            'user_id': session['user_id'],
+            'organization_id': session['organization_id'],
+            'project_id': request.form.get('project_id') or None,
+            'report_date': request.form['report_date'],
+            'work_title': request.form['work_title'],
+            'work_description': request.form['work_description'],
+            'status': request.form['status'],
+            'discussion': request.form['discussion'],
+            'visible_to_manager': 'visible_to_manager' in request.form,
+            'visible_to_admin': 'visible_to_admin' in request.form
+        }
+        
+        try:
+            report_id = db.create_daily_report(data)
+            if report_id:
+                flash('Daily report submitted successfully!', 'success')
+                return redirect(url_for('daily_reports'))
+            else:
+                flash('Failed to submit daily report.', 'error')
+        except Exception as e:
+            flash(f'Error submitting report: {str(e)}', 'error')
+    
+    # Get current user info and available projects for the form
+    user = db.get_user_by_id(session['user_id'])
+    projects = db.get_user_projects(session['user_id'], session['organization_id'])
+    today = datetime.now().strftime('%Y-%m-%d')
+    
+    return render_template('daily_reports/new.html', user=user, projects=projects, today=today)
+
+@app.route('/daily-reports/<int:report_id>')
+@login_required
+def view_daily_report(report_id):
+    """View a specific daily report"""
+    user_id = session['user_id']
+    org_id = session['organization_id']
+    user_role = session['user_role']  # Get user role from session
+    
+    report = db.get_daily_report_by_id(report_id, user_id, org_id, user_role)
+    
+    if not report:
+        flash('Daily report not found or access denied.', 'error')
+        return redirect(url_for('daily_reports'))
+    
+    return render_template('daily_reports/view.html', report=report)
+
+@app.route('/daily-reports/filter', methods=['POST'])
+@login_required
+def filter_daily_reports():
+    """Filter daily reports by date range"""
+    start_date = request.form.get('start_date')
+    end_date = request.form.get('end_date')
+    user_role = session['user_role']
+    org_id = session['organization_id']
+    user_id = session['user_id']
+    
+    if not start_date or not end_date:
+        flash('Please select both start and end dates.', 'error')
+        return redirect(url_for('daily_reports'))
+    
+    # Get all reports for the user role first, then filter by date
+    all_reports = db.get_daily_reports_for_user_role(user_id, org_id, user_role)
+    
+    # Filter by date range
+    filtered_reports = []
+    for report in all_reports:
+        if report['report_date']:
+            report_date = report['report_date']
+            if isinstance(report_date, str):
+                report_date = datetime.strptime(report_date, '%Y-%m-%d').date()
+            elif hasattr(report_date, 'date'):
+                report_date = report_date.date()
+            
+            start_date_obj = datetime.strptime(start_date, '%Y-%m-%d').date()
+            end_date_obj = datetime.strptime(end_date, '%Y-%m-%d').date()
+            
+            if start_date_obj <= report_date <= end_date_obj:
+                filtered_reports.append(report)
+    
+    return render_template('daily_reports/list.html', 
+                         reports=filtered_reports, 
+                         user_role=user_role,
+                         start_date=start_date,
+                         end_date=end_date)
+
 # Error handlers
 @app.errorhandler(404)
 def not_found_error(error):

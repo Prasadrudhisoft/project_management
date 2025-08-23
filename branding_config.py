@@ -3,7 +3,7 @@
 
 # Company Information
 COMPANY_NAME = "Rudhisoft"  # Change this to your company name
-APP_NAME = "RudhiSphere - All project in one sphere"  # Full application name
+APP_NAME = "RudhiManage"  # Full application name
 TAGLINE = "made by razi and om "
 
 # Contact Information

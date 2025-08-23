@@ -220,23 +220,60 @@ COMMENT='Project tasks';
 DROP TABLE IF EXISTS `task_comments`;
 CREATE TABLE `task_comments` (
     `id` INT AUTO_INCREMENT PRIMARY KEY,
-    `task_id` INT NOT NULL,
-    `user_id` INT NOT NULL,
-    `content` TEXT NOT NULL COMMENT 'Comment content',
+    `task_id` INT NOT NULL COMMENT 'Reference to task',
+    `user_id` INT NOT NULL COMMENT 'User who made comment',
+    `comment` TEXT NOT NULL COMMENT 'Comment text',
     `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     
     -- Foreign key constraints
     CONSTRAINT `fk_task_comments_task` FOREIGN KEY (`task_id`) 
         REFERENCES `tasks`(`id`) ON DELETE CASCADE,
     CONSTRAINT `fk_task_comments_user` FOREIGN KEY (`user_id`) 
-        REFERENCES `users`(`id`) ON DELETE CASCADE,
-    
+        REFERENCES `users`(`id`) ON DELETE RESTRICT,
+        
     -- Indexes
     INDEX `idx_task_comments_task` (`task_id`),
     INDEX `idx_task_comments_user` (`user_id`),
     INDEX `idx_task_comments_created` (`created_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci 
-COMMENT='Task comments';
+COMMENT='Task comments and discussions';
+
+-- =====================================================
+-- 9. DAILY REPORTS TABLE
+-- =====================================================
+DROP TABLE IF EXISTS `daily_reports`;
+CREATE TABLE `daily_reports` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `user_id` INT NOT NULL COMMENT 'User who submitted the report',
+    `organization_id` INT NOT NULL COMMENT 'Reference to organization',
+    `project_id` INT COMMENT 'Reference to project (optional)',
+    `report_date` DATE NOT NULL COMMENT 'Date of the report',
+    `work_title` VARCHAR(255) NOT NULL COMMENT 'Title of work done',
+    `work_description` TEXT COMMENT 'Detailed description of work',
+    `status` ENUM('completed', 'in_progress', 'pending', 'blocked') DEFAULT 'completed' COMMENT 'Work status',
+    `discussion` TEXT COMMENT 'Any discussions or notes',
+    `visible_to_manager` BOOLEAN DEFAULT FALSE COMMENT 'Visible to managers',
+    `visible_to_admin` BOOLEAN DEFAULT FALSE COMMENT 'Visible to admins',
+    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    
+    -- Foreign key constraints
+    CONSTRAINT `fk_daily_reports_user` FOREIGN KEY (`user_id`) 
+        REFERENCES `users`(`id`) ON DELETE CASCADE,
+    CONSTRAINT `fk_daily_reports_organization` FOREIGN KEY (`organization_id`) 
+        REFERENCES `organizations`(`id`) ON DELETE CASCADE,
+    CONSTRAINT `fk_daily_reports_project` FOREIGN KEY (`project_id`) 
+        REFERENCES `projects`(`id`) ON DELETE SET NULL,
+        
+    -- Indexes
+    INDEX `idx_daily_reports_user` (`user_id`),
+    INDEX `idx_daily_reports_organization` (`organization_id`),
+    INDEX `idx_daily_reports_project` (`project_id`),
+    INDEX `idx_daily_reports_date` (`report_date`),
+    INDEX `idx_daily_reports_manager` (`visible_to_manager`),
+    INDEX `idx_daily_reports_admin` (`visible_to_admin`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci 
+COMMENT='Daily work reports submitted by users';
 
 -- =====================================================
 -- 9. MESSAGES TABLE
@@ -332,8 +369,12 @@ INSERT INTO `project_members` (`project_id`, `user_id`, `role`) VALUES
 (1, 3, 'member');
 
 -- Insert sample task comment
-INSERT INTO `task_comments` (`task_id`, `user_id`, `content`) VALUES
+INSERT INTO `task_comments` (`task_id`, `user_id`, `comment`) VALUES
 (1, 2, 'Started working on the project structure. Setting up the basic folders and documentation.');
+
+-- Insert sample daily report
+INSERT INTO `daily_reports` (`user_id`, `organization_id`, `project_id`, `report_date`, `work_title`, `work_description`, `status`, `visible_to_manager`, `visible_to_admin`) VALUES
+(2, 1, 1, '2025-02-28', 'Project Planning', 'Planning and discussing the project structure and requirements.', 'completed', TRUE, FALSE);
 
 -- Insert sample message
 INSERT INTO `messages` (`subject`, `content`, `sender_id`, `recipient_id`, `project_id`) VALUES
