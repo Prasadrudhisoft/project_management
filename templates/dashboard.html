@@ -4,20 +4,65 @@
 
 {% block extra_css %}
 <style>
-    /* Dashboard-specific responsive styles */
+    /* Enhanced Dashboard Styling - Modern & Attractive */
     
-    /* CSS Variables for Dashboard Theme */
+    /* CSS Variables for Enhanced Theme */
     :root {
-        --dashboard-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        --stat-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-        --card-hover-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        --success-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        --warning-gradient: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+        --info-gradient: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+        --danger-gradient: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
+        
+        --card-shadow: 0 8px 32px rgba(31, 38, 135, 0.15);
+        --card-hover-shadow: 0 15px 35px rgba(31, 38, 135, 0.2);
+        --card-border-radius: 20px;
+        --transition-smooth: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        
+        --bg-light: #f8fafc;
+        --bg-gradient: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        --text-primary: #2d3748;
+        --text-secondary: #4a5568;
+        --text-muted: #718096;
     }
     
-    /* Page Animations */
+    /* Body & Layout Enhancement */
+    body {
+        background: var(--bg-gradient);
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        color: var(--text-primary);
+        min-height: 100vh;
+        line-height: 1.6;
+    }
+    
+    /* Add subtle pattern overlay */
+    body::before {
+        content: '';
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image: 
+            radial-gradient(circle at 25% 25%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+            radial-gradient(circle at 75% 75%, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
+        pointer-events: none;
+        z-index: -1;
+    }
+    
+    /* Container & Layout */
+    .container-fluid {
+        max-width: 100%;
+        padding: 0 24px;
+        margin: 0 auto;
+    }
+    
+    /* Animation Keyframes */
     @keyframes slideInUp {
         from {
             opacity: 0;
-            transform: translateY(30px);
+            transform: translateY(40px);
         }
         to {
             opacity: 1;
@@ -28,7 +73,7 @@
     @keyframes fadeInScale {
         from {
             opacity: 0;
-            transform: scale(0.95);
+            transform: scale(0.92);
         }
         to {
             opacity: 1;
@@ -37,29 +82,71 @@
     }
     
     @keyframes pulse {
-        0% { box-shadow: 0 0 0 0 rgba(13, 110, 253, 0.4); }
-        70% { box-shadow: 0 0 0 10px rgba(13, 110, 253, 0); }
-        100% { box-shadow: 0 0 0 0 rgba(13, 110, 253, 0); }
+        0%, 100% { 
+            box-shadow: 0 0 0 0 rgba(102, 126, 234, 0.4);
+        }
+        50% { 
+            box-shadow: 0 0 0 20px rgba(102, 126, 234, 0);
+        }
     }
     
-    /* Apply animations to dashboard sections */
+    @keyframes shimmer {
+        0% {
+            transform: translateX(-100%);
+        }
+        100% {
+            transform: translateX(100%);
+        }
+    }
+    
+    /* Dashboard Section Animations */
     .dashboard-section {
-        animation: slideInUp 0.6s ease-out;
+        animation: slideInUp 0.8s ease-out;
+        animation-fill-mode: both;
     }
     
-    .dashboard-section:nth-child(2) { animation-delay: 0.1s; }
-    .dashboard-section:nth-child(3) { animation-delay: 0.2s; }
-    .dashboard-section:nth-child(4) { animation-delay: 0.3s; }
-    .dashboard-section:nth-child(5) { animation-delay: 0.4s; }
+    .dashboard-section:nth-child(1) { animation-delay: 0.1s; }
+    .dashboard-section:nth-child(2) { animation-delay: 0.2s; }
+    .dashboard-section:nth-child(3) { animation-delay: 0.3s; }
+    .dashboard-section:nth-child(4) { animation-delay: 0.4s; }
+    .dashboard-section:nth-child(5) { animation-delay: 0.5s; }
     
-    /* Enhanced Dashboard Cards */
+    /* Enhanced Header Styling */
+    .dashboard-header {
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.7) 100%);
+        backdrop-filter: blur(20px);
+        border-radius: var(--card-border-radius);
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: var(--card-shadow);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+    
+    .dashboard-header h1 {
+        font-size: 2.5rem;
+        font-weight: 700;
+        background: var(--primary-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 0.5rem;
+    }
+    
+    .dashboard-header p {
+        color: var(--text-muted);
+        font-size: 1.1rem;
+        margin: 0;
+    }
+    
+    /* Enhanced Cards */
     .dashboard-card {
-        background: white;
-        border: none;
-        border-radius: 16px;
-        box-shadow: var(--shadow-sm);
+        background: linear-gradient(145deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.8) 100%);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        border-radius: var(--card-border-radius);
+        box-shadow: var(--card-shadow);
         margin-bottom: 1.5rem;
-        transition: all 0.3s ease;
+        transition: var(--transition-smooth);
         position: relative;
         overflow: hidden;
         animation: fadeInScale 0.6s ease-out;
@@ -72,27 +159,29 @@
         left: -100%;
         width: 100%;
         height: 100%;
-        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
-        transition: left 0.5s;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+        transition: left 0.6s ease-in-out;
         z-index: 1;
     }
     
     .dashboard-card:hover {
-        transform: translateY(-4px);
+        transform: translateY(-8px) scale(1.02);
         box-shadow: var(--card-hover-shadow);
+        border-color: rgba(102, 126, 234, 0.3);
     }
     
     .dashboard-card:hover::before {
         left: 100%;
     }
     
-    /* Stat Cards with Enhanced Gradients */
+    /* Enhanced Stat Cards */
     .stat-card {
         position: relative;
         overflow: hidden;
         color: white;
-        border-radius: 16px;
-        box-shadow: var(--stat-shadow);
+        border-radius: var(--card-border-radius);
+        box-shadow: var(--card-shadow);
+        transition: var(--transition-smooth);
     }
     
     .stat-card::after {
@@ -102,93 +191,181 @@
         right: -50%;
         width: 200%;
         height: 200%;
-        background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
-        animation: pulse 3s ease-in-out infinite;
+        background: radial-gradient(circle, rgba(255, 255, 255, 0.15) 0%, transparent 70%);
+        animation: pulse 4s ease-in-out infinite;
         pointer-events: none;
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-5px) scale(1.03);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+    }
+    
+    .stat-card:hover::after {
+        animation: pulse 2s ease-in-out infinite;
     }
     
     .stat-card-content {
         position: relative;
         z-index: 2;
-        padding: 1.5rem;
+        padding: 2rem;
         display: flex;
         justify-content: space-between;
         align-items: center;
     }
     
     .stat-info h3 {
-        font-size: 2.5rem;
-        font-weight: 700;
+        font-size: 3rem;
+        font-weight: 800;
         margin: 0;
         line-height: 1;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
     
     .stat-info p {
-        font-size: 1rem;
-        margin: 0.5rem 0 0 0;
-        opacity: 0.9;
+        font-size: 1.1rem;
+        margin: 0.75rem 0 0 0;
+        opacity: 0.95;
         font-weight: 500;
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
     }
     
     .stat-icon {
-        font-size: 3.5rem;
-        opacity: 0.3;
-        transition: all 0.3s ease;
+        font-size: 4rem;
+        opacity: 0.2;
+        transition: var(--transition-smooth);
+        filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
     }
     
     .stat-card:hover .stat-icon {
-        opacity: 0.5;
-        transform: scale(1.1);
+        opacity: 0.4;
+        transform: scale(1.1) rotate(5deg);
     }
     
-    /* Gradient backgrounds for stat cards */
+    /* Beautiful Gradient Backgrounds for Stat Cards */
     .bg-gradient-primary {
-        background: linear-gradient(135deg, #0d6efd 0%, #667eea 100%);
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        position: relative;
     }
     
     .bg-gradient-success {
-        background: linear-gradient(135deg, #198754 0%, #20c997 100%);
+        background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        position: relative;
     }
     
     .bg-gradient-info {
-        background: linear-gradient(135deg, #0dcaf0 0%, #0077ff 100%);
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        position: relative;
     }
     
     .bg-gradient-warning {
-        background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%);
-        color: #212529 !important;
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        color: white !important;
+        position: relative;
     }
     
     .bg-gradient-warning .stat-icon,
     .bg-gradient-warning .stat-info {
-        color: #212529 !important;
+        color: white !important;
     }
     
-    /* Table Enhancements */
+    /* Card Header Enhancement */
+    .card-header {
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        padding: 1.5rem 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-radius: var(--card-border-radius) var(--card-border-radius) 0 0;
+        backdrop-filter: blur(10px);
+    }
+    
+    .card-header h5 {
+        margin: 0;
+        font-weight: 600;
+        color: var(--text-primary);
+        font-size: 1.25rem;
+    }
+    
+    .card-body {
+        padding: 2rem;
+        position: relative;
+    }
+    
+    /* Table Enhancement */
     .dashboard-table {
-        font-size: 0.9rem;
+        font-size: 0.95rem;
+        border-collapse: separate;
+        border-spacing: 0;
     }
     
-    .dashboard-table .avatar-circle {
-        margin-right: 0.75rem;
-        flex-shrink: 0;
+    .dashboard-table tbody tr {
+        transition: var(--transition-smooth);
+        border: none;
     }
     
+    .dashboard-table tbody tr:hover {
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+        transform: translateX(5px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+    }
+    
+    .dashboard-table tbody tr td {
+        padding: 1.25rem;
+        border: none;
+        vertical-align: middle;
+    }
+    
+    /* Enhanced Task/Project Items */
     .task-item, .project-item {
         display: flex;
         align-items: center;
-        gap: 0.75rem;
+        gap: 1rem;
+        width: 100%;
+    }
+    
+    .avatar-circle {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background: var(--primary-gradient);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 1.25rem;
+        flex-shrink: 0;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    
+    .item-content {
+        flex: 1;
+        min-width: 0;
     }
     
     .item-content h6 {
-        margin: 0 0 0.25rem 0;
-        font-size: 0.95rem;
+        margin: 0 0 0.5rem 0;
+        font-size: 1rem;
         font-weight: 600;
+        color: var(--text-primary);
+    }
+    
+    .item-content h6 a {
+        text-decoration: none;
+        color: inherit;
+        transition: var(--transition-smooth);
+    }
+    
+    .item-content h6 a:hover {
+        color: #667eea;
     }
     
     .item-content small {
-        color: var(--gray-500);
-        font-size: 0.8rem;
+        color: var(--text-muted);
+        font-size: 0.85rem;
+        display: block;
     }
     
     .item-badges {
@@ -196,165 +373,193 @@
         gap: 0.5rem;
         flex-wrap: wrap;
         align-items: center;
+        flex-shrink: 0;
     }
     
-    /* Alert Enhancements */
-    .dashboard-alert {
-        border-radius: 12px;
-        border: none;
-        box-shadow: var(--shadow-sm);
-        margin-bottom: 1.5rem;
-    }
-    
-    .alert-info {
-        background: linear-gradient(135deg, #e1f5fe 0%, #b3e5fc 100%);
-        color: #0d47a1;
-        border-left: 4px solid #2196f3;
-    }
-    
-    .alert-warning {
-        background: linear-gradient(135deg, #fff8e1 0%, #ffecb3 100%);
-        color: #e65100;
-        border-left: 4px solid #ff9800;
-    }
-    
-    .task-due-card, .overdue-card {
-        background: white;
-        border: 1px solid var(--gray-200);
-        border-radius: 12px;
-        padding: 1rem;
-        margin-bottom: 1rem;
-        transition: all 0.3s ease;
-        box-shadow: var(--shadow-sm);
-    }
-    
-    .task-due-card:hover, .overdue-card:hover {
-        transform: translateY(-2px);
-        box-shadow: var(--shadow-md);
-    }
-    
-    .task-due-card h6, .overdue-card h6 {
-        margin: 0 0 0.5rem 0;
+    /* Enhanced Badges */
+    .badge {
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
         font-weight: 600;
+        border: none;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        transition: var(--transition-smooth);
     }
     
-    /* Quick Actions Section */
-    .quick-actions {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 0.75rem;
+    .badge:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
     }
     
-    .quick-actions .btn {
-        flex: 1;
-        min-width: 140px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 0.5rem;
-        padding: 0.75rem 1rem;
-        font-weight: 500;
-        white-space: nowrap;
-    }
-    
-    /* Empty State Styling */
-    .empty-state {
-        text-align: center;
-        padding: 3rem 1rem;
-        color: var(--gray-500);
-    }
-    
-    .empty-state i {
-        font-size: 4rem;
-        margin-bottom: 1rem;
-        color: var(--gray-400);
-    }
-    
-    .empty-state p {
-        font-size: 1.1rem;
-        margin-bottom: 1.5rem;
-    }
-    
-    /* Badge Priority Colors */
+    /* Priority Badges */
     .badge-priority-high {
-        background: linear-gradient(135deg, #dc3545, #c82333);
+        background: linear-gradient(135deg, #ff6b6b, #ee5a52);
         color: white;
     }
     
     .badge-priority-medium {
-        background: linear-gradient(135deg, #ffc107, #e0a800);
-        color: #212529;
+        background: linear-gradient(135deg, #feca57, #ff9ff3);
+        color: white;
     }
     
     .badge-priority-low {
-        background: linear-gradient(135deg, #6c757d, #5a6268);
+        background: linear-gradient(135deg, #48dbfb, #0abde3);
         color: white;
     }
     
     /* Status Badges */
     .badge.bg-success {
-        background: linear-gradient(135deg, #28a745, #20c997) !important;
+        background: linear-gradient(135deg, #00d2d3, #54a0ff) !important;
     }
     
     .badge.bg-primary {
-        background: linear-gradient(135deg, #007bff, #6610f2) !important;
+        background: linear-gradient(135deg, #667eea, #764ba2) !important;
     }
     
     .badge.bg-secondary {
-        background: linear-gradient(135deg, #6c757d, #5a6268) !important;
+        background: linear-gradient(135deg, #74b9ff, #0984e3) !important;
     }
     
-    /* Responsive Design */
-    
-    /* Large screens */
-    @media (min-width: 1200px) {
-        .stat-info h3 {
-            font-size: 3rem;
-        }
-        
-        .stat-icon {
-            font-size: 4rem;
-        }
-        
-        .stat-card-content {
-            padding: 2rem;
-        }
+    /* Enhanced Buttons */
+    .btn {
+        padding: 0.75rem 1.5rem;
+        border-radius: 12px;
+        font-weight: 600;
+        transition: var(--transition-smooth);
+        border: none;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        position: relative;
+        overflow: hidden;
     }
     
-    /* Medium screens */
-    @media (max-width: 991.98px) {
-        .dashboard-card .card-header {
-            flex-direction: column;
-            align-items: flex-start !important;
-            gap: 1rem;
-        }
-        
-        .dashboard-card .card-header h5 {
-            margin-bottom: 0;
-        }
-        
-        .dashboard-card .card-header .btn {
-            width: auto;
-            min-width: 120px;
-        }
-        
-        .quick-actions {
-            flex-direction: column;
-        }
-        
-        .quick-actions .btn {
-            width: 100%;
-            min-width: unset;
-        }
-        
-        .item-badges {
-            justify-content: flex-start;
-            margin-top: 0.5rem;
-        }
+    .btn::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: left 0.5s;
     }
     
-    /* Small screens */
-    @media (max-width: 767.98px) {
+    .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+    }
+    
+    .btn:hover::before {
+        left: 100%;
+    }
+    
+    .btn-outline-primary {
+        background: transparent;
+        border: 2px solid #667eea;
+        color: #667eea;
+    }
+    
+    .btn-outline-primary:hover {
+        background: var(--primary-gradient);
+        color: white;
+        border-color: transparent;
+    }
+    
+    /* Alert Enhancement */
+    .dashboard-alert {
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.8) 100%);
+        backdrop-filter: blur(20px);
+        border-radius: var(--card-border-radius);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        box-shadow: var(--card-shadow);
+        margin-bottom: 2rem;
+        padding: 2rem;
+    }
+    
+    .alert-info {
+        border-left: 4px solid #667eea;
+    }
+    
+    .alert-warning {
+        border-left: 4px solid #f093fb;
+    }
+    
+    .task-due-card, .overdue-card {
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.7) 100%);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        border-radius: 16px;
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+        transition: var(--transition-smooth);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    
+    .task-due-card:hover, .overdue-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+        border-color: rgba(102, 126, 234, 0.3);
+    }
+    
+    /* Quick Actions Enhancement */
+    .quick-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+    
+    .quick-actions .btn {
+        flex: 1;
+        min-width: 160px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.75rem;
+        padding: 1rem 1.5rem;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+    
+    /* Empty State Enhancement */
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        color: var(--text-muted);
+    }
+    
+    .empty-state i {
+        font-size: 5rem;
+        margin-bottom: 1.5rem;
+        color: var(--text-muted);
+        opacity: 0.5;
+    }
+    
+    .empty-state p {
+        font-size: 1.2rem;
+        margin-bottom: 2rem;
+    }
+    
+    /* Responsive Design - Mobile First Approach */
+    
+    /* Extra Small Devices */
+    @media (max-width: 575.98px) {
+        .container-fluid {
+            padding: 0 16px;
+        }
+        
+        .dashboard-header {
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .dashboard-header h1 {
+            font-size: 1.75rem;
+        }
+        
+        .dashboard-header p {
+            font-size: 1rem;
+        }
+        
         .stat-card-content {
             padding: 1.25rem;
             flex-direction: column;
@@ -368,145 +573,208 @@
         
         .stat-icon {
             font-size: 2.5rem;
-            opacity: 0.4;
+            opacity: 0.3;
         }
         
-        .dashboard-table {
-            font-size: 0.85rem;
+        .card-body {
+            padding: 1.25rem;
+        }
+        
+        .card-header {
+            padding: 1.25rem;
+            flex-direction: column;
+            align-items: flex-start !important;
+            gap: 1rem;
+        }
+        
+        .quick-actions {
+            flex-direction: column;
+        }
+        
+        .quick-actions .btn {
+            width: 100%;
+            min-width: unset;
         }
         
         .task-item, .project-item {
             flex-direction: column;
             align-items: flex-start;
-            gap: 0.5rem;
-        }
-        
-        .item-content {
-            width: 100%;
+            gap: 1rem;
         }
         
         .item-badges {
-            justify-content: flex-start;
             width: 100%;
+            justify-content: flex-start;
         }
         
         .empty-state {
-            padding: 2rem 1rem;
-        }
-        
-        .empty-state i {
-            font-size: 3rem;
-        }
-        
-        .task-due-card, .overdue-card {
-            padding: 0.875rem;
-        }
-        
-        .dashboard-alert .row > [class*='col-'] {
-            margin-bottom: 1rem;
-        }
-        
-        .dashboard-alert .row > [class*='col-']:last-child {
-            margin-bottom: 0;
-        }
-    }
-    
-    /* Extra small screens */
-    @media (max-width: 575.98px) {
-        .dashboard-section h1 {
-            font-size: 1.5rem;
-        }
-        
-        .stat-card-content {
-            padding: 1rem;
-        }
-        
-        .stat-info h3 {
-            font-size: 1.75rem;
-        }
-        
-        .stat-info p {
-            font-size: 0.9rem;
-        }
-        
-        .stat-icon {
-            font-size: 2rem;
-        }
-        
-        .dashboard-card .card-body {
-            padding: 1rem;
-        }
-        
-        .dashboard-card .card-header {
-            padding: 1rem;
+            padding: 3rem 1rem;
         }
         
         .dashboard-table {
-            font-size: 0.8rem;
-        }
-        
-        .item-content h6 {
-            font-size: 0.9rem;
-        }
-        
-        .item-content small {
-            font-size: 0.75rem;
-        }
-        
-        .badge {
-            font-size: 0.7rem;
-            padding: 0.25em 0.5em;
-        }
-        
-        .empty-state {
-            padding: 1.5rem 0.5rem;
-        }
-        
-        .empty-state p {
-            font-size: 1rem;
-        }
-        
-        .alert {
-            padding: 1rem;
-        }
-        
-        .task-due-card, .overdue-card {
-            padding: 0.75rem;
-        }
-    }
-    
-    /* Ultra small screens */
-    @media (max-width: 359.98px) {
-        .stat-info h3 {
-            font-size: 1.5rem;
-        }
-        
-        .stat-info p {
-            font-size: 0.8rem;
-        }
-        
-        .item-content h6 {
             font-size: 0.85rem;
         }
         
-        .quick-actions .btn {
-            font-size: 0.8rem;
-            padding: 0.625rem 0.875rem;
+        .dashboard-table tbody tr td {
+            padding: 1rem 0.75rem;
         }
     }
     
-    /* Print styles */
+    /* Small Devices */
+    @media (min-width: 576px) and (max-width: 767.98px) {
+        .stat-card-content {
+            padding: 1.5rem;
+        }
+        
+        .stat-info h3 {
+            font-size: 2.25rem;
+        }
+        
+        .stat-icon {
+            font-size: 3rem;
+        }
+        
+        .quick-actions .btn {
+            min-width: 140px;
+        }
+    }
+    
+    /* Medium Devices */
+    @media (min-width: 768px) and (max-width: 991.98px) {
+        .card-header {
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        
+        .quick-actions {
+            justify-content: center;
+        }
+        
+        .task-item, .project-item {
+            flex-wrap: wrap;
+        }
+        
+        .item-badges {
+            margin-top: 0.5rem;
+        }
+    }
+    
+    /* Large Devices */
+    @media (min-width: 992px) and (max-width: 1199.98px) {
+        .stat-info h3 {
+            font-size: 2.75rem;
+        }
+        
+        .stat-icon {
+            font-size: 3.75rem;
+        }
+    }
+    
+    /* Extra Large Devices */
+    @media (min-width: 1200px) {
+        .container-fluid {
+            max-width: 1400px;
+        }
+        
+        .stat-info h3 {
+            font-size: 3.25rem;
+        }
+        
+        .stat-icon {
+            font-size: 4.25rem;
+        }
+        
+        .stat-card-content {
+            padding: 2.5rem;
+        }
+    }
+    
+    /* Ultra Wide Displays */
+    @media (min-width: 1400px) {
+        .container-fluid {
+            max-width: 1600px;
+            padding: 0 32px;
+        }
+    }
+    
+    /* Grid System */
+    .row {
+        display: flex;
+        flex-wrap: wrap;
+        margin: 0 -15px;
+    }
+    
+    [class*="col-"] {
+        padding: 0 15px;
+        margin-bottom: 1rem;
+    }
+    
+    .col-12 { flex: 0 0 100%; max-width: 100%; }
+    .col-lg-3 { flex: 0 0 25%; max-width: 25%; }
+    .col-lg-6 { flex: 0 0 50%; max-width: 50%; }
+    .col-md-6 { flex: 0 0 50%; max-width: 50%; }
+    .col-xl-6 { flex: 0 0 50%; max-width: 50%; }
+    
+    /* Responsive Grid Adjustments */
+    @media (max-width: 1199.98px) {
+        .col-lg-3 { flex: 0 0 50%; max-width: 50%; }
+    }
+    
+    @media (max-width: 991.98px) {
+        .col-lg-3, .col-lg-6 { flex: 0 0 100%; max-width: 100%; }
+        .col-xl-6 { flex: 0 0 100%; max-width: 100%; }
+    }
+    
+    @media (max-width: 767.98px) {
+        .col-md-6 { flex: 0 0 100%; max-width: 100%; }
+    }
+    
+    /* Utility Classes */
+    .mb-3 { margin-bottom: 1rem; }
+    .mb-4 { margin-bottom: 1.5rem; }
+    .me-2 { margin-right: 0.5rem; }
+    .text-muted { color: var(--text-muted) !important; }
+    .text-center { text-align: center; }
+    .text-decoration-none { text-decoration: none !important; }
+    .text-primary { color: #667eea !important; }
+    .text-danger { color: #ff6b6b !important; }
+    .text-info { color: #667eea !important; }
+    .fw-bold { font-weight: 700 !important; }
+    .d-block { display: block !important; }
+    .ms-2 { margin-left: 0.5rem; }
+    
+    /* Loading States */
+    .btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none !important;
+    }
+    
+    .loading {
+        opacity: 0.7;
+        pointer-events: none;
+    }
+    
+    /* Focus States for Accessibility */
+    .btn:focus,
+    .dashboard-card:focus-within {
+        outline: 2px solid #667eea;
+        outline-offset: 2px;
+    }
+    
+    /* Print Styles */
     @media print {
+        body {
+            background: white !important;
+        }
+        
         .dashboard-card, .stat-card {
             break-inside: avoid;
             box-shadow: none !important;
+            border: 1px solid #ddd !important;
         }
         
         .btn {
-            display: none !important;
-        }
-        
-        .navbar {
             display: none !important;
         }
     }
@@ -516,8 +784,10 @@
 {% block content %}
 <div class="row dashboard-section">
     <div class="col-12">
-        <h1 class="mb-3"><i class="fas fa-tachometer-alt me-2"></i>Admin Dashboard</h1>
-        <p class="text-muted mb-4">Welcome back, {{ session.user_name }}! Here's your project overview.</p>
+        <div class="dashboard-header">
+            <h1><i class="fas fa-tachometer-alt me-2"></i>Admin Dashboard</h1>
+            <p>Welcome back, {{ session.user_name }}! Here's your project overview.</p>
+        </div>
     </div>
 </div>
 
@@ -803,104 +1073,247 @@
 {% endif %}
 
 <script>
-// Dashboard-specific JavaScript for enhanced interactivity
+// Enhanced Dashboard JavaScript for improved interactivity
 document.addEventListener('DOMContentLoaded', function() {
-    // Add loading states for quick action buttons
+    // Initialize animations with stagger effect
+    const dashboardSections = document.querySelectorAll('.dashboard-section');
+    dashboardSections.forEach((section, index) => {
+        section.style.animationDelay = `${index * 0.1}s`;
+    });
+    
+    // Enhanced loading states for quick action buttons
     const quickActionBtns = document.querySelectorAll('.quick-actions .btn');
     quickActionBtns.forEach(btn => {
-        btn.addEventListener('click', function() {
-            const originalText = this.innerHTML;
-            this.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Loading...';
-            this.disabled = true;
+        btn.addEventListener('click', function(e) {
+            const originalContent = this.innerHTML;
+            const loadingContent = `<i class="fas fa-spinner fa-spin me-2"></i>Loading...`;
             
-            // Re-enable button after navigation (fallback)
+            this.innerHTML = loadingContent;
+            this.disabled = true;
+            this.classList.add('loading');
+            
+            // Re-enable button after navigation timeout (fallback)
             setTimeout(() => {
-                this.innerHTML = originalText;
-                this.disabled = false;
+                if (document.contains(this)) {
+                    this.innerHTML = originalContent;
+                    this.disabled = false;
+                    this.classList.remove('loading');
+                }
             }, 3000);
         });
     });
     
-    // Auto-refresh stats every 30 seconds
-    setInterval(function() {
-        // Only refresh if page is visible
-        if (!document.hidden) {
-            fetch(window.location.href + '?ajax=1')
-                .then(response => response.json())
-                .then(data => {
-                    if (data.stats) {
-                        // Update stat numbers with animation
-                        updateStatWithAnimation('projects_total', data.stats.projects_total);
-                        updateStatWithAnimation('projects_active', data.stats.projects_active);
-                        updateStatWithAnimation('tasks_completed', data.stats.tasks_completed);
-                        updateStatWithAnimation('overdue_tasks', data.stats.overdue_tasks);
-                    }
-                })
-                .catch(error => console.log('Stats refresh failed:', error));
-        }
-    }, 30000);
-    
-    // Function to update stats with animation
-    function updateStatWithAnimation(statName, newValue) {
-        const elements = document.querySelectorAll('.stat-info h3');
-        elements.forEach(el => {
-            const parent = el.closest('.stat-card');
-            if (parent && parent.classList.contains('bg-gradient-primary') && statName === 'projects_total') {
-                animateValue(el, parseInt(el.textContent), newValue, 1000);
-            } else if (parent && parent.classList.contains('bg-gradient-success') && statName === 'projects_active') {
-                animateValue(el, parseInt(el.textContent), newValue, 1000);
-            } else if (parent && parent.classList.contains('bg-gradient-info') && statName === 'tasks_completed') {
-                animateValue(el, parseInt(el.textContent), newValue, 1000);
-            } else if (parent && parent.classList.contains('bg-gradient-warning') && statName === 'overdue_tasks') {
-                animateValue(el, parseInt(el.textContent), newValue, 1000);
-            }
-        });
-    }
-    
-    // Animate number changes
-    function animateValue(element, start, end, duration) {
-        if (start === end) return;
-        
-        const range = end - start;
-        const increment = end > start ? 1 : -1;
-        const stepTime = Math.abs(Math.floor(duration / range));
-        
-        let current = start;
-        const timer = setInterval(function() {
-            current += increment;
-            element.textContent = current;
-            if (current === end) {
-                clearInterval(timer);
-            }
-        }, stepTime);
-    }
-    
-    // Add hover effects to cards
-    const cards = document.querySelectorAll('.dashboard-card');
-    cards.forEach(card => {
+    // Enhanced hover effects for interactive elements
+    const interactiveCards = document.querySelectorAll('[data-href], .task-item, .project-item');
+    interactiveCards.forEach(card => {
         card.addEventListener('mouseenter', function() {
-            this.style.transform = 'translateY(-4px)';
+            this.style.transform = 'translateX(3px)';
+            this.style.transition = 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
         });
         
         card.addEventListener('mouseleave', function() {
-            this.style.transform = 'translateY(0)';
+            this.style.transform = 'translateX(0)';
+        });
+        
+        // Add click ripple effect
+        card.addEventListener('click', function(e) {
+            const ripple = document.createElement('div');
+            ripple.style.cssText = `
+                position: absolute;
+                border-radius: 50%;
+                background: rgba(102, 126, 234, 0.3);
+                transform: scale(0);
+                animation: ripple 0.6s linear;
+                pointer-events: none;
+            `;
+            
+            const rect = this.getBoundingClientRect();
+            const size = Math.max(rect.width, rect.height);
+            ripple.style.width = ripple.style.height = size + 'px';
+            ripple.style.left = (e.clientX - rect.left - size / 2) + 'px';
+            ripple.style.top = (e.clientY - rect.top - size / 2) + 'px';
+            
+            this.style.position = 'relative';
+            this.appendChild(ripple);
+            
+            setTimeout(() => {
+                ripple.remove();
+            }, 600);
         });
     });
     
-    // Mobile touch interactions
-    if ('ontouchstart' in window) {
-        cards.forEach(card => {
-            card.addEventListener('touchstart', function() {
-                this.style.transform = 'translateY(-2px)';
-            });
-            
-            card.addEventListener('touchend', function() {
-                setTimeout(() => {
-                    this.style.transform = 'translateY(0)';
-                }, 150);
-            });
+    // Auto-refresh stats with enhanced animations
+    let refreshInterval;
+    
+    function startStatsRefresh() {
+        refreshInterval = setInterval(function() {
+            // Only refresh if page is visible and user is active
+            if (!document.hidden && document.hasFocus()) {
+                fetch(window.location.href + '?ajax=1', {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.stats) {
+                        updateStatsWithAnimation(data.stats);
+                    }
+                })
+                .catch(error => {
+                    console.log('Stats refresh failed:', error);
+                });
+            }
+        }, 30000); // Refresh every 30 seconds
+    }
+    
+    function updateStatsWithAnimation(newStats) {
+        const statMappings = [
+            { key: 'projects_total', gradient: 'bg-gradient-primary' },
+            { key: 'projects_active', gradient: 'bg-gradient-success' },
+            { key: 'tasks_completed', gradient: 'bg-gradient-info' },
+            { key: 'overdue_tasks', gradient: 'bg-gradient-warning' }
+        ];
+        
+        statMappings.forEach(mapping => {
+            const statCard = document.querySelector(`.${mapping.gradient} .stat-info h3`);
+            if (statCard && newStats[mapping.key] !== undefined) {
+                const currentValue = parseInt(statCard.textContent) || 0;
+                const newValue = newStats[mapping.key];
+                
+                if (currentValue !== newValue) {
+                    animateStatValue(statCard, currentValue, newValue, 1000);
+                }
+            }
         });
     }
+    
+    function animateStatValue(element, startValue, endValue, duration) {
+        const startTime = performance.now();
+        
+        function updateValue(currentTime) {
+            const elapsed = currentTime - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            
+            // Use easing function for smooth animation
+            const easeOutCubic = 1 - Math.pow(1 - progress, 3);
+            const currentValue = Math.round(startValue + (endValue - startValue) * easeOutCubic);
+            
+            element.textContent = currentValue;
+            
+            // Add pulse effect during animation
+            element.style.transform = `scale(${1 + Math.sin(progress * Math.PI) * 0.1})`;
+            
+            if (progress < 1) {
+                requestAnimationFrame(updateValue);
+            } else {
+                element.style.transform = 'scale(1)';
+            }
+        }
+        
+        requestAnimationFrame(updateValue);
+    }
+    
+    // Start auto-refresh
+    startStatsRefresh();
+    
+    // Pause refresh when page is not visible
+    document.addEventListener('visibilitychange', function() {
+        if (document.hidden) {
+            clearInterval(refreshInterval);
+        } else {
+            startStatsRefresh();
+        }
+    });
+    
+    // Enhanced responsive behavior
+    function handleResize() {
+        const screenWidth = window.innerWidth;
+        const statCards = document.querySelectorAll('.stat-card-content');
+        
+        statCards.forEach(card => {
+            if (screenWidth < 576) {
+                card.classList.add('mobile-layout');
+            } else {
+                card.classList.remove('mobile-layout');
+            }
+        });
+    }
+    
+    // Initialize resize handler
+    handleResize();
+    window.addEventListener('resize', debounce(handleResize, 250));
+    
+    // Debounce function for performance
+    function debounce(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+            const later = () => {
+                clearTimeout(timeout);
+                func(...args);
+            };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+        };
+    }
+    
+    // Add keyboard navigation support
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Tab') {
+            document.body.classList.add('keyboard-navigation');
+        }
+    });
+    
+    document.addEventListener('mousedown', function() {
+        document.body.classList.remove('keyboard-navigation');
+    });
+    
+    // Performance optimization: Intersection Observer for animations
+    const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+    };
+    
+    const observer = new IntersectionObserver(function(entries) {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('animate-in');
+            }
+        });
+    }, observerOptions);
+    
+    // Observe all dashboard cards for animation
+    document.querySelectorAll('.dashboard-card').forEach(card => {
+        observer.observe(card);
+    });
+    
+    // Add CSS for intersection observer animations
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes ripple {
+            to {
+                transform: scale(4);
+                opacity: 0;
+            }
+        }
+        
+        .mobile-layout {
+            flex-direction: column !important;
+            text-align: center !important;
+            gap: 1rem !important;
+        }
+        
+        .keyboard-navigation .btn:focus,
+        .keyboard-navigation .dashboard-card:focus-within {
+            outline: 3px solid #667eea !important;
+            outline-offset: 2px !important;
+        }
+        
+        .animate-in {
+            animation: slideInUp 0.6s ease-out forwards;
+        }
+    `;
+    document.head.appendChild(style);
 });
 </script>
 {% endblock %}
