@@ -3,27 +3,34 @@
 {% block title %}Edit User - {{ config.APP_NAME }}{% endblock %}
 
 {% block content %}
-<div class="container">
+<div class="container-fluid px-3 px-md-4">
     <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="d-flex align-items-center mb-4">
-                <a href="{{ url_for('users') }}" class="btn btn-outline-secondary me-3">
+        <div class="col-12 col-lg-10 col-xl-8">
+            <!-- Header with back button - responsive layout -->
+            <div class="d-flex align-items-center mb-3 mb-md-4 flex-wrap">
+                <a href="{{ url_for('users') }}" class="btn btn-outline-secondary me-2 me-md-3 mb-2 mb-md-0">
                     <i class="fas fa-arrow-left"></i>
+                    <span class="d-none d-sm-inline ms-1">Back</span>
                 </a>
-                <h1><i class="fas fa-user-edit"></i> Edit User: {{ user.full_name }}</h1>
+                <h1 class="h3 h-md-1 mb-2 mb-md-0 flex-grow-1">
+                    <i class="fas fa-user-edit"></i> 
+                    <span class="d-inline d-sm-none">Edit User</span>
+                    <span class="d-none d-sm-inline">Edit User: {{ user.full_name }}</span>
+                </h1>
             </div>
 
-            <div class="card">
-                <div class="card-body">
+            <div class="card shadow-sm">
+                <div class="card-body p-3 p-md-4">
                     <form method="POST">
-                        <div class="row">
-                            <div class="col-md-6">
+                        <!-- Name and Email Row -->
+                        <div class="row g-3 g-md-4">
+                            <div class="col-12 col-md-6">
                                 <div class="mb-3">
-                                    <label for="full_name" class="form-label">
+                                    <label for="full_name" class="form-label fw-semibold">
                                         <i class="fas fa-user"></i> Full Name *
                                     </label>
                                     <input type="text" 
-                                           class="form-control" 
+                                           class="form-control form-control-lg" 
                                            id="full_name" 
                                            name="full_name" 
                                            required
@@ -32,13 +39,13 @@
                                 </div>
                             </div>
                             
-                            <div class="col-md-6">
+                            <div class="col-12 col-md-6">
                                 <div class="mb-3">
-                                    <label for="email" class="form-label">
+                                    <label for="email" class="form-label fw-semibold">
                                         <i class="fas fa-envelope"></i> Email Address *
                                     </label>
                                     <input type="email" 
-                                           class="form-control" 
+                                           class="form-control form-control-lg" 
                                            id="email" 
                                            name="email" 
                                            required
@@ -48,14 +55,15 @@
                             </div>
                         </div>
 
-                        <div class="row">
-                            <div class="col-md-6">
+                        <!-- Password and Phone Row -->
+                        <div class="row g-3 g-md-4">
+                            <div class="col-12 col-md-6">
                                 <div class="mb-3">
-                                    <label for="password" class="form-label">
+                                    <label for="password" class="form-label fw-semibold">
                                         <i class="fas fa-lock"></i> New Password
                                     </label>
                                     <input type="password" 
-                                           class="form-control" 
+                                           class="form-control form-control-lg" 
                                            id="password" 
                                            name="password" 
                                            minlength="6"
@@ -64,13 +72,13 @@
                                 </div>
                             </div>
                             
-                            <div class="col-md-6">
+                            <div class="col-12 col-md-6">
                                 <div class="mb-3">
-                                    <label for="phone" class="form-label">
+                                    <label for="phone" class="form-label fw-semibold">
                                         <i class="fas fa-phone"></i> Phone Number
                                     </label>
                                     <input type="tel" 
-                                           class="form-control" 
+                                           class="form-control form-control-lg" 
                                            id="phone" 
                                            name="phone"
                                            value="{{ user.phone or '' }}"
@@ -79,44 +87,48 @@
                             </div>
                         </div>
 
-                        <div class="row">
-                            <div class="col-md-6">
+                        <!-- Role and Status Row -->
+                        <div class="row g-3 g-md-4">
+                            <div class="col-12 col-md-6">
                                 <div class="mb-3">
-                                    <label for="role" class="form-label">
+                                    <label for="role" class="form-label fw-semibold">
                                         <i class="fas fa-user-tag"></i> User Role *
                                     </label>
-                                    <select class="form-select {{ 'text-danger' if user.role == 'admin' else 'text-warning' if user.role == 'manager' else 'text-info' }}" 
+                                    <select class="form-select form-select-lg {{ 'text-danger' if user.role == 'admin' else 'text-warning' if user.role == 'manager' else 'text-info' }}" 
                                             id="role" 
                                             name="role" 
                                             required
                                             {% if user.id == session.user_id and user.role == 'admin' %}disabled{% endif %}>
                                         <option value="member" {% if user.role == 'member' %}selected{% endif %}>
-                                            Member - Basic access to assigned tasks
+                                            <span class="d-none d-sm-inline">Member - Basic access to assigned tasks</span>
+                                            <span class="d-inline d-sm-none">Member</span>
                                         </option>
                                         <option value="manager" {% if user.role == 'manager' %}selected{% endif %}>
-                                            Manager - Can manage projects and tasks
+                                            <span class="d-none d-sm-inline">Manager - Can manage projects and tasks</span>
+                                            <span class="d-inline d-sm-none">Manager</span>
                                         </option>
                                         {% if current_user_role == 'admin' %}
                                         <option value="admin" {% if user.role == 'admin' %}selected{% endif %}>
-                                            Admin - Full system access
+                                            <span class="d-none d-sm-inline">Admin - Full system access</span>
+                                            <span class="d-inline d-sm-none">Admin</span>
                                         </option>
                                         {% endif %}
                                     </select>
                                     {% if user.id == session.user_id and user.role == 'admin' %}
-                                    <div class="form-text text-muted">
+                                    <div class="form-text text-muted small">
                                         <i class="fas fa-info-circle"></i> You cannot change your own admin role
                                     </div>
                                     {% endif %}
                                 </div>
                             </div>
                             
-                            <div class="col-md-6">
+                            <div class="col-12 col-md-6">
                                 <div class="mb-3">
-                                    <label class="form-label">
+                                    <label class="form-label fw-semibold">
                                         <i class="fas fa-toggle-on"></i> Account Status
                                     </label>
                                     <div class="form-check form-switch">
-                                        <input class="form-check-input" 
+                                        <input class="form-check-input form-check-input-lg" 
                                                type="checkbox" 
                                                id="is_active" 
                                                name="is_active" 
@@ -127,7 +139,7 @@
                                         </label>
                                     </div>
                                     {% if user.id == session.user_id %}
-                                    <div class="form-text text-muted">
+                                    <div class="form-text text-muted small">
                                         <i class="fas fa-info-circle"></i> You cannot deactivate your own account
                                     </div>
                                     {% endif %}
@@ -135,29 +147,35 @@
                             </div>
                         </div>
 
-                        <div class="card bg-light mb-3">
-                            <div class="card-body">
-                                <h6 class="card-title"><i class="fas fa-info-circle"></i> User Information</h6>
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <small class="text-muted">
-                                            <strong>Created:</strong> {{ user.created_at.strftime('%B %d, %Y at %I:%M %p') }}
+                        <!-- User Information Card -->
+                        <div class="card bg-light mb-3 mb-md-4">
+                            <div class="card-body p-3">
+                                <h6 class="card-title mb-3">
+                                    <i class="fas fa-info-circle"></i> User Information
+                                </h6>
+                                <div class="row g-2 g-md-3">
+                                    <div class="col-12 col-sm-6">
+                                        <small class="text-muted d-block">
+                                            <strong>Created:</strong><br class="d-sm-none"> 
+                                            <span class="d-none d-lg-inline">{{ user.created_at.strftime('%B %d, %Y at %I:%M %p') }}</span>
+                                            <span class="d-lg-none">{{ user.created_at.strftime('%b %d, %Y') }}</span>
                                         </small>
                                     </div>
-                                    <div class="col-md-6">
-                                        <small class="text-muted">
-                                            <strong>User ID:</strong> {{ user.id }}
+                                    <div class="col-12 col-sm-6">
+                                        <small class="text-muted d-block">
+                                            <strong>User ID:</strong><br class="d-sm-none"> {{ user.id }}
                                         </small>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="d-flex justify-content-between">
-                            <a href="{{ url_for('users') }}" class="btn btn-secondary">
+                        <!-- Action Buttons -->
+                        <div class="d-flex flex-column flex-sm-row justify-content-between gap-2 gap-sm-3">
+                            <a href="{{ url_for('users') }}" class="btn btn-secondary btn-lg order-2 order-sm-1">
                                 <i class="fas fa-times"></i> Cancel
                             </a>
-                            <button type="submit" class="btn btn-success">
+                            <button type="submit" class="btn btn-success btn-lg order-1 order-sm-2">
                                 <i class="fas fa-save"></i> Update User
                             </button>
                         </div>
@@ -167,6 +185,67 @@
         </div>
     </div>
 </div>
+
+<!-- Custom CSS for better mobile experience -->
+<style>
+@media (max-width: 575.98px) {
+    .form-control-lg, .form-select-lg {
+        font-size: 1rem;
+        padding: 0.75rem 1rem;
+    }
+    
+    .btn-lg {
+        font-size: 1rem;
+        padding: 0.75rem 1.5rem;
+    }
+    
+    .card {
+        border-radius: 0.75rem;
+    }
+    
+    .form-check-input-lg {
+        width: 2.5rem;
+        height: 1.25rem;
+    }
+}
+
+@media (min-width: 576px) and (max-width: 767.98px) {
+    .container-fluid {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+}
+
+@media (min-width: 768px) {
+    .form-control-lg, .form-select-lg {
+        font-size: 1.125rem;
+    }
+}
+
+/* Enhanced touch targets for mobile */
+@media (hover: none) and (pointer: coarse) {
+    .btn {
+        min-height: 44px;
+    }
+    
+    .form-control, .form-select {
+        min-height: 44px;
+    }
+    
+    .form-check-input {
+        min-width: 44px;
+        min-height: 44px;
+    }
+}
+
+/* Better spacing on larger screens */
+@media (min-width: 1200px) {
+    .container-fluid {
+        padding-left: 2rem;
+        padding-right: 2rem;
+    }
+}
+</style>
 {% endblock %}
 
 {% block scripts %}
@@ -208,7 +287,7 @@ document.getElementById('role').addEventListener('change', function() {
     };
     
     // Reset classes
-    this.className = 'form-select';
+    this.className = 'form-select form-select-lg';
     if (roleClasses[role]) {
         this.classList.add(roleClasses[role]);
     }

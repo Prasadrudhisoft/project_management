@@ -3,103 +3,171 @@
 {% block title %}Edit Milestone - {{ milestone.name }}{% endblock %}
 
 {% block content %}
-<div class="container-fluid">
-    <div class="row">
-        <div class="col-md-8 mx-auto">
-            <div class="card">
-                <div class="card-header">
-                    <h4><i class="bi bi-flag me-2"></i>Edit Milestone</h4>
-                    <small class="text-muted">Project: {{ project.name }}</small>
+<div class="container-fluid px-2 px-md-3">
+    <div class="row justify-content-center">
+        <div class="col-12 col-lg-8 col-xl-6">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-1 d-flex align-items-center">
+                        <i class="bi bi-flag me-2"></i>
+                        <span class="d-none d-sm-inline">Edit Milestone</span>
+                        <span class="d-sm-none">Edit</span>
+                    </h4>
+                    <small class="opacity-75 d-block">
+                        <i class="bi bi-folder me-1"></i>
+                        <span class="d-inline d-md-none">{{ project.name|truncate(20) }}</span>
+                        <span class="d-none d-md-inline">Project: {{ project.name }}</span>
+                    </small>
                 </div>
-                <div class="card-body">
+                
+                <div class="card-body p-3 p-md-4">
                     <!-- Project Due Date Info -->
-                    <div class="form-group mb-3">
-                        <div class="alert alert-info">
-                            <i class="bi bi-calendar-event me-2"></i>
-                            <strong>Project Due Date:</strong> 
-                            {% if project.end_date %}
-                                {{ project.end_date.strftime('%B %d, %Y') }}
-                            {% else %}
-                                <span class="text-muted">No due date set</span>
-                            {% endif %}
-                            <small class="d-block mt-1 text-muted">Milestone due dates cannot exceed the project due date.</small>
+                    <div class="alert alert-info d-flex align-items-start mb-4" role="alert">
+                        <i class="bi bi-calendar-event me-2 mt-1 flex-shrink-0"></i>
+                        <div class="flex-grow-1">
+                            <strong class="d-block mb-1">Project Due Date:</strong>
+                            <div class="mb-2">
+                                {% if project.end_date %}
+                                    <span class="fw-medium">{{ project.end_date.strftime('%B %d, %Y') }}</span>
+                                {% else %}
+                                    <span class="text-muted fst-italic">No due date set</span>
+                                {% endif %}
+                            </div>
+                            <small class="text-muted d-block">
+                                Milestone due dates cannot exceed the project due date.
+                            </small>
                         </div>
                     </div>
 
-                    <form method="POST">
-                        <div class="form-group mb-3">
-                            <label for="name" class="form-label">Milestone Name *</label>
-                            <input type="text" class="form-control" id="name" name="name" required 
-                                   value="{{ milestone.name }}" placeholder="Enter milestone name">
+                    <form method="POST" novalidate>
+                        <!-- Milestone Name -->
+                        <div class="mb-4">
+                            <label for="name" class="form-label fw-medium">
+                                Milestone Name <span class="text-danger">*</span>
+                            </label>
+                            <input type="text" 
+                                   class="form-control form-control-lg" 
+                                   id="name" 
+                                   name="name" 
+                                   required
+                                   value="{{ milestone.name }}" 
+                                   placeholder="Enter milestone name"
+                                   maxlength="100">
+                            <div class="form-text">
+                                Choose a clear, descriptive name for this milestone
+                            </div>
                         </div>
 
-                        <div class="form-group mb-3">
-                            <label for="description" class="form-label">Description</label>
-                            <textarea class="form-control" id="description" name="description" rows="4" 
-                                      placeholder="Describe this milestone">{{ milestone.description or '' }}</textarea>
+                        <!-- Description -->
+                        <div class="mb-4">
+                            <label for="description" class="form-label fw-medium">Description</label>
+                            <textarea class="form-control" 
+                                      id="description" 
+                                      name="description" 
+                                      rows="4"
+                                      placeholder="Describe this milestone and its objectives..."
+                                      maxlength="500">{{ milestone.description or '' }}</textarea>
+                            <div class="form-text">
+                                Optional: Provide details about what this milestone represents
+                            </div>
                         </div>
 
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group mb-3">
-                                    <label for="due_date" class="form-label">Due Date</label>
-                                    <input type="date" class="form-control" id="due_date" name="due_date" 
-                                           value="{{ milestone.due_date.strftime('%Y-%m-%d') if milestone.due_date }}">
+                        <!-- Due Date and Status Row -->
+                        <div class="row g-3 mb-4">
+                            <div class="col-12 col-md-6">
+                                <label for="due_date" class="form-label fw-medium">Due Date</label>
+                                <input type="date" 
+                                       class="form-control form-control-lg" 
+                                       id="due_date" 
+                                       name="due_date"
+                                       value="{{ milestone.due_date.strftime('%Y-%m-%d') if milestone.due_date }}">
+                                <div class="form-text" id="dueDateHelp">
+                                    Select a target completion date
                                 </div>
                             </div>
-                            <div class="col-md-6">
-                                <div class="form-group mb-3">
-                                    <label for="status" class="form-label">Status</label>
-                                    <select class="form-select" id="status" name="status" required>
-                                        <option value="pending" {{ 'selected' if milestone.status == 'pending' }}>Pending</option>
-                                        <option value="in_progress" {{ 'selected' if milestone.status == 'in_progress' }}>In Progress</option>
-                                        <option value="completed" {{ 'selected' if milestone.status == 'completed' }}>Completed</option>
-                                        <option value="overdue" {{ 'selected' if milestone.status == 'overdue' }}>Overdue</option>
-                                    </select>
+                            <div class="col-12 col-md-6">
+                                <label for="status" class="form-label fw-medium">Status</label>
+                                <select class="form-select form-select-lg" id="status" name="status" required>
+                                    <option value="pending" {{ 'selected' if milestone.status == 'pending' }}>
+                                        <i class="bi bi-clock"></i> Pending
+                                    </option>
+                                    <option value="in_progress" {{ 'selected' if milestone.status == 'in_progress' }}>
+                                        <i class="bi bi-play-circle"></i> In Progress
+                                    </option>
+                                    <option value="completed" {{ 'selected' if milestone.status == 'completed' }}>
+                                        <i class="bi bi-check-circle"></i> Completed
+                                    </option>
+                                    <option value="overdue" {{ 'selected' if milestone.status == 'overdue' }}>
+                                        <i class="bi bi-exclamation-triangle"></i> Overdue
+                                    </option>
+                                </select>
+                                <div class="form-text">
+                                    Current milestone status
                                 </div>
                             </div>
                         </div>
 
                         <!-- Milestone Statistics -->
-                        <div class="row mb-3">
-                            <div class="col-md-4">
-                                <div class="card bg-light">
-                                    <div class="card-body text-center">
-                                        <h5 class="card-title">{{ milestone.task_count or 0 }}</h5>
-                                        <p class="card-text">Total Tasks</p>
+                        <div class="mb-4">
+                            <h6 class="fw-medium mb-3 d-flex align-items-center">
+                                <i class="bi bi-bar-chart me-2"></i>
+                                Milestone Statistics
+                            </h6>
+                            <div class="row g-3">
+                                <div class="col-12 col-sm-4">
+                                    <div class="card bg-light border-0">
+                                        <div class="card-body text-center p-3">
+                                            <div class="d-flex align-items-center justify-content-center mb-2">
+                                                <i class="bi bi-list-task text-primary me-2"></i>
+                                                <h5 class="card-title mb-0">{{ milestone.task_count or 0 }}</h5>
+                                            </div>
+                                            <p class="card-text small text-muted mb-0">Total Tasks</p>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="card bg-light">
-                                    <div class="card-body text-center">
-                                        <h5 class="card-title">{{ milestone.completed_tasks or 0 }}</h5>
-                                        <p class="card-text">Completed</p>
+                                <div class="col-12 col-sm-4">
+                                    <div class="card bg-light border-0">
+                                        <div class="card-body text-center p-3">
+                                            <div class="d-flex align-items-center justify-content-center mb-2">
+                                                <i class="bi bi-check-circle text-success me-2"></i>
+                                                <h5 class="card-title mb-0">{{ milestone.completed_tasks or 0 }}</h5>
+                                            </div>
+                                            <p class="card-text small text-muted mb-0">Completed</p>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="card bg-light">
-                                    <div class="card-body text-center">
-                                        <h5 class="card-title">
-                                            {% if milestone.task_count and milestone.task_count > 0 %}
-                                                {{ ((milestone.completed_tasks or 0) * 100 // milestone.task_count) }}%
-                                            {% else %}
-                                                0%
-                                            {% endif %}
-                                        </h5>
-                                        <p class="card-text">Progress</p>
+                                <div class="col-12 col-sm-4">
+                                    <div class="card bg-light border-0">
+                                        <div class="card-body text-center p-3">
+                                            <div class="d-flex align-items-center justify-content-center mb-2">
+                                                <i class="bi bi-pie-chart text-info me-2"></i>
+                                                <h5 class="card-title mb-0">
+                                                    {% if milestone.task_count and milestone.task_count > 0 %}
+                                                        {{ ((milestone.completed_tasks or 0) * 100 // milestone.task_count) }}%
+                                                    {% else %}
+                                                        0%
+                                                    {% endif %}
+                                                </h5>
+                                            </div>
+                                            <p class="card-text small text-muted mb-0">Progress</p>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="d-flex gap-2">
-                            <button type="submit" class="btn btn-primary">
-                                <i class="bi bi-check me-1"></i>Update Milestone
+                        <!-- Action Buttons -->
+                        <div class="d-flex flex-column flex-sm-row gap-2 gap-sm-3 mt-4">
+                            <button type="submit" class="btn btn-primary btn-lg flex-grow-1 flex-sm-grow-0">
+                                <i class="bi bi-check me-2"></i>
+                                <span class="d-none d-sm-inline">Update Milestone</span>
+                                <span class="d-sm-none">Update</span>
                             </button>
-                            <a href="{{ url_for('view_project', id=project.id) }}" class="btn btn-secondary">
-                                <i class="bi bi-arrow-left me-1"></i>Back to Project
+                            <a href="{{ url_for('view_project', id=project.id) }}" 
+                               class="btn btn-outline-secondary btn-lg">
+                                <i class="bi bi-arrow-left me-2"></i>
+                                <span class="d-none d-sm-inline">Back to Project</span>
+                                <span class="d-sm-none">Back</span>
                             </a>
                         </div>
                     </form>
@@ -109,15 +177,146 @@
     </div>
 </div>
 
+<!-- Hidden data for JavaScript -->
+<div id="project-data" 
+     data-has-end-date="{{ 'true' if project.end_date else 'false' }}"
+     data-end-date="{{ project.end_date.strftime('%Y-%m-%d') if project.end_date else '' }}"
+     style="display: none;"></div>
+
+<style>
+/* Additional responsive styles */
+@media (max-width: 576px) {
+    .container-fluid {
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+    
+    .card {
+        border-radius: 0.5rem;
+        margin-bottom: 1rem;
+    }
+    
+    .card-body {
+        padding: 1rem !important;
+    }
+    
+    .form-control-lg, .form-select-lg {
+        font-size: 1rem;
+        padding: 0.75rem;
+    }
+    
+    .btn-lg {
+        padding: 0.75rem 1rem;
+        font-size: 1rem;
+    }
+    
+    .alert {
+        padding: 0.75rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .alert small {
+        font-size: 0.8rem;
+        line-height: 1.3;
+    }
+    
+    .row.g-3 {
+        --bs-gutter-x: 0.75rem;
+        --bs-gutter-y: 0.75rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .card-header h4 {
+        font-size: 1.1rem;
+    }
+    
+    .card-header small {
+        font-size: 0.85rem;
+    }
+    
+    .card.bg-light .card-body {
+        padding: 0.75rem !important;
+    }
+}
+
+/* Statistics cards on mobile */
+@media (max-width: 575px) {
+    .row.g-3 .col-12 {
+        margin-bottom: 0.5rem;
+    }
+    
+    .card.bg-light {
+        margin-bottom: 0;
+    }
+}
+
+/* Focus styles for better accessibility */
+.form-control:focus, .form-select:focus {
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+}
+
+/* Custom validation styles */
+.form-control.is-valid, .form-select.is-valid {
+    border-color: #198754;
+}
+
+.form-control.is-invalid, .form-select.is-invalid {
+    border-color: #dc3545;
+}
+
+.form-control.is-valid:focus, .form-select.is-valid:focus {
+    border-color: #198754;
+    box-shadow: 0 0 0 0.2rem rgba(25, 135, 84, 0.25);
+}
+
+.form-control.is-invalid:focus, .form-select.is-invalid:focus {
+    border-color: #dc3545;
+    box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+}
+
+/* Loading state for form submission */
+.btn:disabled {
+    cursor: not-allowed;
+}
+
+/* Status-specific styling */
+.form-select option[value="pending"] {
+    background-color: #fff3cd;
+}
+
+.form-select option[value="in_progress"] {
+    background-color: #d1ecf1;
+}
+
+.form-select option[value="completed"] {
+    background-color: #d4edda;
+}
+
+.form-select option[value="overdue"] {
+    background-color: #f8d7da;
+}
+</style>
+{% endblock %}
+
+{% block scripts %}
 <script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Get project data from hidden div
+    const projectData = document.getElementById('project-data');
+    const hasEndDate = projectData.getAttribute('data-has-end-date') === 'true';
+    const projectEndDate = projectData.getAttribute('data-end-date');
+    
     // Set minimum date to today
     const today = new Date().toISOString().split('T')[0];
-    document.getElementById('due_date').min = today;
+    const dueDateInput = document.getElementById('due_date');
+    const dueDateHelp = document.getElementById('dueDateHelp');
+    
+    dueDateInput.min = today;
 
-    // Set milestone due date maximum to project due date if available
-    {% if project.end_date %}
-        const projectEndDate = "{{ project.end_date.strftime('%Y-%m-%d') }}";
-        const dueDateInput = document.getElementById('due_date');
+    // Handle project end date constraint
+    if (hasEndDate && projectEndDate) {
         const todayObj = new Date();
         todayObj.setHours(0, 0, 0, 0);
         const projectEndDateObj = new Date(projectEndDate);
@@ -125,31 +324,137 @@
 
         if (projectEndDateObj >= todayObj) {
             dueDateInput.max = projectEndDate;
+            dueDateHelp.innerHTML = 'Select a date between today and ' + new Date(projectEndDate).toLocaleDateString();
         } else {
             dueDateInput.max = today;
+            dueDateHelp.innerHTML = '<span class="text-warning"><i class="bi bi-exclamation-triangle me-1"></i>Project due date has passed. Maximum date set to today.</span>';
         }
-    {% endif %}
+    }
 
     // Add validation to prevent milestone due date from exceeding project due date
-    document.getElementById('due_date').addEventListener('change', function() {
-        const selectedDate = new Date(this.value);
-        {% if project.end_date %}
-            const projectEndDate = new Date("{{ project.end_date.strftime('%Y-%m-%d') }}");
-            
-            if (selectedDate > projectEndDate) {
-                alert('Milestone due date cannot exceed the project due date (' + projectEndDate.toLocaleDateString() + ').');
-                this.value = projectEndDate.toISOString().split('T')[0];
-            }
-        {% endif %}
+    dueDateInput.addEventListener('change', function() {
+        if (!this.value) return;
         
-        // Also check if date is in the past
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        if (selectedDate < today) {
-            alert('Milestone due date cannot be in the past.');
-            this.value = today.toISOString().split('T')[0];
+        const selectedDate = new Date(this.value);
+        let shouldReset = false;
+        let message = '';
+        
+        // Check against project end date
+        if (hasEndDate && projectEndDate) {
+            const projectEndDateObj = new Date(projectEndDate);
+            if (selectedDate > projectEndDateObj) {
+                message = 'Milestone due date cannot exceed the project due date (' + projectEndDateObj.toLocaleDateString() + ').';
+                this.value = projectEndDate;
+                shouldReset = true;
+            }
+        }
+        
+        // Check if date is in the past
+        const todayObj = new Date();
+        todayObj.setHours(0, 0, 0, 0);
+        if (selectedDate < todayObj) {
+            message = 'Milestone due date cannot be in the past.';
+            this.value = today;
+            shouldReset = true;
+        }
+        
+        if (shouldReset && message) {
+            // Show error message
+            this.classList.add('is-invalid');
+            
+            // Create or update error message
+            let errorDiv = this.parentNode.querySelector('.invalid-feedback');
+            if (!errorDiv) {
+                errorDiv = document.createElement('div');
+                errorDiv.className = 'invalid-feedback';
+                this.parentNode.appendChild(errorDiv);
+            }
+            errorDiv.textContent = message;
+            
+            // Remove error after 3 seconds
+            setTimeout(function() {
+                dueDateInput.classList.remove('is-invalid');
+                if (errorDiv && errorDiv.parentNode) {
+                    errorDiv.parentNode.removeChild(errorDiv);
+                }
+            }, 3000);
+        } else {
+            // Remove any existing error state
+            this.classList.remove('is-invalid');
+            const errorDiv = this.parentNode.querySelector('.invalid-feedback');
+            if (errorDiv && errorDiv.parentNode) {
+                errorDiv.parentNode.removeChild(errorDiv);
+            }
         }
     });
-</script>
 
+    // Form validation
+    const form = dueDateInput.closest('form');
+    const nameInput = document.getElementById('name');
+    const statusInput = document.getElementById('status');
+    
+    form.addEventListener('submit', function(e) {
+        let isValid = true;
+        
+        // Reset previous validation states
+        [nameInput, dueDateInput, statusInput].forEach(function(input) {
+            input.classList.remove('is-invalid', 'is-valid');
+        });
+        
+        // Validate name
+        if (!nameInput.value.trim()) {
+            nameInput.classList.add('is-invalid');
+            isValid = false;
+        } else {
+            nameInput.classList.add('is-valid');
+        }
+        
+        // Validate status
+        if (!statusInput.value) {
+            statusInput.classList.add('is-invalid');
+            isValid = false;
+        } else {
+            statusInput.classList.add('is-valid');
+        }
+        
+        // Validate due date if provided
+        if (dueDateInput.value) {
+            const selectedDate = new Date(dueDateInput.value);
+            const minDate = new Date(dueDateInput.min);
+            const maxDate = dueDateInput.max ? new Date(dueDateInput.max) : null;
+            
+            if (selectedDate < minDate || (maxDate && selectedDate > maxDate)) {
+                dueDateInput.classList.add('is-invalid');
+                isValid = false;
+            } else {
+                dueDateInput.classList.add('is-valid');
+            }
+        }
+        
+        if (!isValid) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+    });
+
+    // Real-time validation for better UX
+    nameInput.addEventListener('input', function() {
+        if (this.value.trim()) {
+            this.classList.remove('is-invalid');
+            this.classList.add('is-valid');
+        } else {
+            this.classList.remove('is-valid');
+        }
+    });
+
+    statusInput.addEventListener('change', function() {
+        if (this.value) {
+            this.classList.remove('is-invalid');
+            this.classList.add('is-valid');
+        } else {
+            this.classList.remove('is-valid');
+        }
+    });
+});
+</script>
 {% endblock %}

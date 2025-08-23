@@ -3,53 +3,98 @@
 {% block title %}Create Milestone - {{ project.name }}{% endblock %}
 
 {% block content %}
-<div class="container-fluid">
-    <div class="row">
-        <div class="col-md-8 mx-auto">
-            <div class="card">
-                <div class="card-header">
-                    <h4><i class="bi bi-flag me-2"></i>Create New Milestone</h4>
-                    <small class="text-muted">Project: {{ project.name }}</small>
+<div class="container-fluid px-2 px-md-3">
+    <div class="row justify-content-center">
+        <div class="col-12 col-lg-8 col-xl-6">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-1 d-flex align-items-center">
+                        <i class="bi bi-flag me-2"></i>
+                        <span class="d-none d-sm-inline">Create New Milestone</span>
+                        <span class="d-sm-none">New Milestone</span>
+                    </h4>
+                    <small class="opacity-75 d-block">
+                        <i class="bi bi-folder me-1"></i>
+                        <span class="d-inline d-md-none">{{ project.name|truncate(20) }}</span>
+                        <span class="d-none d-md-inline">Project: {{ project.name }}</span>
+                    </small>
                 </div>
-                <div class="card-body">
+                
+                <div class="card-body p-3 p-md-4">
                     <!-- Project Due Date Info -->
-                    <div class="form-group mb-3" id="projectDueDateInfo">
-                        <div class="alert alert-info">
-                            <i class="bi bi-calendar-event me-2"></i>
-                            <strong>Project Due Date:</strong> 
-                            {% if project.end_date %}
-                                {{ project.end_date.strftime('%B %d, %Y') }}
-                            {% else %}
-                                <span class="text-muted">No due date set</span>
-                            {% endif %}
-                            <small class="d-block mt-1 text-muted">Milestones cannot be created after the project due date.</small>
+                    <div class="alert alert-info d-flex align-items-start mb-4" role="alert">
+                        <i class="bi bi-calendar-event me-2 mt-1 flex-shrink-0"></i>
+                        <div class="flex-grow-1">
+                            <strong class="d-block mb-1">Project Due Date:</strong>
+                            <div class="mb-2">
+                                {% if project.end_date %}
+                                    <span class="fw-medium">{{ project.end_date.strftime('%B %d, %Y') }}</span>
+                                {% else %}
+                                    <span class="text-muted fst-italic">No due date set</span>
+                                {% endif %}
+                            </div>
+                            <small class="text-muted d-block">
+                                Milestones cannot be created after the project due date.
+                            </small>
                         </div>
                     </div>
 
-                    <form method="POST">
-                        <div class="form-group mb-3">
-                            <label for="name" class="form-label">Milestone Name *</label>
-                            <input type="text" class="form-control" id="name" name="name" required 
-                                   placeholder="Enter milestone name">
+                    <form method="POST" novalidate>
+                        <!-- Milestone Name -->
+                        <div class="mb-4">
+                            <label for="name" class="form-label fw-medium">
+                                Milestone Name <span class="text-danger">*</span>
+                            </label>
+                            <input type="text" 
+                                   class="form-control form-control-lg" 
+                                   id="name" 
+                                   name="name" 
+                                   required
+                                   placeholder="Enter milestone name"
+                                   maxlength="100">
+                            <div class="form-text">
+                                Choose a clear, descriptive name for this milestone
+                            </div>
                         </div>
 
-                        <div class="form-group mb-3">
-                            <label for="description" class="form-label">Description</label>
-                            <textarea class="form-control" id="description" name="description" rows="4" 
-                                      placeholder="Describe this milestone"></textarea>
+                        <!-- Description -->
+                        <div class="mb-4">
+                            <label for="description" class="form-label fw-medium">Description</label>
+                            <textarea class="form-control" 
+                                      id="description" 
+                                      name="description" 
+                                      rows="4"
+                                      placeholder="Describe this milestone and its objectives..."
+                                      maxlength="500"></textarea>
+                            <div class="form-text">
+                                Optional: Provide details about what this milestone represents
+                            </div>
                         </div>
 
-                        <div class="form-group mb-3">
-                            <label for="due_date" class="form-label">Due Date</label>
-                            <input type="date" class="form-control" id="due_date" name="due_date">
+                        <!-- Due Date -->
+                        <div class="mb-4">
+                            <label for="due_date" class="form-label fw-medium">Due Date</label>
+                            <input type="date" 
+                                   class="form-control form-control-lg" 
+                                   id="due_date" 
+                                   name="due_date">
+                            <div class="form-text" id="dueDateHelp">
+                                Select a target completion date for this milestone
+                            </div>
                         </div>
 
-                        <div class="d-flex gap-2">
-                            <button type="submit" class="btn btn-success">
-                                <i class="bi bi-check me-1"></i>Create Milestone
+                        <!-- Action Buttons -->
+                        <div class="d-flex flex-column flex-sm-row gap-2 gap-sm-3 mt-4">
+                            <button type="submit" class="btn btn-success btn-lg flex-grow-1 flex-sm-grow-0">
+                                <i class="bi bi-check me-2"></i>
+                                <span class="d-none d-sm-inline">Create Milestone</span>
+                                <span class="d-sm-none">Create</span>
                             </button>
-                            <a href="{{ url_for('view_project', id=project.id) }}" class="btn btn-secondary">
-                                <i class="bi bi-arrow-left me-1"></i>Cancel
+                            <a href="{{ url_for('view_project', id=project.id) }}" 
+                               class="btn btn-outline-secondary btn-lg">
+                                <i class="bi bi-arrow-left me-2"></i>
+                                <span class="d-none d-sm-inline">Cancel</span>
+                                <span class="d-sm-none">Back</span>
                             </a>
                         </div>
                     </form>
@@ -59,15 +104,109 @@
     </div>
 </div>
 
+<!-- Hidden data for JavaScript -->
+<div id="project-data" 
+     data-has-end-date="{{ 'true' if project.end_date else 'false' }}"
+     data-end-date="{{ project.end_date.strftime('%Y-%m-%d') if project.end_date else '' }}"
+     style="display: none;"></div>
+
+<style>
+/* Additional responsive styles */
+@media (max-width: 576px) {
+    .container-fluid {
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+    
+    .card {
+        border-radius: 0.5rem;
+        margin-bottom: 1rem;
+    }
+    
+    .card-body {
+        padding: 1rem !important;
+    }
+    
+    .form-control-lg {
+        font-size: 1rem;
+        padding: 0.75rem;
+    }
+    
+    .btn-lg {
+        padding: 0.75rem 1rem;
+        font-size: 1rem;
+    }
+    
+    .alert {
+        padding: 0.75rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .alert small {
+        font-size: 0.8rem;
+        line-height: 1.3;
+    }
+}
+
+@media (max-width: 768px) {
+    .card-header h4 {
+        font-size: 1.1rem;
+    }
+    
+    .card-header small {
+        font-size: 0.85rem;
+    }
+}
+
+/* Focus styles for better accessibility */
+.form-control:focus {
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+}
+
+/* Custom validation styles */
+.form-control.is-valid {
+    border-color: #198754;
+}
+
+.form-control.is-invalid {
+    border-color: #dc3545;
+}
+
+.form-control.is-valid:focus {
+    border-color: #198754;
+    box-shadow: 0 0 0 0.2rem rgba(25, 135, 84, 0.25);
+}
+
+.form-control.is-invalid:focus {
+    border-color: #dc3545;
+    box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+}
+
+/* Loading state for form submission */
+.btn:disabled {
+    cursor: not-allowed;
+}
+</style>
+{% endblock %}
+
+{% block scripts %}
 <script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Get project data from hidden div
+    const projectData = document.getElementById('project-data');
+    const hasEndDate = projectData.getAttribute('data-has-end-date') === 'true';
+    const projectEndDate = projectData.getAttribute('data-end-date');
+    
     // Set minimum date to today
     const today = new Date().toISOString().split('T')[0];
-    document.getElementById('due_date').min = today;
+    const dueDateInput = document.getElementById('due_date');
+    const dueDateHelp = document.getElementById('dueDateHelp');
+    
+    dueDateInput.min = today;
 
-    // Set milestone due date maximum to project due date if available
-    {% if project.end_date %}
-        const projectEndDate = "{{ project.end_date.strftime('%Y-%m-%d') }}";
-        const dueDateInput = document.getElementById('due_date');
+    // Handle project end date constraint
+    if (hasEndDate && projectEndDate) {
         const todayObj = new Date();
         todayObj.setHours(0, 0, 0, 0);
         const projectEndDateObj = new Date(projectEndDate);
@@ -75,9 +214,80 @@
 
         if (projectEndDateObj >= todayObj) {
             dueDateInput.max = projectEndDate;
+            dueDateHelp.innerHTML = 'Select a date between today and ' + new Date(projectEndDate).toLocaleDateString();
         } else {
             dueDateInput.max = today;
+            dueDateHelp.innerHTML = '<span class="text-warning"><i class="bi bi-exclamation-triangle me-1"></i>Project due date has passed. Maximum date set to today.</span>';
         }
-    {% endif %}
+    }
+
+    // Form validation feedback
+    const form = dueDateInput.closest('form');
+    const nameInput = document.getElementById('name');
+    
+    form.addEventListener('submit', function(e) {
+        let isValid = true;
+        
+        // Reset previous validation states
+        [nameInput, dueDateInput].forEach(function(input) {
+            input.classList.remove('is-invalid', 'is-valid');
+        });
+        
+        // Validate name
+        if (!nameInput.value.trim()) {
+            nameInput.classList.add('is-invalid');
+            isValid = false;
+        } else {
+            nameInput.classList.add('is-valid');
+        }
+        
+        // Validate due date if provided
+        if (dueDateInput.value) {
+            const selectedDate = new Date(dueDateInput.value);
+            const minDate = new Date(dueDateInput.min);
+            const maxDate = dueDateInput.max ? new Date(dueDateInput.max) : null;
+            
+            if (selectedDate < minDate || (maxDate && selectedDate > maxDate)) {
+                dueDateInput.classList.add('is-invalid');
+                isValid = false;
+            } else {
+                dueDateInput.classList.add('is-valid');
+            }
+        }
+        
+        if (!isValid) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+    });
+
+    // Real-time validation for better UX
+    nameInput.addEventListener('input', function() {
+        if (this.value.trim()) {
+            this.classList.remove('is-invalid');
+            this.classList.add('is-valid');
+        } else {
+            this.classList.remove('is-valid');
+        }
+    });
+
+    dueDateInput.addEventListener('change', function() {
+        if (this.value) {
+            const selectedDate = new Date(this.value);
+            const minDate = new Date(this.min);
+            const maxDate = this.max ? new Date(this.max) : null;
+            
+            if (selectedDate < minDate || (maxDate && selectedDate > maxDate)) {
+                this.classList.add('is-invalid');
+                this.classList.remove('is-valid');
+            } else {
+                this.classList.remove('is-invalid');
+                this.classList.add('is-valid');
+            }
+        } else {
+            this.classList.remove('is-invalid', 'is-valid');
+        }
+    });
+});
 </script>
 {% endblock %}
