@@ -2756,13 +2756,11 @@ class DatabaseHelper:
             if user_role == 'admin':
                 access_conditions.append("dr.visible_to_admin = TRUE")
             elif user_role == 'manager':
-                # Manager access: visible to manager AND (assigned manager OR team member)
+                # Manager access: only from projects they manage or are team members of
                 access_conditions.append("""
-                    dr.visible_to_manager = TRUE AND (
-                        dr.project_id IS NULL 
-                        OR p.assigned_manager_id = %s 
-                        OR pm.user_id = %s
-                    )
+                    dr.project_id IS NULL 
+                    OR p.assigned_manager_id = %s 
+                    OR pm.user_id = %s
                 """)
                 params.extend([user_id, user_id])
             elif user_role == 'member':
@@ -2802,7 +2800,7 @@ class DatabaseHelper:
                     ORDER BY dr.report_date DESC, dr.created_at DESC
                 """, (org_id,))
             elif user_role == 'manager':
-                # Managers can see reports visible to them, plus reports from projects they manage or are team members of
+                # Managers can only see reports from projects they manage or are team members of
                 cursor.execute("""
                     SELECT DISTINCT dr.*, u.full_name as user_name, p.name as project_name
                     FROM daily_reports dr
@@ -2810,8 +2808,9 @@ class DatabaseHelper:
                     LEFT JOIN projects p ON dr.project_id = p.id
                     LEFT JOIN project_members pm ON dr.project_id = pm.project_id AND pm.user_id = %s
                     WHERE dr.organization_id = %s 
-                      AND (dr.visible_to_manager = TRUE 
-                           OR (dr.project_id IS NOT NULL AND (p.assigned_manager_id = %s OR pm.user_id IS NOT NULL)))
+                      AND (dr.project_id IS NULL 
+                           OR p.assigned_manager_id = %s 
+                           OR pm.user_id IS NOT NULL)
                     ORDER BY dr.report_date DESC, dr.created_at DESC
                 """, (user_id, org_id, user_id))
             else:

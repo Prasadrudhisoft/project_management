@@ -17,7 +17,7 @@
                         {% if user_role == 'admin' %}
                             Viewing all reports visible to administrators
                         {% elif user_role == 'manager' %}
-                            Viewing all reports visible to managers
+                            Viewing reports from your managed projects and team members
                         {% else %}
                             Viewing your submitted reports
                         {% endif %}
@@ -162,7 +162,7 @@
                             {% if user_role == 'admin' %}
                                 No daily reports are currently visible to administrators.
                             {% elif user_role == 'manager' %}
-                                No daily reports are currently visible to managers.
+                                No daily reports found from your managed projects or team members.
                             {% else %}
                                 You haven't submitted any daily reports yet.
                             {% endif %}
