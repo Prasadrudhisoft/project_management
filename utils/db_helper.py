@@ -2830,3 +2830,79 @@ class DatabaseHelper:
             return cursor.fetchall()
         finally:
             conn.close()
+
+    def update_user_profile(self, user_id, first_name, last_name, email, phone):
+        """Update user profile information"""
+        conn = self.get_connection()
+        if not conn:
+            return False
+        
+        try:
+            cursor = conn.cursor()
+            
+            # Update user profile
+            cursor.execute("""
+                UPDATE users 
+                SET full_name = %s, email = %s, phone = %s, updated_at = CURRENT_TIMESTAMP
+                WHERE id = %s
+            """, (f"{first_name} {last_name}", email, phone, user_id))
+            
+            conn.commit()
+            return True
+        except Exception as e:
+            logger.error(f"Error updating user profile: {e}")
+            conn.rollback()
+            return False
+        finally:
+            conn.close()
+
+    def update_user_password(self, user_id, password_hash):
+        """Update user password"""
+        conn = self.get_connection()
+        if not conn:
+            return False
+        
+        try:
+            cursor = conn.cursor()
+            
+            # Update user password
+            cursor.execute("""
+                UPDATE users 
+                SET password = %s, updated_at = CURRENT_TIMESTAMP
+                WHERE id = %s
+            """, (password_hash, user_id))
+            
+            conn.commit()
+            return True
+        except Exception as e:
+            logger.error(f"Error updating user password: {e}")
+            conn.rollback()
+            return False
+        finally:
+            conn.close()
+
+    def update_user_avatar(self, user_id, avatar_url):
+        """Update user's avatar URL"""
+        conn = self.get_connection()
+        if not conn:
+            return False
+        try:
+            cursor = conn.cursor()
+            # Add column if missing (safe-guard)
+            try:
+                cursor.execute("ALTER TABLE users ADD COLUMN avatar_url VARCHAR(512) NULL")
+            except Exception:
+                pass
+            cursor.execute("""
+                UPDATE users
+                SET avatar_url = %s, updated_at = CURRENT_TIMESTAMP
+                WHERE id = %s
+            """, (avatar_url, user_id))
+            conn.commit()
+            return True
+        except Exception as e:
+            logger.error(f"Error updating user avatar: {e}")
+            conn.rollback()
+            return False
+        finally:
+            conn.close()

@@ -778,6 +778,297 @@
             display: none !important;
         }
     }
+
+    /* Identity Card Styles */
+    .identity-card {
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.8) 100%);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        border-radius: var(--card-border-radius);
+        box-shadow: var(--card-shadow);
+        margin-bottom: 2rem;
+        padding: 2rem;
+        transition: var(--transition-smooth);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .identity-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+        transition: left 0.6s ease-in-out;
+        z-index: 1;
+    }
+
+    .identity-card:hover::before {
+        left: 100%;
+    }
+
+    .identity-card-content {
+        display: flex;
+        align-items: center;
+        gap: 2rem;
+        position: relative;
+        z-index: 2;
+    }
+
+    .identity-profile {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+    }
+
+    .profile-avatar {
+        position: relative;
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        background: var(--primary-gradient);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+        transition: var(--transition-smooth);
+    }
+
+    .profile-avatar:hover {
+        transform: scale(1.05);
+        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2);
+    }
+
+    .avatar-circle-large {
+        width: 80px;
+        height: 80px;
+        font-size: 2.5rem;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    .online-status {
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #4CAF50, #45a049);
+        border: 3px solid white;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        animation: pulse 2s ease-in-out infinite;
+    }
+
+    .profile-info {
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+    }
+
+    .user-name {
+        font-size: 2rem;
+        font-weight: 700;
+        background: var(--primary-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 0.5rem;
+        line-height: 1.2;
+    }
+
+    .user-role {
+        font-size: 1.1rem;
+        color: var(--text-secondary);
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .user-email {
+        font-size: 0.9rem;
+        color: var(--text-muted);
+        margin-bottom: 0.75rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        word-break: break-word;
+    }
+
+    .user-meta {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .meta-item {
+        font-size: 0.85rem;
+        color: var(--text-muted);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.25rem 0.75rem;
+        background: rgba(102, 126, 234, 0.1);
+        border-radius: 20px;
+        border: 1px solid rgba(102, 126, 234, 0.2);
+    }
+
+    .identity-stats {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1.5rem;
+        flex-shrink: 0;
+        margin-left: auto;
+    }
+
+    .stat-item {
+        text-align: center;
+        padding: 1rem;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 16px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        backdrop-filter: blur(10px);
+        transition: var(--transition-smooth);
+    }
+
+    .stat-item:hover {
+        transform: translateY(-2px);
+        background: rgba(255, 255, 255, 0.2);
+        border-color: rgba(102, 126, 234, 0.3);
+    }
+
+    .stat-number {
+        font-size: 2.5rem;
+        font-weight: 800;
+        background: var(--primary-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 0.5rem;
+        line-height: 1;
+    }
+
+    .stat-label {
+        font-size: 0.9rem;
+        color: var(--text-muted);
+        font-weight: 500;
+    }
+
+    .identity-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+        margin-top: 1rem;
+        width: 100%;
+    }
+
+    .identity-actions .btn {
+        flex: 1;
+        min-width: 140px;
+        padding: 0.75rem 1.25rem;
+        font-size: 0.9rem;
+        transition: var(--transition-smooth);
+    }
+
+    .identity-actions .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    /* Responsive adjustments for identity card */
+    @media (max-width: 1199.98px) {
+        .identity-card-content {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 1.5rem;
+        }
+        
+        .identity-stats {
+            margin-left: 0;
+            width: 100%;
+            justify-content: center;
+        }
+        
+        .stat-item {
+            flex: 1;
+            min-width: 120px;
+        }
+    }
+
+    @media (max-width: 767.98px) {
+        .identity-card {
+            padding: 1.5rem;
+        }
+        
+        .profile-avatar {
+            width: 80px;
+            height: 80px;
+        }
+        
+        .avatar-circle-large {
+            width: 60px;
+            height: 60px;
+            font-size: 2rem;
+        }
+        
+        .user-name {
+            font-size: 1.5rem;
+        }
+        
+        .identity-stats {
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .stat-item {
+            width: 100%;
+            max-width: 200px;
+        }
+        
+        .identity-actions {
+            justify-content: center;
+        }
+        
+        .identity-actions .btn {
+            min-width: 120px;
+        }
+    }
+
+    @media (max-width: 575.98px) {
+        .identity-card {
+            padding: 1rem;
+        }
+        
+        .profile-avatar {
+            width: 70px;
+            height: 70px;
+        }
+        
+        .avatar-circle-large {
+            width: 50px;
+            height: 50px;
+            font-size: 1.5rem;
+        }
+        
+        .user-name {
+            font-size: 1.25rem;
+        }
+        
+        .identity-actions .btn {
+            min-width: 100px;
+            font-size: 0.8rem;
+            padding: 0.5rem 1rem;
+        }
+    }
 </style>
 {% endblock %}
 
@@ -787,6 +1078,80 @@
         <div class="dashboard-header">
             <h1><i class="fas fa-tachometer-alt me-2"></i>Admin Dashboard</h1>
             <p>Welcome back, {{ session.user_name }}! Here's your project overview.</p>
+        </div>
+    </div>
+</div>
+
+<!-- Identity Card Section -->
+<div class="row dashboard-section mb-4">
+    <div class="col-12">
+        <div class="identity-card dashboard-card">
+            <div class="identity-card-content">
+                <div class="identity-profile">
+                    <div class="profile-avatar">
+                        {% if session.avatar_url %}
+                        <img src="{{ session.avatar_url }}" alt="Avatar" style="width:80px;height:80px;border-radius:50%;object-fit:cover;">
+                        {% else %}
+                        <div class="avatar-circle-large">
+                            {{ session.user_name[0].upper() if session.user_name else 'U' }}
+                        </div>
+                        {% endif %}
+                        <div class="online-status"></div>
+                    </div>
+                    <div class="profile-info">
+                        <h3 class="user-name">{{ session.user_name }}</h3>
+                        <p class="user-role">
+                            <i class="fas fa-user-tag me-2"></i>
+                            {{ session.user_role.replace('_', ' ').title() }}
+                        </p>
+                        <p class="user-email">
+                            <i class="fas fa-envelope me-2"></i>
+                            {{ session.user_email or 'No email available' }}
+                        </p>
+                        <div class="user-meta">
+                            <span class="meta-item">
+                                <i class="fas fa-calendar-alt me-1"></i>
+                                Member since: {% if session.user_created_at %}{{ session.user_created_at }}{% else %}N/A{% endif %}
+                            </span>
+                            <span class="meta-item">
+                                <i class="fas fa-building me-1"></i>
+                                {{ session.organization_name or 'Organization' }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="identity-stats">
+                    <div class="stat-item">
+                        <div class="stat-number">{{ stats.projects_total if stats.projects_total else 0 }}</div>
+                        <div class="stat-label">Total Projects</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">{{ stats.tasks_completed if stats.tasks_completed else 0 }}</div>
+                        <div class="stat-label">Tasks Completed</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">{{ stats.overdue_tasks if stats.overdue_tasks else 0 }}</div>
+                        <div class="stat-label">Overdue Tasks</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">{{ session.user_id if session.user_id else 'N/A' }}</div>
+                        <div class="stat-label">User ID</div>
+                    </div>
+                </div>
+                <div class="identity-actions">
+                    <button class="btn btn-outline-primary btn-sm" onclick="editProfile()">
+                        <i class="fas fa-edit me-1"></i>Edit Profile
+                    </button>
+                    <button class="btn btn-outline-info btn-sm" onclick="viewProfile()">
+                        <i class="fas fa-user me-1"></i>View Profile
+                    </button>
+                    {% if session.user_role in ['admin', 'manager'] %}
+                    <button class="btn btn-outline-secondary btn-sm" onclick="changePassword()">
+                        <i class="fas fa-key me-1"></i>Change Password
+                    </button>
+                    {% endif %}
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -1075,6 +1440,20 @@
 <script>
 // Enhanced Dashboard JavaScript for improved interactivity
 document.addEventListener('DOMContentLoaded', function() {
+    // Identity Card Functions
+    window.editProfile = function() {
+        window.location.href = '/profile/edit';
+    };
+    
+    window.viewProfile = function() {
+        window.location.href = '/profile';
+    };
+    
+    window.changePassword = function() {
+        // Only admin and manager see this button; route to app endpoint
+        window.location.href = '/change-password';
+    };
+
     // Initialize animations with stagger effect
     const dashboardSections = document.querySelectorAll('.dashboard-section');
     dashboardSections.forEach((section, index) => {

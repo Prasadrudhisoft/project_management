@@ -1,4 +1,5 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify
+from werkzeug.utils import secure_filename
 import pymysql
 import bcrypt
 import os
@@ -17,10 +18,12 @@ logger = logging.getLogger(__name__)
 app = Flask(__name__)
 app.secret_key = config.SECRET_KEY
 app.config['DEBUG'] = config.DEBUG
+app.config['UPLOAD_FOLDER'] = os.path.join(os.path.dirname(__file__), 'uploads', 'avatars')
+app.config['MAX_CONTENT_LENGTH'] = 2 * 1024 * 1024
 
 # Security Configuration
 app.config.update(
-    SESSION_COOKIE_SECURE=True if not config.DEBUG else False,  # HTTPS only in production
+    SESSION_COOKIE_SECURE=False,  # Allow HTTP in development
     SESSION_COOKIE_HTTPONLY=True,
     SESSION_COOKIE_SAMESITE='Lax',
     PERMANENT_SESSION_LIFETIME=timedelta(hours=2),  # Auto-logout after 2 hours
@@ -175,6 +178,25 @@ def login():
             session['user_name'] = user['full_name']
             session['user_role'] = user['role']
             session['organization_id'] = user['organization_id']
+            session['organization_name'] = user.get('organization_name')
+            # Populate commonly used session fields for dashboards
+            session['user_email'] = user.get('email', '')
+            session['avatar_url'] = user.get('avatar_url')
+            # Handle created_at safely - it might be None or a string
+            created_at = user.get('created_at')
+            if created_at:
+                if hasattr(created_at, 'strftime'):
+                    # It's a datetime object
+                    session['user_created_at'] = created_at.strftime('%Y-%m-%d')
+                else:
+                    # It's already a string or other format
+                    session['user_created_at'] = str(created_at)
+            else:
+                session['user_created_at'] = 'Unknown'
+            
+            # Debug: print session data
+            print(f"DEBUG: Session data set - Email: {session['user_email']}, Created: {session['user_created_at']}")
+            
             flash(f'Welcome back, {user["full_name"]}!', 'success')
             return redirect(url_for('dashboard'))
         else:
@@ -1416,6 +1438,146 @@ def filter_daily_reports():
                          user_role=user_role,
                          start_date=start_date,
                          end_date=end_date)
+
+# Profile Management Routes
+@app.route('/profile')
+@login_required
+def view_profile():
+    """View user profile"""
+    user_id = session['user_id']
+    user = db.get_user_by_id(user_id)
+    
+    if not user:
+        flash('User not found.', 'error')
+        return redirect(url_for('dashboard'))
+    
+    return render_template('profile/view.html', user=user)
+
+@app.route('/profile/edit', methods=['GET', 'POST'])
+@login_required
+def edit_profile():
+    """Edit user profile"""
+    user_id = session['user_id']
+    user = db.get_user_by_id(user_id)
+    
+    if not user:
+        flash('User not found.', 'error')
+        return redirect(url_for('dashboard'))
+    
+    if request.method == 'POST':
+        # Get form data
+        first_name = request.form.get('first_name', '').strip()
+        last_name = request.form.get('last_name', '').strip()
+        email = request.form.get('email', '').strip()
+        phone = request.form.get('phone', '').strip()
+        avatar_file = request.files.get('avatar')
+        
+        # Basic validation
+        if not first_name or not last_name or not email:
+            flash('First name, last name, and email are required.', 'error')
+            return render_template('profile/edit.html', user=user)
+        
+        # Check if email is already taken by another user
+        existing_user = db.get_user_by_email(email)
+        if existing_user and existing_user['id'] != user_id:
+            flash('Email is already taken by another user.', 'error')
+            return render_template('profile/edit.html', user=user)
+        
+        try:
+            # Update user profile
+            success = db.update_user_profile(user_id, first_name, last_name, email, phone)
+            avatar_url = None
+            if avatar_file and avatar_file.filename:
+                os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+                filename = secure_filename(f"user_{user_id}_" + avatar_file.filename)
+                save_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                avatar_file.save(save_path)
+                # Store relative URL to serve via static endpoint
+                avatar_url = url_for('serve_avatar', filename=filename)
+                db.update_user_avatar(user_id, avatar_url)
+            
+            if success:
+                flash('Profile updated successfully!', 'success')
+                # Update session data
+                session['user_name'] = f"{first_name} {last_name}"
+                session['user_email'] = email
+                if avatar_url:
+                    session['avatar_url'] = avatar_url
+                return redirect(url_for('view_profile'))
+            else:
+                flash('Failed to update profile. Please try again.', 'error')
+        except Exception as e:
+            flash(f'Error updating profile: {str(e)}', 'error')
+    
+    return render_template('profile/edit.html', user=user)
+
+@app.route('/change-password', methods=['GET', 'POST'])
+@login_required
+def change_password():
+    """Change user password"""
+    user_id = session['user_id']
+    user = db.get_user_by_id(user_id)
+    
+    if not user:
+        flash('User not found.', 'error')
+        return redirect(url_for('dashboard'))
+    
+    if request.method == 'POST':
+        current_password = request.form.get('current_password')
+        new_password = request.form.get('new_password')
+        confirm_password = request.form.get('confirm_password')
+        
+        # Basic validation
+        if not current_password or not new_password or not confirm_password:
+            flash('All password fields are required.', 'error')
+            return render_template('profile/change_password.html', user=user)
+        
+        if new_password != confirm_password:
+            flash('New password and confirm password do not match.', 'error')
+            return render_template('profile/change_password.html', user=user)
+        
+        if len(new_password) < 6:
+            flash('New password must be at least 6 characters long.', 'error')
+            return render_template('profile/change_password.html', user=user)
+        
+        try:
+            # Verify current password
+            if not bcrypt.checkpw(current_password.encode('utf-8'), user['password'].encode('utf-8')):
+                flash('Current password is incorrect.', 'error')
+                return render_template('profile/change_password.html', user=user)
+            
+            # Hash new password
+            new_password_hash = bcrypt.hashpw(new_password.encode('utf-8'), bcrypt.gensalt())
+            
+            # Update password in database
+            success = db.update_user_password(user_id, new_password_hash.decode('utf-8'))
+            
+            if success:
+                flash('Password changed successfully!', 'success')
+                return redirect(url_for('view_profile'))
+            else:
+                flash('Failed to change password. Please try again.', 'error')
+        except Exception as e:
+            flash(f'Error changing password: {str(e)}', 'error')
+    
+    return render_template('profile/change_password.html', user=user)
+
+@app.route('/debug-session')
+def debug_session():
+    """Debug route to check session data"""
+    return {
+        'session_data': dict(session),
+        'user_id': session.get('user_id'),
+        'user_email': session.get('user_email'),
+        'user_created_at': session.get('user_created_at')
+    }
+
+# Serve uploaded avatars
+@app.route('/uploads/avatars/<path:filename>')
+def serve_avatar(filename):
+    from flask import send_from_directory
+    directory = app.config['UPLOAD_FOLDER']
+    return send_from_directory(directory, filename)
 
 # Error handlers
 @app.errorhandler(404)

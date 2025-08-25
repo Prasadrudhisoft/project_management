@@ -1,0 +1,279 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Profile - {{ user.full_name }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <!-- Edit Profile Header -->
+            <div class="card shadow-lg border-0 mb-4">
+                <div class="card-body p-4">
+                    <div class="row align-items-center">
+                        <div class="col-auto">
+                            <div class="profile-avatar-large">
+                                <span class="avatar-text">{{ user.full_name[0] if user.full_name else 'U' }}</span>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <h2 class="mb-1">Edit Profile</h2>
+                            <p class="text-muted mb-0">Update your personal information and contact details</p>
+                        </div>
+                        <div class="col-auto">
+                            <a href="{{ url_for('view_profile') }}" class="btn btn-outline-secondary">
+                                <i class="fas fa-eye me-2"></i>View Profile
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Edit Profile Form -->
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-edit me-2"></i>Profile Information
+                    </h5>
+                </div>
+                <div class="card-body p-4">
+                    <form method="POST" id="editProfileForm" enctype="multipart/form-data">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="first_name" class="form-label fw-bold">
+                                    <i class="fas fa-user me-2"></i>First Name <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" 
+                                       class="form-control form-control-lg" 
+                                       id="first_name" 
+                                       name="first_name" 
+                                       value="{{ user.full_name.split(' ')[0] if user.full_name and ' ' in user.full_name else user.full_name or '' }}" 
+                                       required>
+                                <div class="form-text">Enter your first name</div>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="last_name" class="form-label fw-bold">
+                                    <i class="fas fa-user me-2"></i>Last Name <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" 
+                                       class="form-control form-control-lg" 
+                                       id="last_name" 
+                                       name="last_name" 
+                                       value="{{ user.full_name.split(' ')[1] if user.full_name and ' ' in user.full_name and user.full_name.split(' ')|length > 1 else '' }}" 
+                                       required>
+                                <div class="form-text">Enter your last name</div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="email" class="form-label fw-bold">
+                                    <i class="fas fa-envelope me-2"></i>Email Address <span class="text-danger">*</span>
+                                </label>
+                                <input type="email" 
+                                       class="form-control form-control-lg" 
+                                       id="email" 
+                                       name="email" 
+                                       value="{{ user.email }}" 
+                                       required>
+                                <div class="form-text">Your email address for notifications</div>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="phone" class="form-label fw-bold">
+                                    <i class="fas fa-phone me-2"></i>Phone Number
+                                </label>
+                                <input type="tel" 
+                                       class="form-control form-control-lg" 
+                                       id="phone" 
+                                       name="phone" 
+                                       value="{{ user.phone or '' }}" 
+                                       placeholder="+1 (555) 123-4567">
+                                <div class="form-text">Optional: Your contact number</div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="avatar" class="form-label fw-bold">
+                                    <i class="fas fa-image me-2"></i>Profile Picture
+                                </label>
+                                <input type="file" class="form-control form-control-lg" id="avatar" name="avatar" accept="image/*">
+                                <div class="form-text">PNG/JPG up to 2MB</div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                {% if user.avatar_url %}
+                                <label class="form-label fw-bold">Current Picture</label>
+                                <div>
+                                    <img src="{{ user.avatar_url }}" alt="Profile" style="height: 80px; width: 80px; border-radius: 50%; object-fit: cover;">
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">
+                                    <i class="fas fa-user-tag me-2"></i>Role
+                                </label>
+                                <input type="text" 
+                                       class="form-control form-control-lg" 
+                                       value="{{ user.role|title }}" 
+                                       readonly 
+                                       style="background-color: #f8f9fa;">
+                                <div class="form-text">Your role cannot be changed</div>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">
+                                    <i class="fas fa-id-badge me-2"></i>User ID
+                                </label>
+                                <input type="text" 
+                                       class="form-control form-control-lg" 
+                                       value="{{ user.id }}" 
+                                       readonly 
+                                       style="background-color: #f8f9fa;">
+                                <div class="form-text">Your unique user identifier</div>
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <!-- Action Buttons -->
+                        <div class="row">
+                            <div class="col-12 text-center">
+                                <button type="submit" class="btn btn-primary btn-lg me-3">
+                                    <i class="fas fa-save me-2"></i>Save Changes
+                                </button>
+                                <a href="{{ url_for('view_profile') }}" class="btn btn-outline-secondary btn-lg me-3">
+                                    <i class="fas fa-times me-2"></i>Cancel
+                                </a>
+                                <a href="{{ url_for('dashboard') if session.user_role == 'admin' else url_for('manager_dashboard') if session.user_role == 'manager' else url_for('member_dashboard') }}" class="btn btn-outline-info btn-lg">
+                                    <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+                                </a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Help Section -->
+            <div class="card shadow-sm border-0 mt-4">
+                <div class="card-header bg-info text-white">
+                    <h6 class="mb-0">
+                        <i class="fas fa-info-circle me-2"></i>Need Help?
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <p class="mb-2">
+                        <strong>Note:</strong> Fields marked with <span class="text-danger">*</span> are required.
+                    </p>
+                    <p class="mb-0">
+                        Your email address will be used for important notifications and password recovery.
+                        Make sure to provide a valid email address that you have access to.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.profile-avatar-large {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    font-weight: bold;
+    color: white;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.form-control-lg {
+    border-radius: 8px;
+    border: 2px solid #e9ecef;
+    transition: all 0.2s ease-in-out;
+}
+
+.form-control-lg:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+}
+
+.form-label {
+    color: #495057;
+    margin-bottom: 0.5rem;
+}
+
+.btn-lg {
+    padding: 0.875rem 1.75rem;
+    font-weight: 500;
+    border-radius: 8px;
+    transition: all 0.2s ease-in-out;
+}
+
+.btn-lg:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.card {
+    transition: transform 0.2s ease-in-out;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+}
+
+.card-header {
+    border-bottom: none;
+}
+
+@media (max-width: 768px) {
+    .btn-lg {
+        display: block;
+        width: 100%;
+        margin-bottom: 0.5rem;
+    }
+    
+    .btn-lg:last-child {
+        margin-bottom: 0;
+    }
+    
+    .profile-avatar-large {
+        width: 60px;
+        height: 60px;
+        font-size: 1.5rem;
+    }
+}
+</style>
+
+<script>
+document.getElementById('editProfileForm').addEventListener('submit', function(e) {
+    const firstName = document.getElementById('first_name').value.trim();
+    const lastName = document.getElementById('last_name').value.trim();
+    const email = document.getElementById('email').value.trim();
+    
+    if (!firstName || !lastName || !email) {
+        e.preventDefault();
+        alert('Please fill in all required fields.');
+        return;
+    }
+    
+    if (email && !isValidEmail(email)) {
+        e.preventDefault();
+        alert('Please enter a valid email address.');
+        return;
+    }
+});
+
+function isValidEmail(email) {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+}
+</script>
+{% endblock %}

@@ -54,6 +54,7 @@ CREATE TABLE `users` (
     `is_active` BOOLEAN DEFAULT TRUE COMMENT 'User account status',
     `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    `avatar_url` VARCHAR(512) NULL COMMENT 'Profile picture URL',
     
     -- Foreign key constraints
     CONSTRAINT `fk_users_organization` FOREIGN KEY (`organization_id`) 
@@ -276,6 +277,9 @@ CREATE TABLE `daily_reports` (
 COMMENT='Daily work reports submitted by users';
 
 -- =====================================================
+
+
+-- =====================================================
 -- 9. MESSAGES TABLE
 -- =====================================================
 DROP TABLE IF EXISTS `messages`;
@@ -335,6 +339,42 @@ COMMENT='System notifications';
 -- =====================================================
 -- SAMPLE DATA
 -- =====================================================
+
+-- =====================================================
+-- MIGRATION SAFEGUARDS (apply safely on existing databases)
+-- =====================================================
+-- Add avatar_url to users if missing
+ALTER TABLE `users` 
+    ADD COLUMN IF NOT EXISTS `avatar_url` VARCHAR(512) NULL COMMENT 'Profile picture URL' AFTER `updated_at`;
+
+-- Create structured daily report tables if they don't exist
+CREATE TABLE IF NOT EXISTS `daily_report_modules` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `report_id` INT NOT NULL,
+    `module_name` VARCHAR(255) NOT NULL,
+    `total_hours` DECIMAL(5,2) DEFAULT 0,
+    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    CONSTRAINT `fk_daily_report_modules_report` FOREIGN KEY (`report_id`)
+        REFERENCES `daily_reports`(`id`) ON DELETE CASCADE,
+    INDEX `idx_daily_report_modules_report` (`report_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `daily_report_tasks` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `report_id` INT NOT NULL,
+    `module_id` INT NULL,
+    `task_name` VARCHAR(255) NOT NULL,
+    `task_hours` DECIMAL(5,2) DEFAULT 0,
+    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    CONSTRAINT `fk_daily_report_tasks_report` FOREIGN KEY (`report_id`)
+        REFERENCES `daily_reports`(`id`) ON DELETE CASCADE,
+    CONSTRAINT `fk_daily_report_tasks_module` FOREIGN KEY (`module_id`)
+        REFERENCES `daily_report_modules`(`id`) ON DELETE SET NULL,
+    INDEX `idx_daily_report_tasks_report` (`report_id`),
+    INDEX `idx_daily_report_tasks_module` (`module_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Reset foreign key checks
 SET FOREIGN_KEY_CHECKS = 1;
