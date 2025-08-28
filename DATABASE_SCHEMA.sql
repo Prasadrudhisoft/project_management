@@ -336,17 +336,6 @@ CREATE TABLE `notifications` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci 
 COMMENT='System notifications';
 
--- =====================================================
--- SAMPLE DATA
--- =====================================================
-
--- =====================================================
--- MIGRATION SAFEGUARDS (apply safely on existing databases)
--- =====================================================
--- Add avatar_url to users if missing
-ALTER TABLE `users` 
-    ADD COLUMN IF NOT EXISTS `avatar_url` VARCHAR(512) NULL COMMENT 'Profile picture URL' AFTER `updated_at`;
-
 -- Create structured daily report tables if they don't exist
 CREATE TABLE IF NOT EXISTS `daily_report_modules` (
     `id` INT AUTO_INCREMENT PRIMARY KEY,
@@ -375,6 +364,19 @@ CREATE TABLE IF NOT EXISTS `daily_report_tasks` (
     INDEX `idx_daily_report_tasks_report` (`report_id`),
     INDEX `idx_daily_report_tasks_module` (`module_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+-- =====================================================
+-- SAMPLE DATA
+-- =====================================================
+
+-- =====================================================
+-- MIGRATION SAFEGUARDS (apply safely on existing databases)
+-- =====================================================
+-- Add avatar_url to users if missing
+ALTER TABLE `users` 
+    ADD COLUMN IF NOT EXISTS `avatar_url` VARCHAR(512) NULL COMMENT 'Profile picture URL' AFTER `updated_at`;
+
 
 -- Reset foreign key checks
 SET FOREIGN_KEY_CHECKS = 1;
