@@ -5,7 +5,7 @@
 {% block content %}
 <div class="container-fluid px-2 px-md-3">
     <div class="row justify-content-center">
-        <div class="col-12 col-lg-8 col-xl-6">
+        <div class="col-12 col-lg-10 col-xl-8">
             <div class="card shadow-sm">
                 <div class="card-header bg-primary text-white">
                     <h4 class="mb-1 d-flex align-items-center">
@@ -22,127 +22,101 @@
                 
                 <div class="card-body p-3 p-md-4">
                     <form method="POST" novalidate>
-                        <!-- Report Date -->
-                        <div class="mb-4">
-                            <label for="report_date" class="form-label fw-medium">
-                                Report Date <span class="text-danger">*</span>
-                            </label>
-                            <input type="date" 
-                                   class="form-control form-control-lg" 
-                                   id="report_date" 
-                                   name="report_date" 
-                                   value="{{ today }}"
-                                   required>
-                            <div class="form-text">
-                                Select the date for this report (defaults to today)
+                        <!-- Report Header -->
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label for="report_date" class="form-label fw-bold">Report Date</label>
+                                <input type="date" class="form-control form-control-lg" id="report_date" name="report_date" value="{{ today }}" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="project_id" class="form-label fw-bold">Project (optional)</label>
+                                <select class="form-select form-select-lg" id="project_id" name="project_id">
+                                    <option value="">No specific project</option>
+                                    {% for project in projects %}
+                                    <option value="{{ project.id }}">{{ project.name }}</option>
+                                    {% endfor %}
+                                </select>
                             </div>
                         </div>
 
-                        <!-- Project Selection -->
-                        <div class="mb-4">
-                            <label for="project_id" class="form-label fw-medium">Project (Optional)</label>
-                            <select class="form-select form-select-lg" id="project_id" name="project_id">
-                                <option value="">No specific project</option>
-                                {% for project in projects %}
-                                <option value="{{ project.id }}">{{ project.name }}</option>
-                                {% endfor %}
-                            </select>
-                            <div class="form-text">
-                                Select a project if this report is related to specific project work
+                        <!-- Visibility Settings -->
+                        <div class="row g-3 mb-4">
+                            <div class="col-12">
+                                <label class="form-label fw-bold">Report Visibility</label>
+                                <div class="d-flex gap-4">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="visible_to_manager" name="visible_to_manager">
+                                        <label class="form-check-label" for="visible_to_manager">
+                                            <i class="bi bi-eye me-1"></i>Visible to Managers
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="visible_to_admin" name="visible_to_admin">
+                                        <label class="form-check-label" for="visible_to_admin">
+                                            <i class="bi bi-eye-fill me-1"></i>Visible to Admins
+                                        </label>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
-                        <!-- Work Title -->
+                        <!-- Work Items Table -->
                         <div class="mb-4">
-                            <label for="work_title" class="form-label fw-medium">
-                                Work Title <span class="text-danger">*</span>
-                            </label>
-                            <input type="text" 
-                                   class="form-control form-control-lg" 
-                                   id="work_title" 
-                                   name="work_title" 
-                                   required
-                                   placeholder="Brief title of work completed"
-                                   maxlength="255">
-                            <div class="form-text">
-                                Provide a concise title describing the main work done
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h5 class="mb-0">
+                                    <i class="bi bi-list-task me-2"></i>Work Items
+                                </h5>
+                                <button type="button" class="btn btn-outline-primary btn-sm" id="addRowBtn">
+                                    <i class="bi bi-plus-circle me-1"></i>Add Row
+                                </button>
+                            </div>
+                            
+                            <div class="table-responsive">
+                                <table class="table table-bordered align-middle" style="border-color:#ced4da;" id="workItemsTable">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th style="width: 8%;">#</th>
+                                            <th style="width: 30%;">Module/Work Title</th>
+                                            <th style="width: 40%;">Description</th>
+                                            <th style="width: 12%;">Status</th>
+                                            <th style="width: 10%;">Discussion</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr class="work-item-row">
+                                            <td class="fw-bold text-center">1</td>
+                                            <td>
+                                                <input type="text" class="form-control" name="work_title[]" placeholder="e.g., User Authentication Module" maxlength="255" required>
+                                            </td>
+                                            <td>
+                                                <textarea class="form-control" name="work_description[]" rows="3" placeholder="Describe the work completed..." maxlength="1000"></textarea>
+                                            </td>
+                                            <td>
+                                                <select class="form-select" name="status[]" required>
+                                                    <option value="">Select...</option>
+                                                    <option value="completed">Completed</option>
+                                                    <option value="in_progress">In Progress</option>
+                                                    <option value="pending">Pending</option>
+                                                    <option value="blocked">Blocked</option>
+                                                </select>
+                                            </td>
+                                            <td>
+                                                <textarea class="form-control" name="discussion[]" rows="3" placeholder="Notes..." maxlength="500"></textarea>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
 
-                        <!-- Work Description -->
-                        <div class="mb-4">
-                            <label for="work_description" class="form-label fw-medium">Work Description</label>
-                            <textarea class="form-control" 
-                                      id="work_description" 
-                                      name="work_description" 
-                                      rows="4"
-                                      placeholder="Describe the work completed in detail..."
-                                      maxlength="1000"></textarea>
-                            <div class="form-text">
-                                Provide a detailed description of the work completed
-                            </div>
-                        </div>
-
-                        <!-- Status -->
-                        <div class="mb-4">
-                            <label for="status" class="form-label fw-medium">
-                                Work Status <span class="text-danger">*</span>
-                            </label>
-                            <select class="form-select form-select-lg" id="status" name="status" required>
-                                <option value="">Select status...</option>
-                                <option value="completed">Completed</option>
-                                <option value="in_progress">In Progress</option>
-                                <option value="pending">Pending</option>
-                                <option value="blocked">Blocked</option>
-                            </select>
-                            <div class="form-text">
-                                Current status of the work being reported
-                            </div>
-                        </div>
-
-                        <!-- Discussion -->
-                        <div class="mb-4">
-                            <label for="discussion" class="form-label fw-medium">Discussion/Notes</label>
-                            <textarea class="form-control" 
-                                      id="discussion" 
-                                      name="discussion" 
-                                      rows="3"
-                                      placeholder="Any additional notes, challenges, or discussions..."
-                                      maxlength="500"></textarea>
-                            <div class="form-text">
-                                Optional: Add any challenges, discussions, or additional context
-                            </div>
-                        </div>
-
-                        <!-- Visibility Options -->
-                        <div class="mb-4">
-                            <label class="form-label fw-medium">Report Visibility</label>
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" id="visible_to_manager" name="visible_to_manager">
-                                <label class="form-check-label" for="visible_to_manager">
-                                    <i class="bi bi-person-badge me-1"></i>Visible to Managers
-                                </label>
-                            </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" id="visible_to_admin" name="visible_to_admin">
-                                <label class="form-check-label" for="visible_to_admin">
-                                    <i class="bi bi-shield-check me-1"></i>Visible to Admins
-                                </label>
-                            </div>
-                            <div class="form-text">
-                                Select who can view this report. You can select both options.
-                            </div>
-                        </div>
-
-                        <!-- Action Buttons -->
+                        <!-- Submit Buttons -->
                         <div class="d-flex flex-column flex-sm-row gap-2 gap-sm-3 mt-4">
                             <button type="submit" class="btn btn-success btn-lg flex-grow-1 flex-sm-grow-0">
                                 <i class="bi bi-send me-2"></i>
                                 <span class="d-none d-sm-inline">Submit Report</span>
                                 <span class="d-sm-none">Submit</span>
                             </button>
-                            <a href="{{ url_for('daily_reports') }}" 
-                               class="btn btn-outline-secondary btn-lg">
+                            <a href="{{ url_for('daily_reports') }}" class="btn btn-outline-secondary btn-lg">
                                 <i class="bi bi-arrow-left me-2"></i>
                                 <span class="d-none d-sm-inline">Cancel</span>
                                 <span class="d-sm-none">Back</span>
@@ -183,6 +157,9 @@
     }
 }
 
+/* Spreadsheet-like borders */
+.table-bordered> :not(caption)>*>* { border-width: 1px; }
+
 /* Focus styles for better accessibility */
 .form-control:focus, .form-select:focus {
     border-color: #0d6efd;
@@ -207,6 +184,34 @@
     border-color: #dc3545;
     box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
 }
+
+/* Status colors */
+.form-select option[value="completed"] { color: #198754; }
+.form-select option[value="in_progress"] { color: #ffc107; }
+.form-select option[value="pending"] { color: #6c757d; }
+.form-select option[value="blocked"] { color: #dc3545; }
+
+/* Table improvements */
+.table th {
+    background-color: #f8f9fa !important;
+    border-bottom: 2px solid #dee2e6;
+    font-weight: 600;
+}
+
+.table td {
+    vertical-align: middle;
+}
+
+/* Compact form controls in table */
+.table .form-control, .table .form-select {
+    font-size: 0.875rem;
+    padding: 0.375rem 0.75rem;
+}
+
+.table textarea.form-control {
+    resize: vertical;
+    min-height: 60px;
+}
 </style>
 {% endblock %}
 
@@ -216,20 +221,86 @@ document.addEventListener('DOMContentLoaded', function() {
     // Form validation
     const form = document.querySelector('form');
     const reportDateInput = document.getElementById('report_date');
-    const workTitleInput = document.getElementById('work_title');
-    const statusSelect = document.getElementById('status');
+    const addRowBtn = document.getElementById('addRowBtn');
+    const workItemsTable = document.getElementById('workItemsTable');
+    const tbody = workItemsTable.querySelector('tbody');
     
     // Set minimum date to today
     const today = new Date().toISOString().split('T')[0];
     reportDateInput.min = today;
     
+    // Add Row functionality
+    addRowBtn.addEventListener('click', function() {
+        const rowCount = tbody.querySelectorAll('.work-item-row').length + 1;
+        const newRow = document.createElement('tr');
+        newRow.className = 'work-item-row';
+        
+        newRow.innerHTML = `
+            <td class="fw-bold text-center">${rowCount}</td>
+            <td>
+                <input type="text" class="form-control" name="work_title[]" placeholder="e.g., User Authentication Module" maxlength="255" required>
+            </td>
+            <td>
+                <textarea class="form-control" name="work_description[]" rows="3" placeholder="Describe the work completed..." maxlength="1000"></textarea>
+            </td>
+            <td>
+                <select class="form-select" name="status[]" required>
+                    <option value="">Select...</option>
+                    <option value="completed">Completed</option>
+                    <option value="in_progress">In Progress</option>
+                    <option value="pending">Pending</option>
+                    <option value="blocked">Blocked</option>
+                </select>
+            </td>
+            <td>
+                <textarea class="form-control" name="discussion[]" rows="3" placeholder="Notes..." maxlength="500"></textarea>
+            </td>
+        `;
+        
+        tbody.appendChild(newRow);
+        
+        // Add remove button for rows after the first one
+        if (rowCount > 1) {
+            const removeBtn = document.createElement('button');
+            removeBtn.type = 'button';
+            removeBtn.className = 'btn btn-outline-danger btn-sm ms-2';
+            removeBtn.innerHTML = '<i class="bi bi-trash"></i>';
+            removeBtn.title = 'Remove this row';
+            
+            removeBtn.addEventListener('click', function() {
+                newRow.remove();
+                updateRowNumbers();
+            });
+            
+            newRow.querySelector('td:first-child').appendChild(removeBtn);
+        }
+        
+        // Scroll to the new row
+        newRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    });
+    
+    // Update row numbers when rows are removed
+    function updateRowNumbers() {
+        const rows = tbody.querySelectorAll('.work-item-row');
+        rows.forEach((row, index) => {
+            const numberCell = row.querySelector('td:first-child');
+            const removeBtn = numberCell.querySelector('.btn-outline-danger');
+            
+            // Clear the cell and add new number
+            numberCell.innerHTML = (index + 1).toString();
+            
+            // Re-add remove button if it exists (for rows after the first)
+            if (index > 0 && removeBtn) {
+                numberCell.appendChild(removeBtn);
+            }
+        });
+    }
+    
     form.addEventListener('submit', function(e) {
         let isValid = true;
         
         // Reset previous validation states
-        [reportDateInput, workTitleInput, statusSelect].forEach(function(input) {
-            input.classList.remove('is-invalid', 'is-valid');
-        });
+        reportDateInput.classList.remove('is-invalid', 'is-valid');
         
         // Validate report date
         if (!reportDateInput.value) {
@@ -239,21 +310,29 @@ document.addEventListener('DOMContentLoaded', function() {
             reportDateInput.classList.add('is-valid');
         }
         
-        // Validate work title
-        if (!workTitleInput.value.trim()) {
-            workTitleInput.classList.add('is-invalid');
-            isValid = false;
-        } else {
-            workTitleInput.classList.add('is-valid');
-        }
+        // Validate all work items
+        const workTitles = document.querySelectorAll('input[name="work_title[]"]');
+        const statuses = document.querySelectorAll('select[name="status[]"]');
         
-        // Validate status
-        if (!statusSelect.value) {
-            statusSelect.classList.add('is-invalid');
-            isValid = false;
-        } else {
-            statusSelect.classList.add('is-valid');
-        }
+        workTitles.forEach((input, index) => {
+            input.classList.remove('is-invalid', 'is-valid');
+            if (!input.value.trim()) {
+                input.classList.add('is-invalid');
+                isValid = false;
+            } else {
+                input.classList.add('is-valid');
+            }
+        });
+        
+        statuses.forEach((select, index) => {
+            select.classList.remove('is-invalid', 'is-valid');
+            if (!select.value) {
+                select.classList.add('is-invalid');
+                isValid = false;
+            } else {
+                select.classList.add('is-valid');
+            }
+        });
         
         if (!isValid) {
             e.preventDefault();
@@ -261,22 +340,26 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
     
-    // Real-time validation
-    workTitleInput.addEventListener('input', function() {
-        if (this.value.trim()) {
-            this.classList.remove('is-invalid');
-            this.classList.add('is-valid');
-        } else {
-            this.classList.remove('is-valid');
+    // Real-time validation for dynamically added fields
+    document.addEventListener('input', function(e) {
+        if (e.target.name === 'work_title[]') {
+            if (e.target.value.trim()) {
+                e.target.classList.remove('is-invalid');
+                e.target.classList.add('is-valid');
+            } else {
+                e.target.classList.remove('is-valid');
+            }
         }
     });
     
-    statusSelect.addEventListener('change', function() {
-        if (this.value) {
-            this.classList.remove('is-invalid');
-            this.classList.add('is-valid');
-        } else {
-            this.classList.remove('is-valid');
+    document.addEventListener('change', function(e) {
+        if (e.target.name === 'status[]') {
+            if (e.target.value) {
+                e.target.classList.remove('is-invalid');
+                e.target.classList.add('is-valid');
+            } else {
+                e.target.classList.remove('is-valid');
+            }
         }
     });
 });

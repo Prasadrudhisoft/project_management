@@ -1354,18 +1354,69 @@ def daily_reports():
 def new_daily_report():
     """Create new daily report"""
     if request.method == 'POST':
+        # Get arrays of work items
+        work_titles = request.form.getlist('work_title[]')
+        work_descriptions = request.form.getlist('work_description[]')
+        statuses = request.form.getlist('status[]')
+        discussions = request.form.getlist('discussion[]')
+        
+        # Validate that we have at least one work item
+        if not work_titles or not any(title.strip() for title in work_titles):
+            flash('At least one work item is required.', 'error')
+            return render_template('daily_reports/new.html', 
+                                 user=db.get_user_by_id(session['user_id']), 
+                                 projects=db.get_user_projects(session['user_id'], session['organization_id']), 
+                                 today=datetime.now().strftime('%Y-%m-%d'))
+        
+        # Create the main report data
         data = {
             'user_id': session['user_id'],
             'organization_id': session['organization_id'],
             'project_id': request.form.get('project_id') or None,
             'report_date': request.form['report_date'],
-            'work_title': request.form['work_title'],
-            'work_description': request.form['work_description'],
-            'status': request.form['status'],
-            'discussion': request.form['discussion'],
             'visible_to_manager': 'visible_to_manager' in request.form,
             'visible_to_admin': 'visible_to_admin' in request.form
         }
+        
+        # Process multiple work items
+        work_items = []
+        for i in range(len(work_titles)):
+            if work_titles[i].strip():  # Only add non-empty work items
+                work_items.append({
+                    'title': work_titles[i].strip(),
+                    'description': work_descriptions[i].strip() if i < len(work_descriptions) else '',
+                    'status': statuses[i] if i < len(statuses) else 'completed',
+                    'discussion': discussions[i].strip() if i < len(discussions) else ''
+                })
+        
+        # If only one work item, use the original format for backward compatibility
+        if len(work_items) == 1:
+            data.update({
+                'work_title': work_items[0]['title'],
+                'work_description': work_items[0]['description'],
+                'status': work_items[0]['status'],
+                'discussion': work_items[0]['discussion']
+            })
+        else:
+            # For multiple work items, format them into a structured description
+            formatted_description = ""
+            for i, item in enumerate(work_items, 1):
+                formatted_description += f"{i}. {item['title']}\n"
+                if item['description']:
+                    formatted_description += f"{item['description']}\n"
+                if item['status']:
+                    formatted_description += f"Status: {item['status']}\n"
+                if item['discussion']:
+                    formatted_description += f"Discussion: {item['discussion']}\n"
+                formatted_description += "\n\n"  # Double line break to separate items
+            
+            # Use the first work item's title as the main title, and store all items in description
+            data.update({
+                'work_title': work_items[0]['title'],
+                'work_description': formatted_description.strip(),
+                'status': work_items[0]['status'],
+                'discussion': work_items[0]['discussion']
+            })
         
         try:
             report_id = db.create_daily_report(data)
@@ -1387,13 +1438,18 @@ def new_daily_report():
 @app.route('/daily-reports/<int:report_id>')
 @login_required
 def view_daily_report(report_id):
-    """View a specific daily report"""
+    """View a specific daily report with modules and tasks"""
     user_id = session['user_id']
     org_id = session['organization_id']
     user_role = session['user_role']  # Get user role from session
     
-    report = db.get_daily_report_by_id(report_id, user_id, org_id, user_role)
+    # Try to get report with modules first, fallback to regular report
+    report = db.get_daily_report_with_modules(report_id, user_id, org_id, user_role)
     
+    if not report:
+        # Fallback to regular report view
+        report = db.get_daily_report_by_id(report_id, user_id, org_id, user_role)
+        
     if not report:
         flash('Daily report not found or access denied.', 'error')
         return redirect(url_for('daily_reports'))

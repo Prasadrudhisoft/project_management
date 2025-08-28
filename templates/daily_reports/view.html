@@ -5,7 +5,7 @@
 {% block content %}
 <div class="container-fluid px-2 px-md-3">
     <div class="row justify-content-center">
-        <div class="col-12 col-lg-8 col-xl-6">
+        <div class="col-12 col-lg-10 col-xl-8">
             <!-- Back Button -->
             <div class="mb-3">
                 <a href="{{ url_for('daily_reports') }}" class="btn btn-outline-secondary">
@@ -13,111 +13,93 @@
                 </a>
             </div>
 
-            <!-- Report Card -->
-            <div class="card shadow-sm">
+            <!-- Report Header -->
+            <div class="card shadow-sm mb-4">
                 <div class="card-header bg-primary text-white">
-                    <div class="d-flex justify-content-between align-items-start">
-                        <div class="flex-grow-1">
-                            <h4 class="mb-1">{{ report.work_title }}</h4>
-                            <small class="opacity-75 d-block">
-                                <i class="bi bi-calendar me-1"></i>
-                                {{ report.report_date.strftime('%B %d, %Y') if report.report_date else 'No date' }}
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="mb-1">
+                                <i class="bi bi-journal-text me-2"></i>Daily Report
+                            </h5>
+                            <small class="opacity-75">
+                                <i class="bi bi-calendar me-1"></i>{{ report.report_date.strftime('%d-%m-%Y') if report.report_date else '' }}
+                                <i class="bi bi-person ms-3 me-1"></i>{{ report.user_name }}
                             </small>
                         </div>
-                        <div class="ms-3">
-                            <span class="badge bg-{{ 'success' if report.status == 'completed' else 'warning' if report.status == 'in_progress' else 'info' if report.status == 'pending' else 'danger' }} fs-6">
-                                {{ report.status.replace('_', ' ').title() }}
-                            </span>
+                        <div class="text-end">
+                            {% if report.project_name %}
+                            <div class="badge bg-light text-dark mb-1">
+                                <i class="bi bi-folder me-1"></i>{{ report.project_name }}
+                            </div>
+                            {% endif %}
+                            <div>
+                                {% if report.visible_to_manager %}
+                                <span class="badge bg-info me-1">Managers</span>
+                                {% endif %}
+                                {% if report.visible_to_admin %}
+                                <span class="badge bg-warning">Admins</span>
+                                {% endif %}
+                            </div>
                         </div>
                     </div>
                 </div>
-                
-                <div class="card-body p-4">
-                    <!-- Report Details -->
-                    <div class="row mb-4">
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <strong class="text-muted">Submitted by:</strong>
-                                <div class="mt-1">
-                                    <span class="badge bg-secondary fs-6">{{ report.user_name }}</span>
-                                </div>
+            </div>
+
+            <!-- Work Items Table -->
+            <div class="card shadow-sm">
+                <div class="card-header bg-light">
+                    <h6 class="mb-0">
+                        <i class="bi bi-list-task me-2"></i>Work Items
+                    </h6>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-bordered align-middle" style="border-color:#ced4da;">
+                            <thead class="table-light">
+                                <tr>
+                                    <th style="width: 8%;">#</th>
+                                    <th style="width: 30%;">Module/Work Title</th>
+                                    <th style="width: 40%;">Description</th>
+                                    <th style="width: 12%;">Status</th>
+                                    <th style="width: 10%;">Discussion</th>
+                                </tr>
+                            </thead>
+                            <tbody id="workItemsTableBody">
+                                <!-- JavaScript will populate this -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Summary Card -->
+            <div class="card shadow-sm mt-4" id="summaryCard" style="display: none;">
+                <div class="card-header bg-light">
+                    <h6 class="mb-0">
+                        <i class="bi bi-graph-up me-2"></i>Summary
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <div class="text-center">
+                                <div class="h4 text-primary mb-1" id="totalItems">0</div>
+                                <small class="text-muted">Total Items</small>
                             </div>
                         </div>
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <strong class="text-muted">Submitted on:</strong>
-                                <div class="mt-1">
-                                    <span class="text-muted">
-                                        {{ report.created_at.strftime('%B %d, %Y at %I:%M %p') if report.created_at else 'Unknown time' }}
-                                    </span>
-                                </div>
+                        <div class="col-md-4">
+                            <div class="text-center">
+                                <div class="h4 text-success mb-1" id="completedItems">0</div>
+                                <small class="text-muted">Completed</small>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="text-center">
+                                <div class="h4 text-warning mb-1" id="inProgressItems">0</div>
+                                <small class="text-muted">In Progress</small>
                             </div>
                         </div>
                     </div>
-
-                    <!-- Project Information -->
-                    {% if report.project_name %}
-                    <div class="mb-4">
-                        <strong class="text-muted">Related Project:</strong>
-                        <div class="mt-2">
-                            <span class="badge bg-primary fs-6">{{ report.project_name }}</span>
-                        </div>
-                    </div>
-                    {% endif %}
-
-                    <!-- Work Description -->
-                    {% if report.work_description %}
-                    <div class="mb-4">
-                        <strong class="text-muted">Work Description:</strong>
-                        <div class="mt-2 p-3 bg-light rounded">
-                            <p class="mb-0">{{ report.work_description }}</p>
-                        </div>
-                    </div>
-                    {% endif %}
-
-                    <!-- Discussion/Notes -->
-                    {% if report.discussion %}
-                    <div class="mb-4">
-                        <strong class="text-muted">Discussion/Notes:</strong>
-                        <div class="mt-2 p-3 bg-light rounded">
-                            <p class="mb-0">{{ report.discussion }}</p>
-                        </div>
-                    </div>
-                    {% endif %}
-
-                    <!-- Visibility Settings -->
-                    <div class="mb-4">
-                        <strong class="text-muted">Report Visibility:</strong>
-                        <div class="mt-2">
-                            {% if report.visible_to_manager %}
-                                <span class="badge bg-info me-2 fs-6">
-                                    <i class="bi bi-person-badge me-1"></i>Visible to Managers
-                                </span>
-                            {% endif %}
-                            {% if report.visible_to_admin %}
-                                <span class="badge bg-warning me-2 fs-6">
-                                    <i class="bi bi-shield-check me-1"></i>Visible to Admins
-                                </span>
-                            {% endif %}
-                            {% if not report.visible_to_manager and not report.visible_to_admin %}
-                                <span class="badge bg-secondary fs-6">
-                                    <i class="bi bi-eye-slash me-1"></i>Private Report
-                                </span>
-                            {% endif %}
-                        </div>
-                    </div>
-
-                    <!-- Last Updated -->
-                    {% if report.updated_at and report.updated_at != report.created_at %}
-                    <div class="mb-4">
-                        <strong class="text-muted">Last Updated:</strong>
-                        <div class="mt-1">
-                            <span class="text-muted">
-                                {{ report.updated_at.strftime('%B %d, %Y at %I:%M %p') }}
-                            </span>
-                        </div>
-                    </div>
-                    {% endif %}
                 </div>
             </div>
 
@@ -126,6 +108,9 @@
                 <a href="{{ url_for('daily_reports') }}" class="btn btn-outline-secondary">
                     <i class="bi bi-list me-2"></i>All Reports
                 </a>
+                <!-- <button id="downloadReportBtn" class="btn btn-success">
+                    <i class="bi bi-download me-2"></i>Download Report
+                </button> -->
                 {% if report.user_id == session.user_id %}
                 <a href="{{ url_for('new_daily_report') }}" class="btn btn-primary">
                     <i class="bi bi-plus me-2"></i>Submit New Report
@@ -135,6 +120,147 @@
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const workDescription = `{{ report.work_description|safe }}`;
+    const workTitle = `{{ report.work_title|safe }}`;
+    const status = `{{ report.status|safe }}`;
+    const discussion = `{{ report.discussion|safe }}`;
+    
+    const tableBody = document.getElementById('workItemsTableBody');
+    const summaryCard = document.getElementById('summaryCard');
+    
+    // Check if this is a multiple work items report
+    if (workDescription && (workDescription.includes('1.') || workDescription.includes('2.'))) {
+        // Parse multiple work items
+        parseMultipleWorkItems(workDescription);
+    } else {
+        // Display single work item
+        displaySingleWorkItem(workTitle, workDescription, status, discussion);
+    }
+    
+    function parseMultipleWorkItems(description) {
+        const lines = description.split('\n');
+        const workItems = [];
+        let currentItem = null;
+        
+        for (let i = 0; i < lines.length; i++) {
+            const line = lines[i].trim();
+            if (!line) continue;
+            
+            // Check if this line starts a new work item
+            if (line.match(/^\d+\./)) {
+                // Save previous item if exists
+                if (currentItem) {
+                    workItems.push(currentItem);
+                }
+                
+                // Start new item
+                const parts = line.split('.', 2);
+                currentItem = {
+                    number: parts[0],
+                    title: parts[1] ? parts[1].trim() : '',
+                    description: '',
+                    status: 'completed',
+                    discussion: ''
+                };
+            } else if (currentItem) {
+                // Process line for current item
+                if (line.startsWith('Status:')) {
+                    currentItem.status = line.replace('Status:', '').trim();
+                } else if (line.startsWith('Discussion:')) {
+                    currentItem.discussion = line.replace('Discussion:', '').trim();
+                } else if (currentItem.title) {
+                    // This is description content
+                    if (currentItem.description) {
+                        currentItem.description += '\n' + line;
+                    } else {
+                        currentItem.description = line;
+                    }
+                }
+            }
+        }
+        
+        // Add the last item
+        if (currentItem) {
+            workItems.push(currentItem);
+        }
+        
+        // Display all items
+        displayWorkItems(workItems);
+        
+        // Show summary
+        showSummary(workItems);
+    }
+    
+    function displaySingleWorkItem(title, description, status, discussion) {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td class="fw-bold text-center">1</td>
+            <td class="fw-semibold">${title || 'No title'}</td>
+            <td style="white-space: pre-wrap; font-size: 0.9rem;">${description || 'No description'}</td>
+            <td class="text-center">
+                <span class="badge bg-${getStatusBadgeClass(status)}">
+                    ${getStatusDisplayText(status)}
+                </span>
+            </td>
+            <td style="white-space: pre-wrap; font-size: 0.85rem;">${discussion || 'No discussion'}</td>
+        `;
+        tableBody.appendChild(row);
+    }
+    
+    function displayWorkItems(workItems) {
+        workItems.forEach(item => {
+            if (item.title) {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="fw-bold text-center">${item.number}</td>
+                    <td class="fw-semibold">${item.title}</td>
+                    <td style="white-space: pre-wrap; font-size: 0.9rem;">${item.description}</td>
+                    <td class="text-center">
+                        <span class="badge bg-${getStatusBadgeClass(item.status)}">
+                            ${getStatusDisplayText(item.status)}
+                        </span>
+                    </td>
+                    <td style="white-space: pre-wrap; font-size: 0.85rem;">${item.discussion}</td>
+                `;
+                tableBody.appendChild(row);
+            }
+        });
+    }
+    
+    function showSummary(workItems) {
+        const totalItems = workItems.length;
+        const completedItems = workItems.filter(item => item.status === 'completed').length;
+        const inProgressItems = workItems.filter(item => item.status === 'in_progress').length;
+        
+        document.getElementById('totalItems').textContent = totalItems;
+        document.getElementById('completedItems').textContent = completedItems;
+        document.getElementById('inProgressItems').textContent = inProgressItems;
+        
+        summaryCard.style.display = 'block';
+    }
+    
+    function getStatusBadgeClass(status) {
+        switch(status) {
+            case 'completed': return 'success';
+            case 'in_progress': return 'warning';
+            case 'blocked': return 'danger';
+            default: return 'secondary';
+        }
+    }
+    
+    function getStatusDisplayText(status) {
+        switch(status) {
+            case 'completed': return 'Done';
+            case 'in_progress': return 'In Progress';
+            case 'blocked': return 'Blocked';
+            default: return status ? status.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase()) : 'Unknown';
+        }
+    }
+});
+</script>
 
 <style>
 /* Responsive adjustments */
@@ -146,17 +272,14 @@
     .badge.fs-6 {
         font-size: 0.875rem !important;
     }
+    
+    .table-responsive {
+        font-size: 0.85rem;
+    }
 }
 
-/* Card hover effects */
-.card {
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
-}
+/* Spreadsheet-like borders */
+.table-bordered> :not(caption)>*>* { border-width: 1px; }
 
 /* Status badge colors */
 .badge.bg-success {
@@ -176,12 +299,23 @@
     background-color: #dc3545 !important;
 }
 
-.badge.bg-primary {
-    background-color: #0d6efd !important;
+.badge.bg-primary { background-color: #0d6efd !important; }
+.badge.bg-secondary { background-color: #6c757d !important; }
+
+/* Table improvements */
+.table th {
+    background-color: #f8f9fa !important;
+    border-bottom: 2px solid #dee2e6;
+    font-weight: 600;
 }
 
-.badge.bg-secondary {
-    background-color: #6c757d !important;
+.table td {
+    vertical-align: middle;
+}
+
+/* Card improvements */
+.card-header {
+    border-bottom: 1px solid rgba(0,0,0,.125);
 }
 </style>
 {% endblock %}

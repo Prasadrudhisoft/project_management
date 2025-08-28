@@ -99,7 +99,12 @@ class DatabaseHelper:
             is_active BOOLEAN DEFAULT TRUE,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-            FOREIGN KEY (organization_id) REFERENCES organizations(id) ON DELETE CASCADE
+            avatar_url VARCHAR(512) NULL COMMENT 'Profile picture URL',
+            FOREIGN KEY (organization_id) REFERENCES organizations(id) ON DELETE CASCADE,
+            INDEX idx_users_organization (organization_id),
+            INDEX idx_users_role (role),
+            INDEX idx_users_active (is_active),
+            INDEX idx_users_email (email)
         )
         """)
         
@@ -120,7 +125,12 @@ class DatabaseHelper:
             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
             FOREIGN KEY (organization_id) REFERENCES organizations(id) ON DELETE CASCADE,
             FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE CASCADE,
-            FOREIGN KEY (assigned_manager_id) REFERENCES users(id) ON DELETE SET NULL
+            FOREIGN KEY (assigned_manager_id) REFERENCES users(id) ON DELETE SET NULL,
+            INDEX idx_projects_organization (organization_id),
+            INDEX idx_projects_status (status),
+            INDEX idx_projects_creator (created_by),
+            INDEX idx_projects_manager (assigned_manager_id),
+            INDEX idx_projects_dates (start_date, end_date)
         )
         """)
         
@@ -138,7 +148,11 @@ class DatabaseHelper:
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
             FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE,
-            FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE CASCADE
+            FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE CASCADE,
+            INDEX idx_milestones_project (project_id),
+            INDEX idx_milestones_status (status),
+            INDEX idx_milestones_due_date (due_date),
+            INDEX idx_milestones_created_by (created_by)
         )
         """)
         
@@ -161,7 +175,14 @@ class DatabaseHelper:
             FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE,
             FOREIGN KEY (milestone_id) REFERENCES milestones(id) ON DELETE SET NULL,
             FOREIGN KEY (assigned_to) REFERENCES users(id) ON DELETE SET NULL,
-            FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE CASCADE
+            FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE CASCADE,
+            INDEX idx_tasks_project (project_id),
+            INDEX idx_tasks_milestone (milestone_id),
+            INDEX idx_tasks_assignee (assigned_to),
+            INDEX idx_tasks_status (status),
+            INDEX idx_tasks_priority (priority),
+            INDEX idx_tasks_due_date (due_date),
+            INDEX idx_tasks_created_by (created_by)
         )
         """)
         
@@ -178,7 +199,12 @@ class DatabaseHelper:
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (sender_id) REFERENCES users(id) ON DELETE CASCADE,
             FOREIGN KEY (recipient_id) REFERENCES users(id) ON DELETE CASCADE,
-            FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE SET NULL
+            FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE SET NULL,
+            INDEX idx_messages_sender (sender_id),
+            INDEX idx_messages_recipient (recipient_id),
+            INDEX idx_messages_project (project_id),
+            INDEX idx_messages_read (read_at),
+            INDEX idx_messages_created (created_at)
         )
         """)
         
@@ -191,7 +217,10 @@ class DatabaseHelper:
             content TEXT NOT NULL,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (task_id) REFERENCES tasks(id) ON DELETE CASCADE,
-            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+            INDEX idx_task_comments_task (task_id),
+            INDEX idx_task_comments_user (user_id),
+            INDEX idx_task_comments_created (created_at)
         )
         """)
         
@@ -205,7 +234,10 @@ class DatabaseHelper:
             joined_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             UNIQUE KEY unique_project_user (project_id, user_id),
             FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE,
-            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+            INDEX idx_project_members_project (project_id),
+            INDEX idx_project_members_user (user_id),
+            INDEX idx_project_members_role (role)
         )
         """)
 
@@ -217,7 +249,9 @@ class DatabaseHelper:
             user_id INT NOT NULL,
             UNIQUE KEY unique_project_user_visibility (project_id, user_id),
             FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE,
-            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+            INDEX idx_project_visibility_project (project_id),
+            INDEX idx_project_visibility_user (user_id)
         )
         """)
         
@@ -236,8 +270,78 @@ class DatabaseHelper:
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
             FOREIGN KEY (task_id) REFERENCES tasks(id) ON DELETE CASCADE,
-            FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE
+            FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE,
+            INDEX idx_notifications_user (user_id),
+            INDEX idx_notifications_type (type),
+            INDEX idx_notifications_read (is_read),
+            INDEX idx_notifications_created (created_at)
         )
+        """)
+        
+        # Daily reports table
+        cursor.execute("""
+        CREATE TABLE IF NOT EXISTS daily_reports (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            user_id INT NOT NULL COMMENT 'User who submitted the report',
+            organization_id INT NOT NULL COMMENT 'Reference to organization',
+            project_id INT COMMENT 'Reference to project (optional)',
+            report_date DATE NOT NULL COMMENT 'Date of the report',
+            work_title VARCHAR(255) NOT NULL COMMENT 'Title of work done',
+            work_description TEXT COMMENT 'Detailed description of work',
+            status ENUM('completed', 'in_progress', 'pending', 'blocked') DEFAULT 'completed' COMMENT 'Work status',
+            discussion TEXT COMMENT 'Any discussions or notes',
+            visible_to_manager BOOLEAN DEFAULT FALSE COMMENT 'Visible to managers',
+            visible_to_admin BOOLEAN DEFAULT FALSE COMMENT 'Visible to admins',
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            
+            -- Foreign key constraints
+            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+            FOREIGN KEY (organization_id) REFERENCES organizations(id) ON DELETE CASCADE,
+            FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE SET NULL,
+            
+            -- Indexes
+            INDEX idx_daily_reports_user (user_id),
+            INDEX idx_daily_reports_organization (organization_id),
+            INDEX idx_daily_reports_project (project_id),
+            INDEX idx_daily_reports_date (report_date),
+            INDEX idx_daily_reports_manager (visible_to_manager),
+            INDEX idx_daily_reports_admin (visible_to_admin)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci 
+        COMMENT='Daily work reports submitted by users'
+        """)
+        
+        # Daily report modules table (for structured reporting)
+        cursor.execute("""
+        CREATE TABLE IF NOT EXISTS daily_report_modules (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            report_id INT NOT NULL,
+            module_name VARCHAR(255) NOT NULL,
+            total_hours DECIMAL(5,2) DEFAULT 0,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            FOREIGN KEY (report_id) REFERENCES daily_reports(id) ON DELETE CASCADE,
+            INDEX idx_daily_report_modules_report (report_id)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+        COMMENT='Daily report modules for structured reporting'
+        """)
+        
+        # Daily report tasks table (for detailed task tracking)
+        cursor.execute("""
+        CREATE TABLE IF NOT EXISTS daily_report_tasks (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            report_id INT NOT NULL,
+            module_id INT NULL,
+            task_name VARCHAR(255) NOT NULL,
+            task_hours DECIMAL(5,2) DEFAULT 0,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            FOREIGN KEY (report_id) REFERENCES daily_reports(id) ON DELETE CASCADE,
+            FOREIGN KEY (module_id) REFERENCES daily_report_modules(id) ON DELETE SET NULL,
+            INDEX idx_daily_report_tasks_report (report_id),
+            INDEX idx_daily_report_tasks_module (module_id)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+        COMMENT='Daily report tasks for detailed tracking'
         """)
     
     def insert_sample_data(self, cursor):
@@ -2904,5 +3008,111 @@ class DatabaseHelper:
             logger.error(f"Error updating user avatar: {e}")
             conn.rollback()
             return False
+        finally:
+            conn.close()
+
+    def get_daily_report_with_modules(self, report_id, user_id, org_id, user_role):
+        """Get a specific daily report with its modules and tasks"""
+        conn = self.get_connection()
+        if not conn:
+            return None
+        
+        try:
+            cursor = conn.cursor(pymysql.cursors.DictCursor)
+            
+            # Get the main report
+            cursor.execute("""
+                SELECT dr.*, u.full_name as user_name, p.name as project_name
+                FROM daily_reports dr
+                JOIN users u ON dr.user_id = u.id
+                LEFT JOIN projects p ON dr.project_id = p.id
+                WHERE dr.id = %s AND dr.organization_id = %s
+            """, (report_id, org_id))
+            
+            report = cursor.fetchone()
+            if not report:
+                return None
+            
+            # Check access permissions based on user role
+            if user_role == 'member' and report['user_id'] != user_id:
+                return None
+            elif user_role == 'manager' and not report['visible_to_manager'] and report['user_id'] != user_id:
+                return None
+            elif user_role == 'admin' and not report['visible_to_admin'] and not report['visible_to_manager'] and report['user_id'] != user_id:
+                return None
+            
+            # Get modules for this report
+            cursor.execute("""
+                SELECT * FROM daily_report_modules 
+                WHERE report_id = %s 
+                ORDER BY id
+            """, (report_id,))
+            
+            modules = cursor.fetchall()
+            
+            # Get tasks for each module
+            for module in modules:
+                cursor.execute("""
+                    SELECT * FROM daily_report_tasks 
+                    WHERE module_id = %s 
+                    ORDER BY id
+                """, (module['id'],))
+                
+                module['tasks'] = cursor.fetchall()
+            
+            report['modules'] = modules
+            return report
+            
+        finally:
+            conn.close()
+
+    def get_daily_reports_with_module_counts(self, user_id, org_id, user_role):
+        """Get daily reports with module counts for list view"""
+        conn = self.get_connection()
+        if not conn:
+            return []
+        
+        try:
+            cursor = conn.cursor(pymysql.cursors.DictCursor)
+            
+            if user_role == 'admin':
+                # Admins can see all reports visible to them
+                cursor.execute("""
+                    SELECT dr.*, u.full_name as user_name, p.name as project_name,
+                           (SELECT COUNT(*) FROM daily_report_modules WHERE report_id = dr.id) as module_count
+                    FROM daily_reports dr
+                    JOIN users u ON dr.user_id = u.id
+                    LEFT JOIN projects p ON dr.project_id = p.id
+                    WHERE dr.organization_id = %s AND dr.visible_to_admin = TRUE
+                    ORDER BY dr.report_date DESC, dr.created_at DESC
+                """, (org_id,))
+            elif user_role == 'manager':
+                # Managers can see reports from their projects or visible to managers
+                cursor.execute("""
+                    SELECT dr.*, u.full_name as user_name, p.name as project_name,
+                           (SELECT COUNT(*) FROM daily_report_modules WHERE report_id = dr.id) as module_count
+                    FROM daily_reports dr
+                    JOIN users u ON dr.user_id = u.id
+                    LEFT JOIN projects p ON dr.project_id = p.id
+                    WHERE dr.organization_id = %s AND (
+                        dr.visible_to_manager = TRUE OR
+                        dr.user_id = %s OR
+                        p.id IN (SELECT pm.project_id FROM project_members pm WHERE pm.user_id = %s)
+                    )
+                    ORDER BY dr.report_date DESC, dr.created_at DESC
+                """, (org_id, user_id, user_id))
+            else:
+                # Members can only see their own reports
+                cursor.execute("""
+                    SELECT dr.*, u.full_name as user_name, p.name as project_name,
+                           (SELECT COUNT(*) FROM daily_report_modules WHERE report_id = dr.id) as module_count
+                    FROM daily_reports dr
+                    JOIN users u ON dr.user_id = u.id
+                    LEFT JOIN projects p ON dr.project_id = p.id
+                    WHERE dr.user_id = %s AND dr.organization_id = %s
+                    ORDER BY dr.report_date DESC, dr.created_at DESC
+                """, (user_id, org_id))
+            
+            return cursor.fetchall()
         finally:
             conn.close()
