@@ -1246,7 +1246,7 @@
                                             <td>{{ task_count }} tasks</td>
                                             <td>
                                                 {% if project.end_date %}
-                                                    {{ project.end_date.strftime('%m/%d/%Y') }}
+                                                    {{ project.end_date.strftime('%d/%m/%Y') }}
                                                 {% else %}
                                                     <span class="text-muted">No deadline</span>
                                                 {% endif %}

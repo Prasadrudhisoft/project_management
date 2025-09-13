@@ -1,6 +1,7 @@
 import pymysql
 from datetime import datetime, timedelta
 import logging
+import os
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -342,6 +343,30 @@ class DatabaseHelper:
             INDEX idx_daily_report_tasks_module (module_id)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
         COMMENT='Daily report tasks for detailed tracking'
+        """)
+
+        # Documents table
+        cursor.execute("""
+        CREATE TABLE IF NOT EXISTS documents (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            organization_id INT NOT NULL,
+            project_id INT NULL,
+            uploaded_by INT NOT NULL,
+            original_name VARCHAR(255) NOT NULL,
+            stored_name VARCHAR(255) NOT NULL,
+            file_path VARCHAR(1024) NOT NULL,
+            mime_type VARCHAR(255) NULL,
+            file_size BIGINT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (organization_id) REFERENCES organizations(id) ON DELETE CASCADE,
+            FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE SET NULL,
+            FOREIGN KEY (uploaded_by) REFERENCES users(id) ON DELETE CASCADE,
+            INDEX idx_documents_org (organization_id),
+            INDEX idx_documents_project (project_id),
+            INDEX idx_documents_user (uploaded_by),
+            INDEX idx_documents_created (created_at)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+        COMMENT='Uploaded documents for projects and organization'
         """)
     
     def insert_sample_data(self, cursor):
@@ -2391,6 +2416,259 @@ class DatabaseHelper:
                 'generated_at': datetime.now()
             }
             
+        finally:
+            conn.close()
+
+    # Documents methods
+    # Updated Documents methods to match your database table schema
+
+    def create_document_record(self, organization_id, project_id, uploaded_by, original_name, stored_name, file_path, mime_type, file_size):
+        """Create a document record with enhanced fields to match database schema"""
+        conn = self.get_connection()
+        if not conn:
+            return None
+        try:
+            cursor = conn.cursor()
+            
+            # Get file extension from original name
+            file_extension = os.path.splitext(original_name)[1].lower() if original_name else ''
+            
+            cursor.execute(
+                """
+                INSERT INTO documents (
+                    organization_id, project_id, title, description, filename, 
+                    file_path, file_size, file_type, file_extension, uploaded_by,
+                    is_active, version, download_count
+                ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                """,
+                (
+                    organization_id, 
+                    project_id or None, 
+                    original_name,  # Use original name as title
+                    None,  # description - can be added later
+                    stored_name,  # filename field stores the actual stored filename
+                    file_path, 
+                    file_size, 
+                    mime_type,  # file_type field
+                    file_extension, 
+                    uploaded_by,
+                    1,  # is_active = true
+                    1,  # version = 1 (initial version)
+                    0   # download_count = 0
+                ),
+            )
+            doc_id = cursor.lastrowid
+            conn.commit()
+            return doc_id
+        except Exception as e:
+            conn.rollback()
+            logger.error(f"Error creating document record: {e}")
+            return None
+        finally:
+            conn.close()
+
+    def create_document_record_enhanced(self, data):
+        """Create document record with all optional fields"""
+        conn = self.get_connection()
+        if not conn:
+            return None
+        try:
+            cursor = conn.cursor()
+            
+            cursor.execute(
+                """
+                INSERT INTO documents (
+                    organization_id, project_id, title, description, filename,
+                    file_path, file_size, file_type, file_extension, uploaded_by,
+                    tags, version, is_active, download_count
+                ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                """,
+                (
+                    data['organization_id'], data.get('project_id'), data['title'],
+                    data.get('description'), data['filename'], data['file_path'],
+                    data['file_size'], data['file_type'], data['file_extension'],
+                    data['uploaded_by'], data.get('tags'), data.get('version', 1),
+                    data.get('is_active', True), data.get('download_count', 0)
+                )
+            )
+            doc_id = cursor.lastrowid
+            conn.commit()
+            return doc_id
+        except Exception as e:
+            conn.rollback()
+            logger.error(f"Error creating enhanced document record: {e}")
+            return None
+        finally:
+            conn.close()
+
+    def get_documents_for_user(self, user_id, org_id, role):
+        """List documents based on role with enhanced access control"""
+        conn = self.get_connection()
+        if not conn:
+            return []
+        try:
+            cursor = conn.cursor(pymysql.cursors.DictCursor)
+            
+            if role == 'admin':
+                # Admin sees all active organization documents
+                cursor.execute(
+                    """
+                    SELECT d.*, u.full_name AS uploaded_by_name, p.name AS project_name
+                    FROM documents d
+                    JOIN users u ON d.uploaded_by = u.id
+                    LEFT JOIN projects p ON d.project_id = p.id
+                    WHERE d.organization_id = %s AND d.is_active = 1
+                    ORDER BY d.created_at DESC
+                    """,
+                    (org_id,),
+                )
+            elif role == 'manager':
+                # Manager sees documents from their assigned projects + their own uploads
+                cursor.execute(
+                    """
+                    SELECT DISTINCT d.*, u.full_name AS uploaded_by_name, p.name AS project_name
+                    FROM documents d
+                    JOIN users u ON d.uploaded_by = u.id
+                    LEFT JOIN projects p ON d.project_id = p.id
+                    WHERE d.organization_id = %s AND d.is_active = 1
+                    AND (p.assigned_manager_id = %s OR d.uploaded_by = %s OR d.project_id IS NULL)
+                    ORDER BY d.created_at DESC
+                    """,
+                    (org_id, user_id, user_id),
+                )
+            else:
+                # Members see their own uploads + documents from projects they're assigned to
+                cursor.execute(
+                    """
+                    SELECT DISTINCT d.*, u.full_name AS uploaded_by_name, p.name AS project_name
+                    FROM documents d
+                    JOIN users u ON d.uploaded_by = u.id
+                    LEFT JOIN projects p ON d.project_id = p.id
+                    LEFT JOIN project_assignments pa ON p.id = pa.project_id
+                    WHERE d.organization_id = %s AND d.is_active = 1
+                    AND (d.uploaded_by = %s OR pa.user_id = %s OR d.project_id IS NULL)
+                    ORDER BY d.created_at DESC
+                    """,
+                    (org_id, user_id, user_id),
+                )
+            
+            return cursor.fetchall()
+        except Exception as e:
+            logger.error(f"Error getting documents for user: {e}")
+            return []
+        finally:
+            conn.close()
+
+    def get_document_by_id(self, doc_id):
+        """Get document details by id"""
+        conn = self.get_connection()
+        if not conn:
+            return None
+        try:
+            cursor = conn.cursor(pymysql.cursors.DictCursor)
+            cursor.execute(
+                """
+                SELECT d.*, u.full_name AS uploaded_by_name, p.name AS project_name
+                FROM documents d
+                JOIN users u ON d.uploaded_by = u.id
+                LEFT JOIN projects p ON d.project_id = p.id
+                WHERE d.id = %s AND d.is_active = 1
+                """,
+                (doc_id,),
+            )
+            return cursor.fetchone()
+        finally:
+            conn.close()
+
+    def can_user_view_document(self, user_id, org_id, role, document):
+        """Enhanced RBAC for document viewing"""
+        if not document or document.get('organization_id') != org_id or not document.get('is_active', True):
+            return False
+        
+        if role == 'admin':
+            return True
+        
+        # Users can always view their own uploads
+        if document.get('uploaded_by') == user_id:
+            return True
+        
+        # For project-associated documents
+        if document.get('project_id'):
+            if role == 'manager':
+                # Manager can view documents from their assigned projects
+                project = self.get_project_by_id(document['project_id'])
+                if project and project.get('assigned_manager_id') == user_id:
+                    return True
+            elif role == 'member':
+                # Member can view documents from projects they're assigned to
+                return self.is_user_assigned_to_project(user_id, document['project_id'])
+        
+        # Documents not associated with projects are visible to all org members
+        if not document.get('project_id'):
+            return True
+        
+        return False
+
+    def delete_document(self, doc_id):
+        """Soft delete document (set is_active to 0) instead of hard delete"""
+        conn = self.get_connection()
+        if not conn:
+            return False
+        try:
+            cursor = conn.cursor()
+            cursor.execute("UPDATE documents SET is_active = 0 WHERE id = %s", (doc_id,))
+            conn.commit()
+            return cursor.rowcount > 0
+        except Exception as e:
+            conn.rollback()
+            logger.error(f"Error deleting document record: {e}")
+            return False
+        finally:
+            conn.close()
+
+    def increment_download_count(self, doc_id):
+        """Increment download count and update last downloaded timestamp"""
+        conn = self.get_connection()
+        if not conn:
+            return False
+        try:
+            cursor = conn.cursor()
+            cursor.execute(
+                """
+                UPDATE documents 
+                SET download_count = download_count + 1, 
+                    last_downloaded_at = CURRENT_TIMESTAMP
+                WHERE id = %s AND is_active = 1
+                """,
+                (doc_id,)
+            )
+            conn.commit()
+            return cursor.rowcount > 0
+        except Exception as e:
+            conn.rollback()
+            logger.error(f"Error updating download count: {e}")
+            return False
+        finally:
+            conn.close()
+
+    def is_user_assigned_to_project(self, user_id, project_id):
+        """Check if user is assigned to a project"""
+        conn = self.get_connection()
+        if not conn:
+            return False
+        try:
+            cursor = conn.cursor()
+            cursor.execute(
+                """
+                SELECT 1 FROM project_assignments 
+                WHERE user_id = %s AND project_id = %s
+                """,
+                (user_id, project_id)
+            )
+            return cursor.fetchone() is not None
+        except Exception as e:
+            logger.error(f"Error checking project assignment: {e}")
+            return False
         finally:
             conn.close()
     

@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+{% block title %}Documents - {{ super() }}{% endblock %}
+
+{% block content %}
+<div class="row mt-3">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header">
+        <h5 class="mb-0">Documents</h5>
+        <div>
+          <a href="{{ url_for('documents_upload') }}" class="btn btn-primary btn-sm">
+            <i class="bi bi-cloud-upload me-1"></i>Upload
+          </a>
+        </div>
+      </div>
+      <div class="card-body">
+        {% if documents and documents|length > 0 %}
+        <div class="table-responsive">
+          <table class="table align-middle">
+            <thead>
+              <tr>
+                <th>File</th>
+                <th>Project</th>
+                <th>Uploaded By</th>
+                <th>Type</th>
+                <th>Size</th>
+                <th>Uploaded</th>
+                <th class="text-end">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for d in documents %}
+              <tr>
+                <td>{{ d.original_name }}</td>
+                <td>{{ d.project_name or '-' }}</td>
+                <td>{{ d.uploaded_by_name }}</td>
+                <td>{{ d.mime_type or '-' }}</td>
+                <td>{{ (d.file_size // 1024) }} KB</td>
+                <td>{{ d.created_at.strftime('%Y-%m-%d %H:%M') if d.created_at else '' }}</td>
+                <td class="text-end">
+                  <a href="{{ url_for('documents_download', doc_id=d.id) }}" class="btn btn-sm btn-success">
+                    <i class="bi bi-download"></i>
+                  </a>
+                  {% if session.user_role == 'admin' or (session.user_role == 'manager' and d.uploaded_by == session.user_id) %}
+                  <form action="{{ url_for('documents_delete', doc_id=d.id) }}" method="post" class="d-inline" onsubmit="return confirm('Delete this document?');">
+                    <button type="submit" class="btn btn-sm btn-danger">
+                      <i class="bi bi-trash"></i>
+                    </button>
+                  </form>
+                  {% endif %}
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% else %}
+        <div class="text-center text-muted">No documents found.</div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+

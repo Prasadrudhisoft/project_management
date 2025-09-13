@@ -1172,7 +1172,7 @@
                                     <h6 class="mb-0">{{ task.title }}</h6>
                                     <small class="text-muted">
                                         <i class="bi bi-calendar-check me-1"></i>{{ task.project_name }}
-                                        {% if task.due_date %} • Due: {{ task.due_date.strftime('%m/%d/%Y') }}{% endif %}
+                                        {% if task.due_date %} • Due: {{ task.due_date.strftime('%d/%m/%Y') }}{% endif %}
                                     </small>
                                 </div>
                                 <div class="d-flex align-items-center gap-2">
@@ -1291,7 +1291,7 @@
                                     <div class="card-body p-3">
                                         <h6><a href="{{ url_for('view_task', id=task.id) }}" class="text-decoration-none">{{ task.title }}</a></h6>
                                         <small class="text-muted">{{ task.project_name }}</small><br>
-                                        <small class="text-danger">Due: {{ task.due_date.strftime('%m/%d/%Y') }}</small>
+                                        <small class="text-danger">Due: {{ task.due_date.strftime('%d/%m/%Y') }}</small>
                                         <br><span class="badge badge-priority-{{ task.priority }}">{{ task.priority.title() }} Priority</span>
                                     </div>
                                 </div>

@@ -37,9 +37,9 @@
                     {% if project.start_date or project.end_date %}
                     <div class="mb-2">
                         <small class="text-muted">
-                            {% if project.start_date %}Start: {{ project.start_date.strftime('%m/%d/%Y') }}{% endif %}
+                            {% if project.start_date %}Start: {{ project.start_date.strftime('%d/%m/%Y') }}{% endif %}
                             {% if project.start_date and project.end_date %} • {% endif %}
-                            {% if project.end_date %}End: {{ project.end_date.strftime('%m/%d/%Y') }}{% endif %}
+                            {% if project.end_date %}End: {{ project.end_date.strftime('%d/%m/%Y') }}{% endif %}
                         </small>
                     </div>
                     {% endif %}

@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="mb-0">
+                        <i class="bi bi-cloud-upload me-2"></i>Upload Document
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <!-- Flash messages -->
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                      {% if messages %}
+                        {% for category, message in messages %}
+                          <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                          </div>
+                        {% endfor %}
+                      {% endif %}
+                    {% endwith %}
+
+                    <form action="{{ url_for('documents_upload') }}" method="POST" enctype="multipart/form-data" id="uploadForm">
+                        <!-- File Upload -->
+                        <div class="mb-4">
+                            <label for="file" class="form-label">Select File <span class="text-danger">*</span></label>
+                            <input type="file" class="form-control" id="file" name="file" required>
+                            <div class="form-text">Maximum file size: 2MB</div>
+                        </div>
+
+                        <!-- Document Title (Optional) -->
+                        <div class="mb-3">
+                            <label for="title" class="form-label">Document Title</label>
+                            <input type="text" class="form-control" id="title" name="title" 
+                                   placeholder="Enter document title (optional - defaults to filename)">
+                            <div class="form-text">If not provided, the filename will be used as the title.</div>
+                        </div>
+
+                        <!-- Document Description (Optional) -->
+                        <div class="mb-3">
+                            <label for="description" class="form-label">Description</label>
+                            <textarea class="form-control" id="description" name="description" rows="3" 
+                                      placeholder="Brief description of the document (optional)"></textarea>
+                        </div>
+
+                        <!-- Project Association -->
+                        <div class="mb-3">
+                            <label for="project_id" class="form-label">Associate with Project</label>
+                            <select class="form-select" id="project_id" name="project_id">
+                                <option value="">-- No Project Association --</option>
+                                {% for project in projects %}
+                                    <option value="{{ project['id'] }}">{{ project['name'] }}</option>
+                                {% endfor %}
+                            </select>
+                            <div class="form-text">Optional: Link this document to a specific project.</div>
+                        </div>
+
+                        <!-- Tags (Optional) -->
+                        <div class="mb-4">
+                            <label for="tags" class="form-label">Tags</label>
+                            <input type="text" class="form-control" id="tags" name="tags" 
+                                   placeholder="Enter tags separated by commas (e.g., report, financial, Q1)">
+                            <div class="form-text">Tags help categorize and search for documents later.</div>
+                        </div>
+
+                        <!-- Submit Buttons -->
+                        <div class="d-flex justify-content-between">
+                            <a href="{{ url_for('documents_list') }}" class="btn btn-secondary">
+                                <i class="bi bi-arrow-left me-1"></i>Back to Documents
+                            </a>
+                            <button type="submit" class="btn btn-primary" id="submitBtn">
+                                <i class="bi bi-cloud-upload me-1"></i>Upload Document
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const fileInput = document.getElementById('file');
+    const titleInput = document.getElementById('title');
+    const uploadForm = document.getElementById('uploadForm');
+    const submitBtn = document.getElementById('submitBtn');
+
+    // Auto-fill title when file is selected
+    fileInput.addEventListener('change', function(e) {
+        if (e.target.files[0] && !titleInput.value.trim()) {
+            titleInput.value = e.target.files[0].name;
+        }
+        
+        // Validate file size (2MB limit)
+        if (e.target.files[0] && e.target.files[0].size > 2 * 1024 * 1024) {
+            alert('File size exceeds 2MB limit. Please select a smaller file.');
+            e.target.value = '';
+            return;
+        }
+    });
+
+    // Form submission with loading state
+    uploadForm.addEventListener('submit', function(e) {
+        if (!fileInput.files[0]) {
+            e.preventDefault();
+            alert('Please select a file to upload.');
+            return;
+        }
+
+        // Show loading state
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="bi bi-hourglass-split me-1"></i>Uploading...';
+    });
+});
+</script>
+{% endblock %}

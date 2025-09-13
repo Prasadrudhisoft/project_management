@@ -1289,7 +1289,7 @@
                                                 </h6>
                                                 <small class="text-muted">
                                                     {{ task.project_name }} • 
-                                                    {% if task.due_date %}Due: {{ task.due_date.strftime('%m/%d/%Y') }}{% else %}No due date{% endif %}
+                                                    {% if task.due_date %}Due: {{ task.due_date.strftime('%d/%m/%Y') }}{% else %}No due date{% endif %}
                                                 </small>
                                             </div>
                                             <div class="item-badges">

@@ -8,11 +8,11 @@ TAGLINE = "made by razi and om "
 
 # Contact Information
 SUPPORT_EMAIL = "rudhisoft@gmail.com"  # Change to your support email
-SALES_EMAIL = "sales@projectpro.com"      # Change to your sales email
-PHONE_NUMBER = "+1 (555) 123-4567"        # Change to your phone number
+SALES_EMAIL = "rudhisoft@gmail.com"      # Change to your sales email
+PHONE_NUMBER = "+91 8668709244"        # Change to your phone number
 
 # Website URLs (if you have existing website/social media)
-WEBSITE_URL = "https://www.projectpro.com"
+WEBSITE_URL = "https://www.rudhisoft.com/"
 BLOG_URL = "https://blog.projectpro.com"
 LINKEDIN_URL = "https://linkedin.com/company/projectpro"
 TWITTER_URL = "https://twitter.com/projectpro"

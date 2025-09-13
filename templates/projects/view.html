@@ -253,10 +253,10 @@
                                             <td>
                                                 {% if task.due_date is defined and task.due_date %}
                                                     {% if task.due_date|to_date and task.due_date|to_date < today() and task.status != 'completed' %}
-                                                        <span class="overdue-task">{{ task.due_date.strftime('%m/%d/%Y') }}</span>
+                                                        <span class="overdue-task">{{ task.due_date.strftime('%d/%m/%Y') }}</span>
                                                         <br><small class="overdue-task">Overdue</small>
                                                     {% else %}
-                                                        {{ task.due_date.strftime('%m/%d/%Y') }}
+                                                        {{ task.due_date.strftime('%d/%m/%Y') }}
                                                     {% endif %}
                                                 {% else %}
                                                     <span class="text-muted">No due date</span>
@@ -377,7 +377,7 @@
                                         <small class="text-muted">{{ milestone.description }}</small>
                                     {% endif %}
                                     {% if milestone.due_date is defined and milestone.due_date %}
-                                        <br><small class="text-muted">Due: {{ milestone.due_date.strftime('%m/%d/%Y') }}</small>
+                                        <br><small class="text-muted">Due: {{ milestone.due_date.strftime('%d/%m/%Y') }}</small>
                                     {% endif %}
                                     {% if milestone.assigned_member_name is defined and milestone.assigned_member_name %}
                                         <br><small class="text-info">Assigned to: {{ milestone.assigned_member_name }}</small>

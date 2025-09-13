@@ -19,6 +19,7 @@ app = Flask(__name__)
 app.secret_key = config.SECRET_KEY
 app.config['DEBUG'] = config.DEBUG
 app.config['UPLOAD_FOLDER'] = os.path.join(os.path.dirname(__file__), 'uploads', 'avatars')
+app.config['DOCUMENTS_FOLDER'] = os.path.join(os.path.dirname(__file__), 'uploads', 'documents')
 app.config['MAX_CONTENT_LENGTH'] = 2 * 1024 * 1024
 
 # Security Configuration
@@ -1310,6 +1311,223 @@ def get_message_count():
     """Get unread message count"""
     count = db.get_unread_message_count(session['user_id'])
     return jsonify({'unread_count': count})
+
+############################## Documents Routes
+@app.route('/documents')
+@login_required
+def documents_list():
+    """List documents based on RBAC"""
+    docs = db.get_documents_for_user(session['user_id'], session['organization_id'], session['user_role'])
+    return render_template('documents/list.html', documents=docs)
+
+@app.route('/documents/upload', methods=['GET', 'POST'])
+@login_required
+def documents_upload():
+    """Upload a document with enhanced fields matching your database schema"""
+    if request.method == 'POST':
+        file = request.files.get('file')
+        project_id = request.form.get('project_id') or None
+        title = request.form.get('title', '').strip()
+        description = request.form.get('description', '').strip()
+        tags = request.form.get('tags', '').strip()
+        
+        if not file or not file.filename:
+            flash('Please select a file to upload.', 'error')
+            return redirect(url_for('documents_upload'))
+
+        # Create documents folder if it doesn't exist
+        os.makedirs(app.config['DOCUMENTS_FOLDER'], exist_ok=True)
+        
+        # Get file details
+        original_name = secure_filename(file.filename)
+        file_extension = os.path.splitext(original_name)[1].lower()
+        mime_type = file.mimetype or 'application/octet-stream'
+        
+        # Truncate very long original names to keep within column limits
+        if len(original_name) > 200:
+            name_part, ext = os.path.splitext(original_name)
+            original_name = (name_part[:200] + ext)[:200]
+        
+        # Generate unique stored filename
+        unique_prefix = secrets.token_hex(8)
+        stored_name = f"{session['organization_id']}_{session['user_id']}_{unique_prefix}_{original_name}"
+        
+        # Ensure stored name fits in database column (255 chars)
+        if len(stored_name) > 255:
+            name_part, ext = os.path.splitext(original_name)
+            max_base_len = 255 - (len(str(session['organization_id'])) + 1 + 
+                                 len(str(session['user_id'])) + 1 + 
+                                 len(unique_prefix) + 1 + len(ext))
+            if max_base_len < 10:
+                max_base_len = 10
+            base_name = name_part[:max_base_len] + ext
+            stored_name = f"{session['organization_id']}_{session['user_id']}_{unique_prefix}_{base_name}"
+        
+        save_path = os.path.join(app.config['DOCUMENTS_FOLDER'], stored_name)
+        
+        try:
+            # Save the file
+            file.save(save_path)
+            file_size = os.path.getsize(save_path)
+            
+            # Validate project belongs to same org if provided
+            if project_id:
+                try:
+                    project_id = int(project_id)
+                    project = db.get_project_by_id(project_id)
+                    if not project or project['organization_id'] != session['organization_id']:
+                        flash('Invalid project selection.', 'error')
+                        # Clean up uploaded file
+                        try:
+                            os.remove(save_path)
+                        except:
+                            pass
+                        return redirect(url_for('documents_upload'))
+                except (ValueError, TypeError):
+                    project_id = None
+            
+            # Store relative path in DB
+            db_relative_path = os.path.join('uploads', 'documents', stored_name).replace('\\', '/')
+            
+            # Check if we want to use enhanced method with extra fields
+            if title or description or tags:
+                # Use enhanced method for additional fields
+                document_data = {
+                    'organization_id': session['organization_id'],
+                    'project_id': project_id,
+                    'title': title or original_name,
+                    'description': description,
+                    'filename': stored_name,
+                    'file_path': db_relative_path,
+                    'file_size': file_size,
+                    'file_type': mime_type,
+                    'file_extension': file_extension,
+                    'uploaded_by': session['user_id'],
+                    'tags': tags,
+                    'version': 1,
+                    'is_active': True,
+                    'download_count': 0
+                }
+                doc_id = db.create_document_record_enhanced(document_data)
+            else:
+                # Use original method for basic upload
+                doc_id = db.create_document_record(
+                    session['organization_id'], 
+                    project_id, 
+                    session['user_id'], 
+                    title or original_name,  # Use title if provided, else original name
+                    stored_name, 
+                    db_relative_path, 
+                    mime_type, 
+                    file_size
+                )
+            
+            if doc_id:
+                flash('Document uploaded successfully!', 'success')
+                return redirect(url_for('documents_list'))
+            else:
+                # Cleanup file if DB record fails
+                try:
+                    os.remove(save_path)
+                except:
+                    pass
+                flash('Failed to save document metadata.', 'error')
+                
+        except Exception as e:
+            # Cleanup file on any error
+            try:
+                if os.path.exists(save_path):
+                    os.remove(save_path)
+            except:
+                pass
+            flash(f'Upload failed: {str(e)}', 'error')
+            return redirect(url_for('documents_upload'))
+
+    # GET request - show upload form
+    user_role = session.get('user_role')
+    org_id = session.get('organization_id')
+    
+    # Get projects based on user role
+    if user_role == 'admin':
+        projects = db.get_organization_projects(org_id)
+    elif user_role == 'manager':
+        projects = db.get_manager_assigned_projects(session['user_id'], org_id)
+    else:
+        projects = db.get_user_visible_projects(session['user_id'], org_id)
+    
+    return render_template('documents/upload.html', projects=projects)
+
+
+@app.route('/documents/<int:doc_id>/download')
+@login_required
+def documents_download(doc_id):
+    """Download a document with download tracking"""
+    from flask import send_file
+    
+    document = db.get_document_by_id(doc_id)
+    if not document:
+        flash('Document not found.', 'error')
+        return redirect(url_for('documents_list'))
+    
+    # Check user permissions
+    if not db.can_user_view_document(session['user_id'], session['organization_id'], session['user_role'], document):
+        flash('Access denied.', 'error')
+        return redirect(url_for('documents_list'))
+    
+    try:
+        # Construct file path using the filename field (stored_name)
+        stored_name = document.get('filename', '')
+        if not stored_name:
+            flash('File information missing.', 'error')
+            return redirect(url_for('documents_list'))
+        
+        abs_path = os.path.join(app.config['DOCUMENTS_FOLDER'], stored_name)
+        
+        # Check if file exists
+        if not os.path.exists(abs_path):
+            flash('File not found on server.', 'error')
+            return redirect(url_for('documents_list'))
+        
+        # Increment download count
+        db.increment_download_count(doc_id)
+        
+        # Use title as download name, fallback to original_name
+        download_name = document.get('title') or document.get('filename', 'document')
+        
+        return send_file(
+            abs_path, 
+            as_attachment=True, 
+            download_name=download_name,
+            mimetype=document.get('file_type')
+        )
+        
+    except Exception as e:
+        print(f"Download error: {e}")
+        flash('Error downloading file.', 'error')
+        return redirect(url_for('documents_list'))
+
+@app.route('/documents/<int:doc_id>/delete', methods=['POST'])
+@login_required
+def documents_delete(doc_id):
+    """Delete document. Admin can delete all; manager only own; member cannot delete."""
+    document = db.get_document_by_id(doc_id)
+    if not document:
+        flash('Document not found.', 'error')
+        return redirect(url_for('documents_list'))
+    if not db.can_user_manage_document(session['user_id'], session['user_role'], document):
+        flash('Access denied. You cannot delete this document.', 'error')
+        return redirect(url_for('documents_list'))
+    file_path = document['file_path']
+    if db.delete_document(doc_id):
+        try:
+            if os.path.exists(file_path):
+                os.remove(file_path)
+        except Exception:
+            pass
+        flash('Document deleted.', 'success')
+    else:
+        flash('Failed to delete document.', 'error')
+    return redirect(url_for('documents_list'))
 
 @app.route('/notifications')
 @login_required

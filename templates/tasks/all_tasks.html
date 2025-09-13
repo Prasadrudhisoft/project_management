@@ -121,7 +121,7 @@
                             </td>
                             <td>
                                 {% if task.due_date %}
-                                    {{ task.due_date.strftime('%m/%d/%Y') }}
+                                    {{ task.due_date.strftime('%d/%m/%Y') }}
                                     {% if task.due_date|to_date and task.due_date|to_date < today() and task.status != 'completed' %}
                                     <br><small class="text-danger">Overdue</small>
                                     {% endif %}
