@@ -74,31 +74,28 @@ COMMENT='Users table with role-based access';
 -- 3. PROJECTS TABLE
 -- =====================================================
 DROP TABLE IF EXISTS `projects`;
-CREATE TABLE `projects` (
-    `id` INT AUTO_INCREMENT PRIMARY KEY,
-    `organization_id` INT NOT NULL,
-    `name` VARCHAR(255) NOT NULL COMMENT 'Project name',
-    `description` TEXT COMMENT 'Project description',
-    `status` ENUM('planning', 'active', 'completed', 'on_hold') DEFAULT 'planning' COMMENT 'Project status',
-    `visibility` ENUM('all', 'specific') DEFAULT 'all' COMMENT 'Project visibility',
-    `start_date` DATE COMMENT 'Project start date',
-    `end_date` DATE COMMENT 'Project end date',
-    `created_by` INT NOT NULL COMMENT 'User who created project',
-    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    
-    -- Foreign key constraints
-    CONSTRAINT `fk_projects_organization` FOREIGN KEY (`organization_id`) 
-        REFERENCES `organizations`(`id`) ON DELETE CASCADE,
-    CONSTRAINT `fk_projects_creator` FOREIGN KEY (`created_by`) 
-        REFERENCES `users`(`id`) ON DELETE RESTRICT,
-        
-    -- Indexes
-    INDEX `idx_projects_organization` (`organization_id`),
-    INDEX `idx_projects_status` (`status`),
-    INDEX `idx_projects_creator` (`created_by`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci 
-COMMENT='Projects table';
+CREATE TABLE projects (
+    id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    organization_id INT NOT NULL,
+    name VARCHAR(255) NOT NULL,
+    description TEXT,
+    status ENUM('planning', 'active', 'completed', 'on_hold') DEFAULT 'planning',
+    start_date DATE,
+    end_date DATE,
+    created_by INT NOT NULL,
+    assigned_manager_id INT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    visibility ENUM('all', 'specific') DEFAULT 'all',
+    INDEX (organization_id),
+    INDEX (status),
+    INDEX (created_by),
+    INDEX (assigned_manager_id),
+    INDEX (visibility),
+    FOREIGN KEY (organization_id) REFERENCES organizations(id) ON DELETE CASCADE,
+    FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (assigned_manager_id) REFERENCES users(id) ON DELETE SET NULL
+);
 
 -- =====================================================
 -- 4. PROJECT VISIBILITY TABLE
@@ -108,7 +105,6 @@ CREATE TABLE `project_visibility` (
     `id` INT AUTO_INCREMENT PRIMARY KEY,
     `project_id` INT NOT NULL,
     `user_id` INT NOT NULL,
-    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     
     CONSTRAINT `fk_project_visibility_project` FOREIGN KEY (`project_id`) 
         REFERENCES `projects`(`id`) ON DELETE CASCADE,
@@ -219,25 +215,18 @@ COMMENT='Project tasks';
 -- 8. TASK COMMENTS TABLE
 -- =====================================================
 DROP TABLE IF EXISTS `task_comments`;
-CREATE TABLE `task_comments` (
-    `id` INT AUTO_INCREMENT PRIMARY KEY,
-    `task_id` INT NOT NULL COMMENT 'Reference to task',
-    `user_id` INT NOT NULL COMMENT 'User who made comment',
-    `comment` TEXT NOT NULL COMMENT 'Comment text',
-    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    
-    -- Foreign key constraints
-    CONSTRAINT `fk_task_comments_task` FOREIGN KEY (`task_id`) 
-        REFERENCES `tasks`(`id`) ON DELETE CASCADE,
-    CONSTRAINT `fk_task_comments_user` FOREIGN KEY (`user_id`) 
-        REFERENCES `users`(`id`) ON DELETE RESTRICT,
-        
-    -- Indexes
-    INDEX `idx_task_comments_task` (`task_id`),
-    INDEX `idx_task_comments_user` (`user_id`),
-    INDEX `idx_task_comments_created` (`created_at`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci 
-COMMENT='Task comments and discussions';
+CREATE TABLE task_comments (
+    id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    task_id INT NOT NULL,
+    user_id INT NOT NULL,
+    content TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX (task_id),
+    INDEX (user_id),
+    FOREIGN KEY (task_id) REFERENCES tasks(id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
 
 -- =====================================================
 -- 9. DAILY REPORTS TABLE
@@ -313,28 +302,27 @@ COMMENT='Internal messaging system';
 -- 10. NOTIFICATIONS TABLE
 -- =====================================================
 DROP TABLE IF EXISTS `notifications`;
-CREATE TABLE `notifications` (
-    `id` INT AUTO_INCREMENT PRIMARY KEY,
-    `user_id` INT NOT NULL,
-    `title` VARCHAR(255) NOT NULL COMMENT 'Notification title',
-    `content` TEXT NOT NULL COMMENT 'Notification content',
-    `type` VARCHAR(50) NOT NULL COMMENT 'Notification type',
-    `reference_type` VARCHAR(50) COMMENT 'Referenced entity type',
-    `reference_id` INT COMMENT 'Referenced entity ID',
-    `read_at` TIMESTAMP NULL COMMENT 'When notification was read',
-    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    
-    -- Foreign key constraints
-    CONSTRAINT `fk_notifications_user` FOREIGN KEY (`user_id`) 
-        REFERENCES `users`(`id`) ON DELETE CASCADE,
-    
-    -- Indexes
-    INDEX `idx_notifications_user` (`user_id`),
-    INDEX `idx_notifications_type` (`type`),
-    INDEX `idx_notifications_read` (`read_at`),
-    INDEX `idx_notifications_reference` (`reference_type`, `reference_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci 
-COMMENT='System notifications';
+CREATE TABLE notifications (
+    id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    task_id INT,
+    project_id INT,
+    type ENUM('task_due_soon', 'task_overdue', 'task_assigned', 'project_update', 'milestone_due') DEFAULT 'task_due_soon',
+    title VARCHAR(255) NOT NULL,
+    message TEXT NOT NULL,
+    days_until_due INT,
+    is_read TINYINT(1) DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX (user_id),
+    INDEX (task_id),
+    INDEX (project_id),
+    INDEX (type),
+    INDEX (is_read),
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (task_id) REFERENCES tasks(id) ON DELETE SET NULL,
+    FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE SET NULL
+);
+
 
 -- Create structured daily report tables if they don't exist
 CREATE TABLE IF NOT EXISTS `daily_report_modules` (
@@ -364,6 +352,63 @@ CREATE TABLE IF NOT EXISTS `daily_report_tasks` (
     INDEX `idx_daily_report_tasks_report` (`report_id`),
     INDEX `idx_daily_report_tasks_module` (`module_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+
+CREATE TABLE document_permissions (
+    id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    document_id INT NOT NULL,
+    user_id INT,
+    role ENUM('admin', 'manager', 'member'),
+    permission_type ENUM('view', 'download', 'edit', 'delete') NOT NULL DEFAULT 'view',
+    granted_by INT NOT NULL,
+    granted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX (document_id),
+    INDEX (user_id),
+    INDEX (role),
+    INDEX (permission_type),
+    INDEX (granted_by),
+    FOREIGN KEY (document_id) REFERENCES documents(id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL,
+    FOREIGN KEY (granted_by) REFERENCES users(id) ON DELETE CASCADE
+);
+
+
+CREATE TABLE documents (
+    id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    organization_id INT NOT NULL,
+    project_id INT,
+    title VARCHAR(255) NOT NULL,
+    description TEXT,
+    filename VARCHAR(255) NOT NULL,
+    file_path VARCHAR(512) NOT NULL,
+    file_size BIGINT NOT NULL,
+    file_type VARCHAR(100) NOT NULL,
+    file_extension VARCHAR(10) NOT NULL,
+    uploaded_by INT NOT NULL,
+    upload_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    is_active TINYINT(1) DEFAULT 1,
+    tags TEXT,
+    version INT DEFAULT 1,
+    parent_document_id INT,
+    download_count INT DEFAULT 0,
+    last_downloaded_at TIMESTAMP NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX (organization_id),
+    INDEX (project_id),
+    INDEX (file_type),
+    INDEX (uploaded_by),
+    INDEX (upload_date),
+    INDEX (is_active),
+    INDEX (parent_document_id),
+    FOREIGN KEY (organization_id) REFERENCES organizations(id) ON DELETE CASCADE,
+    FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE SET NULL,
+    FOREIGN KEY (uploaded_by) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (parent_document_id) REFERENCES documents(id) ON DELETE SET NULL
+);
+
+
 
 
 -- =====================================================
@@ -425,6 +470,10 @@ INSERT INTO `messages` (`subject`, `content`, `sender_id`, `recipient_id`, `proj
 -- Insert sample notification
 INSERT INTO `notifications` (`user_id`, `title`, `content`, `type`, `reference_type`, `reference_id`) VALUES
 (2, 'New Task Assigned', 'You have been assigned a new task: Setup Project Structure', 'task_assigned', 'task', 1);
+
+
+--##################document_permissions####################
+
 
 -- =====================================================
 -- USEFUL QUERIES FOR DEBUGGING

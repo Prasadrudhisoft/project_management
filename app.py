@@ -1514,7 +1514,7 @@ def documents_delete(doc_id):
     if not document:
         flash('Document not found.', 'error')
         return redirect(url_for('documents_list'))
-    if not db.can_user_manage_document(session['user_id'], session['user_role'], document):
+    if not db.can_user_manage_document(session['user_id'], session['organization_id'], session['user_role'], document):
         flash('Access denied. You cannot delete this document.', 'error')
         return redirect(url_for('documents_list'))
     file_path = document['file_path']

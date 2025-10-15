@@ -2609,6 +2609,30 @@ class DatabaseHelper:
         
         return False
 
+    def can_user_manage_document(self, user_id, org_id, role, document):
+        """Enhanced RBAC for document management (delete, edit)"""
+        if not document or document.get('organization_id') != org_id or not document.get('is_active', True):
+            return False
+        
+        # Admin can manage all documents
+        if role == 'admin':
+            return True
+        
+        # Users can always manage their own uploads
+        if document.get('uploaded_by') == user_id:
+            return True
+        
+        # For project-associated documents
+        if document.get('project_id'):
+            if role == 'manager':
+                # Manager can manage documents from their assigned projects
+                project = self.get_project_by_id(document['project_id'])
+                if project and project.get('assigned_manager_id') == user_id:
+                    return True
+        
+        # Members cannot manage documents (only view)
+        return False
+
     def delete_document(self, doc_id):
         """Soft delete document (set is_active to 0) instead of hard delete"""
         conn = self.get_connection()
