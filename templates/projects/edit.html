@@ -420,7 +420,7 @@
                                             <small class="text-muted">
                                                 <strong>Created:</strong> 
                                                 {% if project.created_at %}
-                                                    {{ project.created_at.strftime('%B %d, %Y at %I:%M %p') }}
+                                                   {{ project.created_at.strftime('%B %d, %Y') }}
                                                 {% else %}
                                                     Unknown
                                                 {% endif %}
@@ -437,7 +437,7 @@
                                             <small class="text-muted">
                                                 <strong>Last updated:</strong> 
                                                 {% if project.updated_at %}
-                                                    {{ project.updated_at.strftime('%B %d, %Y at %I:%M %p') }}
+                                                    {{ project.updated_at.strftime('%B %d, %Y') }}
                                                 {% else %}
                                                     Never
                                                 {% endif %}
