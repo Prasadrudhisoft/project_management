@@ -384,13 +384,13 @@
                         <div class="row">
                             <div class="col-md-6">
                                 <strong>Created:</strong><br>
-                                {{ task.created_at.strftime('%B %d, %Y at %I:%M %p') }}
+                                {{ task.created_at.strftime('%B %d, %Y') }}
                             </div>
                             
                             {% if task.updated_at and task.updated_at != task.created_at %}
                             <div class="col-md-6">
                                 <strong>Last Updated:</strong><br>
-                                {{ task.updated_at.strftime('%B %d, %Y at %I:%M %p') }}
+                                {{ task.updated_at.strftime('%B %d, %Y') }}
                             </div>
                             {% endif %}
                         </div>

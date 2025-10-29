@@ -167,12 +167,12 @@
                                 <div class="row mt-2">
                                     <div class="col-md-6">
                                         <small class="text-muted">
-                                            <strong>Created:</strong> {{ task.created_at.strftime('%B %d, %Y at %I:%M %p') }}
+                                            <strong>Created:</strong> {{ task.created_at.strftime('%B %d, %Y ') }}
                                         </small>
                                     </div>
                                     <div class="col-md-6">
                                         <small class="text-muted">
-                                            <strong>Last updated:</strong> {{ task.updated_at.strftime('%B %d, %Y at %I:%M %p') if task.updated_at else 'Never' }}
+                                            <strong>Last updated:</strong> {{ task.updated_at.strftime('%B %d, %Y ') if task.updated_at else 'Never' }}
                                         </small>
                                     </div>
                                 </div>
