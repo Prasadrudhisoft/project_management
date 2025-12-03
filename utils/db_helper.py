@@ -2544,7 +2544,7 @@ class DatabaseHelper:
                     FROM documents d
                     JOIN users u ON d.uploaded_by = u.id
                     LEFT JOIN projects p ON d.project_id = p.id
-                    LEFT JOIN project_assignments pa ON p.id = pa.project_id
+                    LEFT JOIN project_members pa ON p.id = pa.project_id
                     WHERE d.organization_id = %s AND d.is_active = 1
                     AND (d.uploaded_by = %s OR pa.user_id = %s OR d.project_id IS NULL)
                     ORDER BY d.created_at DESC

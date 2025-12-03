@@ -29,7 +29,7 @@
                                 <input type="date" class="form-control form-control-lg" id="report_date" name="report_date" value="{{ today }}" required>
                             </div>
                             <div class="col-md-6">
-                                <label for="project_id" class="form-label fw-bold">Project (optional)</label>
+                                <label for="project_id" class="form-label fw-bold">Project</label>
                                 <select class="form-select form-select-lg" id="project_id" name="project_id">
                                     <option value="">No specific project</option>
                                     {% for project in projects %}
@@ -42,20 +42,25 @@
                         <!-- Visibility Settings -->
                         <div class="row g-3 mb-4">
                             <div class="col-12">
-                                <label class="form-label fw-bold">Report Visibility</label>
+                                <label class="form-label fw-bold">
+                                    Report Visibility <span class="text-danger">*</span>
+                                </label>
                                 <div class="d-flex gap-4">
                                     <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" id="visible_to_manager" name="visible_to_manager">
+                                        <input class="form-check-input" type="checkbox" id="visible_to_manager" name="visible_to_manager" checked>
                                         <label class="form-check-label" for="visible_to_manager">
                                             <i class="bi bi-eye me-1"></i>Visible to Managers
                                         </label>
                                     </div>
                                     <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" id="visible_to_admin" name="visible_to_admin">
+                                        <input class="form-check-input" type="checkbox" id="visible_to_admin" name="visible_to_admin" required checked>
                                         <label class="form-check-label" for="visible_to_admin">
-                                            <i class="bi bi-eye-fill me-1"></i>Visible to Admins
+                                            <i class="bi bi-eye-fill me-1"></i>Visible to Admins <span class="text-danger">*</span>
                                         </label>
                                     </div>
+                                </div>
+                                <div class="invalid-feedback d-block" id="visibility-error" style="display: none !important;">
+                                    Please check "Visible to Admins" to submit the report.
                                 </div>
                             </div>
                         </div>
@@ -185,6 +190,20 @@
     box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
 }
 
+/* Checkbox validation styles */
+.form-check-input.is-invalid {
+    border-color: #dc3545;
+}
+
+.form-check-input.is-invalid:focus {
+    border-color: #dc3545;
+    box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+}
+
+.form-check-input.is-valid {
+    border-color: #198754;
+}
+
 /* Status colors */
 .form-select option[value="completed"] { color: #198754; }
 .form-select option[value="in_progress"] { color: #ffc107; }
@@ -224,10 +243,23 @@ document.addEventListener('DOMContentLoaded', function() {
     const addRowBtn = document.getElementById('addRowBtn');
     const workItemsTable = document.getElementById('workItemsTable');
     const tbody = workItemsTable.querySelector('tbody');
+    const visibleToAdminCheckbox = document.getElementById('visible_to_admin');
+    const visibilityError = document.getElementById('visibility-error');
     
     // Set minimum date to today
     const today = new Date().toISOString().split('T')[0];
     reportDateInput.min = today;
+    
+    // Real-time validation for admin checkbox
+    visibleToAdminCheckbox.addEventListener('change', function() {
+        if (this.checked) {
+            this.classList.remove('is-invalid');
+            this.classList.add('is-valid');
+            visibilityError.style.display = 'none';
+        } else {
+            this.classList.remove('is-valid');
+        }
+    });
     
     // Add Row functionality
     addRowBtn.addEventListener('click', function() {
@@ -301,6 +333,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Reset previous validation states
         reportDateInput.classList.remove('is-invalid', 'is-valid');
+        visibleToAdminCheckbox.classList.remove('is-invalid', 'is-valid');
         
         // Validate report date
         if (!reportDateInput.value) {
@@ -308,6 +341,19 @@ document.addEventListener('DOMContentLoaded', function() {
             isValid = false;
         } else {
             reportDateInput.classList.add('is-valid');
+        }
+        
+        // Validate "Visible to Admins" checkbox (REQUIRED)
+        if (!visibleToAdminCheckbox.checked) {
+            visibleToAdminCheckbox.classList.add('is-invalid');
+            visibilityError.style.display = 'block';
+            isValid = false;
+            
+            // Scroll to the checkbox
+            visibleToAdminCheckbox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        } else {
+            visibleToAdminCheckbox.classList.add('is-valid');
+            visibilityError.style.display = 'none';
         }
         
         // Validate all work items
@@ -337,6 +383,11 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!isValid) {
             e.preventDefault();
             e.stopPropagation();
+            
+            // Show alert if admin checkbox is not checked
+            if (!visibleToAdminCheckbox.checked) {
+                alert('Please check "Visible to Admins" to submit the report.');
+            }
         }
     });
     
