@@ -67,16 +67,16 @@
                              data-href="{{ url_for('view_daily_report', report_id=report.id) }}"
                              onclick="window.location=this.dataset.href;">
                             <div class="card-header d-flex justify-content-between align-items-start">
-                                <div class="flex-grow-1">
-                                    <h6 class="mb-1 text-truncate" title="{{ report.work_title }}">
+                                <div class="flex-grow-1" style="min-width: 0;">
+                                    <h6 class="mb-1 text-truncate" title="{{ report.work_title }}" style="word-wrap: break-word; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
                                         {{ report.work_title }}
                                     </h6>
-                                    <small class="text-muted">
+                                    <small class="text-muted d-block">
                                         <i class="bi bi-calendar me-1"></i>
                                         {{ report.report_date.strftime('%B %d, %Y') if report.report_date else 'No date' }}
                                     </small>
                                 </div>
-                                <div class="ms-2">
+                                <div class="ms-2 flex-shrink-0">
                                     <span class="badge bg-{{ 'success' if report.status == 'completed' else 'warning' if report.status == 'in_progress' else 'info' if report.status == 'pending' else 'danger' }}">
                                         {{ report.status.replace('_', ' ').title() }}
                                     </span>
@@ -85,33 +85,33 @@
                             
                             <div class="card-body">
                                 <div class="mb-3">
-                                    <strong class="text-muted">Submitted by:</strong>
-                                    <span class="ms-2">{{ report.user_name }}</span>
+                                    <strong class="text-muted d-block mb-1">Submitted by:</strong>
+                                    <span class="d-block text-truncate" title="{{ report.user_name }}">{{ report.user_name }}</span>
                                 </div>
                                 
                                 {% if report.project_name %}
                                 <div class="mb-3">
-                                    <strong class="text-muted">Project:</strong>
-                                    <span class="ms-2 badge bg-primary">{{ report.project_name }}</span>
+                                    <strong class="text-muted d-block mb-1">Project:</strong>
+                                    <span class="badge bg-primary text-truncate d-inline-block" style="max-width: 100%;" title="{{ report.project_name }}">{{ report.project_name }}</span>
                                 </div>
                                 {% endif %}
                                 
                                 {% if report.work_description %}
                                 <div class="mb-3">
-                                    <strong class="text-muted">Description:</strong>
-                                    <p class="mb-0 mt-1">{{ report.work_description|truncate(150) }}</p>
+                                    <strong class="text-muted d-block mb-1">Description:</strong>
+                                    <p class="mb-0 text-break" style="overflow-wrap: break-word; word-wrap: break-word; word-break: break-word;">{{ report.work_description|truncate(150) }}</p>
                                 </div>
                                 {% endif %}
                                 
                                 {% if report.discussion %}
                                 <div class="mb-3">
-                                    <strong class="text-muted">Discussion:</strong>
-                                    <p class="mb-0 mt-1">{{ report.discussion|truncate(120) }}</p>
+                                    <strong class="text-muted d-block mb-1">Discussion:</strong>
+                                    <p class="mb-0 text-break" style="overflow-wrap: break-word; word-wrap: break-word; word-break: break-word;">{{ report.discussion|truncate(120) }}</p>
                                 </div>
                                 {% endif %}
                                 
                                 <div class="mb-3">
-                                    <strong class="text-muted">Visibility:</strong>
+                                    <strong class="text-muted d-block mb-1">Visibility:</strong>
                                     <div class="mt-1">
                                         {% if report.visible_to_manager %}
                                             <span class="badge bg-info me-1">Managers</span>
@@ -122,7 +122,7 @@
                                     </div>
                                 </div>
                                 
-                                <small class="text-muted">
+                                <small class="text-muted d-block">
                                     <i class="bi bi-clock me-1"></i>
                                     Submitted {{ report.created_at.strftime('%B %d, %Y at %I:%M %p') if report.created_at else 'Unknown time' }}
                                 </small>
@@ -193,6 +193,33 @@
     }
 }
 
+/* Prevent text overflow in cards */
+.card {
+    overflow: hidden;
+}
+
+.card-header {
+    overflow: hidden;
+}
+
+.card-body {
+    overflow: hidden;
+}
+
+/* Text truncation and wrapping utilities */
+.text-truncate {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.text-break {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    word-break: break-word;
+    hyphens: auto;
+}
+
 /* Card hover effects */
 .card {
     transition: transform 0.2s ease, box-shadow 0.2s ease;
@@ -217,6 +244,24 @@
 
 .report-card:hover .card-header {
     background: linear-gradient(135deg, #0d6efd, #0b5ed7) !important;
+    color: white;
+}
+
+/* Card header flex fix */
+.card-header {
+    display: flex;
+    align-items: flex-start;
+    padding: 1rem;
+}
+
+.card-header .flex-grow-1 {
+    flex: 1 1 auto;
+    min-width: 0; /* Important for text truncation */
+    margin-right: 0.5rem;
+}
+
+.card-header .flex-shrink-0 {
+    flex: 0 0 auto;
 }
 
 /* Status badge colors */
@@ -235,6 +280,32 @@
 
 .badge.bg-danger {
     background-color: #dc3545 !important;
+}
+
+.badge.bg-primary {
+    background-color: #0d6efd !important;
+}
+
+/* Ensure badges don't break layout */
+.badge {
+    display: inline-block;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    vertical-align: middle;
+}
+
+/* Better spacing in card body sections */
+.card-body > div {
+    overflow: hidden;
+}
+
+/* Improve title display */
+.card-header h6 {
+    margin-bottom: 0.25rem;
+    line-height: 1.3;
+    max-width: 100%;
 }
 </style>
 {% endblock %}
