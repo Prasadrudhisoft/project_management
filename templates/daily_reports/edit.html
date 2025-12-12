@@ -1,0 +1,296 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Daily Report{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-2 px-md-3">
+    <div class="row justify-content-center">
+        <div class="col-12 col-lg-10 col-xl-8">
+            <!-- Back Button -->
+            <div class="mb-3">
+                <a href="{{ url_for('daily_reports') }}" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left me-2"></i>Back to Reports
+                </a>
+            </div>
+
+            <!-- Page Header -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-pencil-square me-2"></i>Edit Daily Report
+                    </h5>
+                </div>
+            </div>
+
+            <!-- Alert Box -->
+            <div class="alert alert-info d-flex align-items-center mb-4" role="alert">
+                <i class="bi bi-info-circle-fill me-2"></i>
+                <div>
+                    <strong>Note:</strong> You can only edit reports submitted today.
+                </div>
+            </div>
+
+            <!-- Edit Form -->
+            <form method="POST" id="editReportForm">
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-light">
+                        <h6 class="mb-0">
+                            <i class="bi bi-info-circle me-2"></i>Report Details
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <!-- Report Date -->
+                        <div class="mb-3">
+                            <label for="report_date" class="form-label required">Report Date</label>
+                            <input type="date" class="form-control" id="report_date" name="report_date" 
+                                   value="{{ report.report_date.strftime('%Y-%m-%d') if report.report_date else '' }}" 
+                                   required readonly>
+                            <small class="text-muted">Report date cannot be changed</small>
+                        </div>
+
+                        <!-- Project Selection -->
+                        <div class="mb-3">
+                            <label for="project_id" class="form-label">Project (Optional)</label>
+                            <select class="form-select" id="project_id" name="project_id">
+                                <option value="">-- No Project --</option>
+                                {% for project in projects %}
+                                <option value="{{ project.id }}" 
+                                        {% if report.project_id == project.id %}selected{% endif %}>
+                                    {{ project.name }} ({{ project.status }})
+                                </option>
+                                {% endfor %}
+                            </select>
+                            <small class="text-muted">Select a project if this work is project-related</small>
+                        </div>
+
+                        <!-- Visibility Options -->
+                        <div class="mb-3">
+                            <label class="form-label">Visibility</label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="visible_to_manager" 
+                                       name="visible_to_manager" value="1" 
+                                       {% if report.visible_to_manager %}checked{% endif %}>
+                                <label class="form-check-label" for="visible_to_manager">
+                                    <i class="bi bi-eye me-1"></i>Visible to Managers
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="visible_to_admin" 
+                                       name="visible_to_admin" value="1" 
+                                       {% if report.visible_to_admin %}checked{% endif %}>
+                                <label class="form-check-label" for="visible_to_admin">
+                                    <i class="bi bi-eye me-1"></i>Visible to Admins
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Work Items Section -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                        <h6 class="mb-0">
+                            <i class="bi bi-list-task me-2"></i>Work Items
+                        </h6>
+                        <button type="button" class="btn btn-sm btn-success" id="addWorkItemBtn">
+                            <i class="bi bi-plus me-1"></i>Add Item
+                        </button>
+                    </div>
+                    <div class="card-body" id="workItemsContainer">
+                        <!-- Work items will be added here by JavaScript -->
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="d-flex justify-content-end gap-3 mb-4">
+                    <a href="{{ url_for('daily_reports') }}" class="btn btn-outline-secondary">
+                        <i class="bi bi-x me-2"></i>Cancel
+                    </a>
+                    <button type="submit" class="btn btn-primary" id="submitBtn">
+                        <i class="bi bi-save me-2"></i>Update Report
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+.work-item-card {
+    border: 1px solid #dee2e6;
+    border-radius: 0.375rem;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    background-color: #f8f9fa;
+    position: relative;
+}
+
+.work-item-card:hover {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.remove-work-item {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+}
+
+.required::after {
+    content: " *";
+    color: red;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    let workItemCount = 0;
+    const container = document.getElementById('workItemsContainer');
+    const addBtn = document.getElementById('addWorkItemBtn');
+    
+    // Parse existing report data
+    const reportData = {
+        workTitle: `{{ report.work_title|safe }}`,
+        workDescription: `{{ report.work_description|safe }}`,
+        status: `{{ report.status|safe }}`,
+        discussion: `{{ report.discussion|safe }}`
+    };
+    
+    // Check if report has multiple work items
+    if (reportData.workDescription && (reportData.workDescription.includes('1.') || reportData.workDescription.includes('2.'))) {
+        parseAndLoadMultipleWorkItems(reportData.workDescription);
+    } else {
+        // Load single work item
+        addWorkItem(reportData.workTitle, reportData.workDescription, reportData.status, reportData.discussion);
+    }
+    
+    function parseAndLoadMultipleWorkItems(description) {
+        const lines = description.split('\n');
+        const workItems = [];
+        let currentItem = null;
+        
+        for (let i = 0; i < lines.length; i++) {
+            const line = lines[i].trim();
+            if (!line) continue;
+            
+            if (line.match(/^\d+\./)) {
+                if (currentItem) {
+                    workItems.push(currentItem);
+                }
+                
+                const parts = line.split('.', 2);
+                currentItem = {
+                    title: parts[1] ? parts[1].trim() : '',
+                    description: '',
+                    status: 'completed',
+                    discussion: ''
+                };
+            } else if (currentItem) {
+                if (line.startsWith('Status:')) {
+                    currentItem.status = line.replace('Status:', '').trim();
+                } else if (line.startsWith('Discussion:')) {
+                    currentItem.discussion = line.replace('Discussion:', '').trim();
+                } else if (currentItem.title) {
+                    if (currentItem.description) {
+                        currentItem.description += '\n' + line;
+                    } else {
+                        currentItem.description = line;
+                    }
+                }
+            }
+        }
+        
+        if (currentItem) {
+            workItems.push(currentItem);
+        }
+        
+        // Load all items
+        workItems.forEach(item => {
+            if (item.title) {
+                addWorkItem(item.title, item.description, item.status, item.discussion);
+            }
+        });
+    }
+    
+    function addWorkItem(title = '', description = '', status = 'completed', discussion = '') {
+        workItemCount++;
+        
+        const workItemHtml = `
+            <div class="work-item-card" data-item-id="${workItemCount}">
+                <button type="button" class="btn btn-sm btn-danger remove-work-item" onclick="removeWorkItem(${workItemCount})">
+                    <i class="bi bi-trash"></i>
+                </button>
+                
+                <div class="mb-3">
+                    <label class="form-label required">Work Title/Module</label>
+                    <input type="text" class="form-control" name="work_title[]" 
+                           value="${title}" required placeholder="e.g., User Authentication Module">
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label">Description</label>
+                    <textarea class="form-control" name="work_description[]" rows="3" 
+                              placeholder="Describe what you worked on...">${description}</textarea>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label required">Status</label>
+                        <select class="form-select" name="status[]" required>
+                            <option value="completed" ${status === 'completed' ? 'selected' : ''}>✅ Completed</option>
+                            <option value="in_progress" ${status === 'in_progress' ? 'selected' : ''}>🔄 In Progress</option>
+                            <option value="pending" ${status === 'pending' ? 'selected' : ''}>⏳ Pending</option>
+                            <option value="blocked" ${status === 'blocked' ? 'selected' : ''}>🚫 Blocked</option>
+                        </select>
+                    </div>
+                    
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Discussion/Notes</label>
+                        <textarea class="form-control" name="discussion[]" rows="3" 
+                                  placeholder="Any discussions or notes...">${discussion}</textarea>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        container.insertAdjacentHTML('beforeend', workItemHtml);
+    }
+    
+    // Add work item button
+    addBtn.addEventListener('click', function() {
+        addWorkItem();
+    });
+    
+    // Global remove function
+    window.removeWorkItem = function(itemId) {
+        const items = document.querySelectorAll('.work-item-card');
+        if (items.length <= 1) {
+            alert('You must have at least one work item.');
+            return;
+        }
+        
+        const item = document.querySelector(`[data-item-id="${itemId}"]`);
+        if (item) {
+            item.remove();
+        }
+    };
+    
+    // Form validation
+    document.getElementById('editReportForm').addEventListener('submit', function(e) {
+        const workTitles = document.querySelectorAll('[name="work_title[]"]');
+        let hasValidItem = false;
+        
+        workTitles.forEach(input => {
+            if (input.value.trim() !== '') {
+                hasValidItem = true;
+            }
+        });
+        
+        if (!hasValidItem) {
+            e.preventDefault();
+            alert('Please add at least one work item with a title.');
+            return false;
+        }
+    });
+});
+</script>
+{% endblock %}

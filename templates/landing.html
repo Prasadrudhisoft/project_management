@@ -1,40 +1,47 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>RudhiManage- Professional Project Management Solution</title>
-    <meta name="description" content="Streamline your projects, boost team productivity, and achieve your goals with our comprehensive project management platform.">
+    <meta name="description"
+        content="Streamline your projects, boost team productivity, and achieve your goals with our comprehensive project management platform.">
     <meta name="keywords" content="project management, task management, team collaboration, productivity, workflow">
-    
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    
+
     <style>
-      :root {
-    --primary-color: #6f42c1;        /* Purple */
-    --primary-dark: #5a2d91;         /* Darker purple */
-    --primary-light: #f3e8ff;        /* Light purple */
-    --secondary-color: #64748b;
-    --accent-color: #e83e8c;         /* Pink */
-    --warning-color: #f59e0b;
-    --danger-color: #ef4444;
-    --dark-color: #1e293b;
-    --light-color: #f8fafc;
-    --gray-100: #f1f5f9;
-    --gray-200: #e2e8f0;
-    --gray-300: #cbd5e1;
-    --gray-400: #94a3b8;
-    --gray-500: #64748b;
-    --gray-600: #475569;
-    --gray-700: #334155;
-    --gray-800: #1e293b;
-    --gray-900: #0f172a;
-    --white: #ffffff;
-    /* ... rest of your shadow variables remain the same ... */
-}
+        :root {
+            --primary-color: #6f42c1;
+            /* Purple */
+            --primary-dark: #5a2d91;
+            /* Darker purple */
+            --primary-light: #f3e8ff;
+            /* Light purple */
+            --secondary-color: #64748b;
+            --accent-color: #e83e8c;
+            /* Pink */
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --dark-color: #1e293b;
+            --light-color: #f8fafc;
+            --gray-100: #f1f5f9;
+            --gray-200: #e2e8f0;
+            --gray-300: #cbd5e1;
+            --gray-400: #94a3b8;
+            --gray-500: #64748b;
+            --gray-600: #475569;
+            --gray-700: #334155;
+            --gray-800: #1e293b;
+            --gray-900: #0f172a;
+            --white: #ffffff;
+            /* ... rest of your shadow variables remain the same ... */
+        }
 
         * {
             margin: 0;
@@ -95,8 +102,15 @@
         }
 
         @keyframes float {
-            0%, 100% { transform: translateY(0px) rotate(0deg); }
-            50% { transform: translateY(-20px) rotate(180deg); }
+
+            0%,
+            100% {
+                transform: translateY(0px) rotate(0deg);
+            }
+
+            50% {
+                transform: translateY(-20px) rotate(180deg);
+            }
         }
 
         /* Parallax Background */
@@ -106,7 +120,7 @@
             left: 0;
             width: 100%;
             height: 120%;
-            background:  linear-gradient(135deg, #6f42c1 0%, #e83e8c 100%);
+            background: linear-gradient(135deg, #6f42c1 0%, #e83e8c 100%);
             z-index: -2;
             will-change: transform;
         }
@@ -115,17 +129,22 @@
             position: absolute;
             width: 100%;
             height: 100%;
-            background-image: 
-                radial-gradient(circle at 20% 20%, rgba(255,255,255,0.1) 1px, transparent 1px),
-                radial-gradient(circle at 80% 80%, rgba(255,255,255,0.1) 1px, transparent 1px),
-                radial-gradient(circle at 40% 40%, rgba(255,255,255,0.05) 2px, transparent 2px);
+            background-image:
+                radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.1) 1px, transparent 1px),
+                radial-gradient(circle at 80% 80%, rgba(255, 255, 255, 0.1) 1px, transparent 1px),
+                radial-gradient(circle at 40% 40%, rgba(255, 255, 255, 0.05) 2px, transparent 2px);
             background-size: 100px 100px, 150px 150px, 200px 200px;
             animation: backgroundMove 20s linear infinite;
         }
 
         @keyframes backgroundMove {
-            0% { transform: translate(0, 0); }
-            100% { transform: translate(50px, 50px); }
+            0% {
+                transform: translate(0, 0);
+            }
+
+            100% {
+                transform: translate(50px, 50px);
+            }
         }
 
         /* Header */
@@ -186,8 +205,15 @@
         }
 
         @keyframes logoFloat {
-            0%, 100% { transform: translateY(0px) rotate(0deg); }
-            50% { transform: translateY(-5px) rotate(5deg); }
+
+            0%,
+            100% {
+                transform: translateY(0px) rotate(0deg);
+            }
+
+            50% {
+                transform: translateY(-5px) rotate(5deg);
+            }
         }
 
         .logo-icon:hover {
@@ -270,7 +296,7 @@
             left: -100%;
             width: 100%;
             height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
             transition: left 0.6s;
         }
 
@@ -382,13 +408,18 @@
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            text-shadow: 0 0 30px rgba(255,255,255,0.5);
+            text-shadow: 0 0 30px rgba(255, 255, 255, 0.5);
             animation: textGlow 2s ease-in-out infinite alternate;
         }
 
         @keyframes textGlow {
-            from { text-shadow: 0 0 20px rgba(255,255,255,0.3); }
-            to { text-shadow: 0 0 30px rgba(255,255,255,0.8), 0 0 40px rgba(255,255,255,0.3); }
+            from {
+                text-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+            }
+
+            to {
+                text-shadow: 0 0 30px rgba(255, 255, 255, 0.8), 0 0 40px rgba(255, 255, 255, 0.3);
+            }
         }
 
         .hero-subtitle {
@@ -499,9 +530,19 @@
         }
 
         @keyframes floatSlow {
-            0%, 100% { transform: translate(0, 0) rotate(0deg); }
-            33% { transform: translate(20px, -20px) rotate(120deg); }
-            66% { transform: translate(-20px, 20px) rotate(240deg); }
+
+            0%,
+            100% {
+                transform: translate(0, 0) rotate(0deg);
+            }
+
+            33% {
+                transform: translate(20px, -20px) rotate(120deg);
+            }
+
+            66% {
+                transform: translate(-20px, 20px) rotate(240deg);
+            }
         }
 
         /* Features Section */
@@ -607,27 +648,32 @@
             transform: scale(1.1) rotate(5deg);
         }
 
-        .feature-icon.blue { 
+        .feature-icon.blue {
             background: linear-gradient(135deg, #3b82f6, #1d4ed8);
             box-shadow: 0 10px 25px rgba(59, 130, 246, 0.3);
         }
-        .feature-icon.green { 
+
+        .feature-icon.green {
             background: linear-gradient(135deg, #2563eb, #1d4ed8);
             box-shadow: 0 10px 25px rgba(37, 99, 235, 0.3);
         }
-        .feature-icon.purple { 
+
+        .feature-icon.purple {
             background: linear-gradient(135deg, #3b82f6, #2563eb);
             box-shadow: 0 10px 25px rgba(59, 130, 246, 0.3);
         }
-        .feature-icon.orange { 
+
+        .feature-icon.orange {
             background: linear-gradient(135deg, #1d4ed8, #2563eb);
             box-shadow: 0 10px 25px rgba(29, 78, 216, 0.3);
         }
-        .feature-icon.red { 
+
+        .feature-icon.red {
             background: linear-gradient(135deg, #3b82f6, #1d4ed8);
             box-shadow: 0 10px 25px rgba(59, 130, 246, 0.3);
         }
-        .feature-icon.indigo { 
+
+        .feature-icon.indigo {
             background: linear-gradient(135deg, #2563eb, #3b82f6);
             box-shadow: 0 10px 25px rgba(37, 99, 235, 0.3);
         }
@@ -717,8 +763,15 @@
         }
 
         @keyframes iconPulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.1); }
+
+            0%,
+            100% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.1);
+            }
         }
 
         .about-card p {
@@ -794,7 +847,7 @@
         /* CTA Section */
         .cta {
             padding: 120px 0;
-            background:  linear-gradient(135deg, #6f42c1 0%, #e83e8c 100%);
+            background: linear-gradient(135deg, #6f42c1 0%, #e83e8c 100%);
             color: white;
             text-align: center;
             position: relative;
@@ -902,6 +955,7 @@
                 opacity: 0;
                 transform: translateY(60px);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -913,6 +967,7 @@
                 opacity: 0;
                 transform: translateX(-60px);
             }
+
             to {
                 opacity: 1;
                 transform: translateX(0);
@@ -924,6 +979,7 @@
                 opacity: 0;
                 transform: translateX(60px);
             }
+
             to {
                 opacity: 1;
                 transform: translateX(0);
@@ -935,6 +991,7 @@
                 opacity: 0;
                 transform: scale(0.8) translateY(40px);
             }
+
             to {
                 opacity: 1;
                 transform: scale(1) translateY(0);
@@ -971,12 +1028,29 @@
 
         /* Glitch Effect for Headlines */
         @keyframes glitch {
-            0% { transform: translateX(0); }
-            20% { transform: translateX(-2px); }
-            40% { transform: translateX(2px); }
-            60% { transform: translateX(-1px); }
-            80% { transform: translateX(1px); }
-            100% { transform: translateX(0); }
+            0% {
+                transform: translateX(0);
+            }
+
+            20% {
+                transform: translateX(-2px);
+            }
+
+            40% {
+                transform: translateX(2px);
+            }
+
+            60% {
+                transform: translateX(-1px);
+            }
+
+            80% {
+                transform: translateX(1px);
+            }
+
+            100% {
+                transform: translateX(0);
+            }
         }
 
         .glitch-effect:hover {
@@ -1010,7 +1084,9 @@
         }
 
         @keyframes spin {
-            to { transform: rotate(360deg); }
+            to {
+                transform: rotate(360deg);
+            }
         }
 
         /* Responsive Design */
@@ -1040,6 +1116,7 @@
                     opacity: 0;
                     transform: translateY(-20px);
                 }
+
                 to {
                     opacity: 1;
                     transform: translateY(0);
@@ -1075,7 +1152,7 @@
                 gap: 0.75rem;
                 box-shadow: var(--shadow-lg);
             }
-            
+
             .nav-buttons.active {
                 display: flex;
             }
@@ -1193,7 +1270,9 @@
                 margin-top: 3rem;
             }
 
-            .features, .about, .cta {
+            .features,
+            .about,
+            .cta {
                 padding: 80px 0;
             }
         }
@@ -1222,18 +1301,19 @@
         }
     </style>
 </head>
+
 <body>
     <!-- Cursor Follower -->
     <div class="cursor-follower" id="cursorFollower"></div>
-    
+
     <!-- Scroll Progress Bar -->
     <div class="scroll-progress" id="scrollProgress"></div>
-    
+
     <!-- Parallax Background -->
     <div class="parallax-bg">
         <div class="parallax-layer"></div>
     </div>
-    
+
     <!-- Floating Elements -->
     <div class="floating-element triangle" style="top: 15%; left: 5%; animation-delay: 0s;"></div>
     <div class="floating-element circle" style="top: 25%; right: 10%; animation-delay: 2s;"></div>
@@ -1250,13 +1330,13 @@
                 </div>
                 <span>RudhiManage</span>
             </a>
-            
+
             <nav class="nav-menu" id="navMenu">
                 <li><a href="#features" class="nav-link">Features</a></li>
                 <li><a href="#about" class="nav-link">About</a></li>
                 <li><a href="#contact" class="nav-link">Contact</a></li>
             </nav>
-            
+
             <div class="nav-buttons">
                 <a href="/login" class="btn btn-secondary magnetic">Login</a>
                 <a href="/register" class="btn btn-primary magnetic">
@@ -1264,7 +1344,7 @@
                     Get Started
                 </a>
             </div>
-            
+
             <div class="mobile-menu-toggle" id="mobileToggle">
                 <span></span>
                 <span></span>
@@ -1285,13 +1365,14 @@
         <div class="hero-decoration dec-3">
             <div class="floating-element triangle"></div>
         </div>
-        
+
         <div class="hero-container">
             <h1 class="glitch-effect" id="heroTitle">Transform Your Project Management Experience</h1>
             <p class="hero-subtitle" id="heroSubtitle">
-                Streamline workflows, boost team productivity, and deliver projects on time with our comprehensive project management platform designed for modern teams.
+                Streamline workflows, boost team productivity, and deliver projects on time with our comprehensive
+                project management platform designed for modern teams.
             </p>
-            
+
             <div class="hero-buttons" id="heroButtons">
                 <a href="/register" class="btn btn-white btn-hero magnetic">
                     <i class="fas fa-rocket"></i>
@@ -1302,7 +1383,7 @@
                     Watch Demo
                 </a>
             </div>
-            
+
             <div class="hero-stats" id="heroStats">
                 <div class="stat-item magnetic">
                     <span class="stat-number" data-target="10000">0</span>
@@ -1330,10 +1411,11 @@
             <div class="section-header">
                 <h2 class="section-title glitch-effect">Powerful Features for Modern Teams</h2>
                 <p class="section-subtitle">
-                    Everything you need to manage projects efficiently, collaborate seamlessly, and deliver exceptional results.
+                    Everything you need to manage projects efficiently, collaborate seamlessly, and deliver exceptional
+                    results.
                 </p>
             </div>
-            
+
             <div class="features-grid">
                 <div class="feature-card magnetic" data-tilt>
                     <div class="feature-icon blue">
@@ -1341,57 +1423,63 @@
                     </div>
                     <h3 class="feature-title">Task Management</h3>
                     <p class="feature-description">
-                        Create, assign, and track tasks with ease. Set priorities, deadlines, and dependencies to keep your projects moving forward.
+                        Create, assign, and track tasks with ease. Set priorities, deadlines, and dependencies to keep
+                        your projects moving forward.
                     </p>
                 </div>
-                
+
                 <div class="feature-card magnetic" data-tilt>
                     <div class="feature-icon green">
                         <i class="fas fa-users"></i>
                     </div>
                     <h3 class="feature-title">Team Collaboration</h3>
                     <p class="feature-description">
-                        Foster seamless collaboration with real-time messaging, file sharing, and team workspaces that keep everyone connected.
+                        Foster seamless collaboration with real-time messaging, file sharing, and team workspaces that
+                        keep everyone connected.
                     </p>
                 </div>
-                
+
                 <div class="feature-card magnetic" data-tilt>
                     <div class="feature-icon purple">
                         <i class="fas fa-chart-line"></i>
                     </div>
                     <h3 class="feature-title">Progress Tracking</h3>
                     <p class="feature-description">
-                        Monitor project progress with visual dashboards, milestone tracking, and comprehensive reporting tools.
+                        Monitor project progress with visual dashboards, milestone tracking, and comprehensive reporting
+                        tools.
                     </p>
                 </div>
-                
+
                 <div class="feature-card magnetic" data-tilt>
                     <div class="feature-icon orange">
                         <i class="fas fa-calendar-alt"></i>
                     </div>
                     <h3 class="feature-title">Smart Scheduling</h3>
                     <p class="feature-description">
-                        Intelligent scheduling with automated reminders, deadline tracking, and resource allocation optimization.
+                        Intelligent scheduling with automated reminders, deadline tracking, and resource allocation
+                        optimization.
                     </p>
                 </div>
-                
+
                 <div class="feature-card magnetic" data-tilt>
                     <div class="feature-icon red">
                         <i class="fas fa-shield-alt"></i>
                     </div>
                     <h3 class="feature-title">Enterprise Security</h3>
                     <p class="feature-description">
-                        Bank-grade security with role-based access control, data encryption, and compliance with industry standards.
+                        Bank-grade security with role-based access control, data encryption, and compliance with
+                        industry standards.
                     </p>
                 </div>
-                
+
                 <div class="feature-card magnetic" data-tilt>
                     <div class="feature-icon indigo">
                         <i class="fas fa-mobile-alt"></i>
                     </div>
                     <h3 class="feature-title">Mobile Ready</h3>
                     <p class="feature-description">
-                        Access your projects anywhere with our responsive design and mobile-optimized interface for on-the-go productivity.
+                        Access your projects anywhere with our responsive design and mobile-optimized interface for
+                        on-the-go productivity.
                     </p>
                 </div>
             </div>
@@ -1407,12 +1495,13 @@
                     We're Changing the Way the World Adopts and Utilizes Technology.
                 </p>
             </div>
-            
+
             <div class="about-hero magnetic">
                 <div class="about-hero-content">
                     <h2>We are Innovating The Technology to Shape a Smarter Tomorrow.</h2>
-                    <p>Transforming business challenges into digital solutions with cutting-edge technology and innovation.</p>
-                    
+                    <p>Transforming business challenges into digital solutions with cutting-edge technology and
+                        innovation.</p>
+
                     <div class="tech-stack">
                         <span class="tech-item magnetic">AI & Machine Learning</span>
                         <span class="tech-item magnetic">Mobile Development</span>
@@ -1422,7 +1511,7 @@
                     </div>
                 </div>
             </div>
-            
+
             <div class="about-grid">
                 <div class="about-card magnetic" data-tilt>
                     <h3>
@@ -1432,10 +1521,12 @@
                         WHO WE ARE
                     </h3>
                     <p>
-                        We are a passionate team of innovators, developers, and tech strategists committed to delivering cutting-edge software solutions for businesses worldwide. Our expertise lies in building scalable, high-performance, and user-friendly digital products that drive business growth.
+                        We are a passionate team of innovators, developers, and tech strategists committed to delivering
+                        cutting-edge software solutions for businesses worldwide. Our expertise lies in building
+                        scalable, high-performance, and user-friendly digital products that drive business growth.
                     </p>
                 </div>
-                
+
                 <div class="about-card magnetic" data-tilt>
                     <h3>
                         <div class="about-icon">
@@ -1444,10 +1535,14 @@
                         WHAT WE DO
                     </h3>
                     <p>
-                        At <span class="company-name">RUDHISOFT</span>, we specialize in transforming business challenges into digital solutions. Our services range from custom software and mobile apps to AI-powered automation and blockchain solutions.
+                        At <span class="company-name">RUDHISOFT</span>, we specialize in transforming business
+                        challenges into digital solutions. Our services range from custom software and mobile apps to
+                        AI-powered automation and blockchain solutions.
                     </p>
                     <p>
-                        With a tech-first mindset and a problem-solving approach, we empower businesses with high-performance software solutions that drive growth, improve operations, and create competitive advantages.
+                        With a tech-first mindset and a problem-solving approach, we empower businesses with
+                        high-performance software solutions that drive growth, improve operations, and create
+                        competitive advantages.
                     </p>
                 </div>
             </div>
@@ -1478,7 +1573,7 @@
                     <h3>RudhiManage</h3>
                     <p>Empowering teams to achieve more through intelligent project management solutions.</p>
                     <div style="margin-top: 1.5rem;">
-                        
+
                         </a>
                     </div>
                 </div>
@@ -1490,7 +1585,7 @@
                         <li><a href="#integrations">Integrations</a></li>
                     </ul>
                 </div>
-                
+
                 <div class="footer-section">
                     <h3>Company</h3>
                     <ul class="footer-links">
@@ -1500,45 +1595,49 @@
                         <li><a href="#press">Press</a></li>
                     </ul>
                 </div>
-                
-              <div class="footer-section">
-    <h3>Contact Us</h3>
-    <ul class="footer-links">
-        <div class="social-links">
-            <a href="https://www.instagram.com/rudhisoftpvtltd/" target="_blank" class="social-link">
-                <i class="fab fa-instagram"></i>
-            </a>
-            <a href="https://www.facebook.com/people/Rudhisoft-Private-Limited/61574642781304/#" target="_blank" class="social-link">
-                <i class="fab fa-facebook-f"></i>
-            </a>
-            <a href="https://www.linkedin.com/company/rudhisoft-private-limited/posts/?feedView=all" target="_blank" class="social-link">
-                <i class="fab fa-linkedin-in"></i>
-            </a>
-        </div>
-        
-        <!-- ✅ Added Gmail above phone number -->
-      <li>
-    <a href="https://mail.google.com/mail/?view=cm&fs=1&to=rudhisoft@gmail.com" target="_blank">
-        <i class="fas fa-envelope"></i> rudhisoft@gmail.com
-    </a>
-</li>
+
+                <div class="footer-section">
+                    <h3>Contact Us</h3>
+                    <ul class="footer-links">
+                        <div class="social-links">
+                            <a href="https://www.instagram.com/rudhisoftpvtltd/" target="_blank" class="social-link">
+                                <i class="fab fa-instagram"></i>
+                            </a>
+                            <a href="https://www.facebook.com/people/Rudhisoft-Private-Limited/61574642781304/#"
+                                target="_blank" class="social-link">
+                                <i class="fab fa-facebook-f"></i>
+                            </a>
+                            <a href="https://www.linkedin.com/company/rudhisoft-private-limited/posts/?feedView=all"
+                                target="_blank" class="social-link">
+                                <i class="fab fa-linkedin-in"></i>
+                            </a>
+                        </div>
+
+                        <!-- ✅ Added Gmail above phone number -->
+                        <li>
+                            <a href="https://mail.google.com/mail/?view=cm&fs=1&to=rudhisoft@gmail.com" target="_blank">
+                                <i class="fas fa-envelope"></i> rudhisoft@gmail.com
+                            </a>
+                        </li>
 
 
-        <!-- Phone number (unchanged) -->
-        <li>
-            <a href="tel:8668709244">
-                <i class="fas fa-phone"></i> 8668709244
-            </a>
-        </li>
+                        <!-- Phone number (unchanged) -->
+                        <li>
+                            <a href="tel:9766149500">
+                                <i class="fas fa-phone"></i> 9766149500
+                            </a>
+                        </li>
 
-        <!-- ✅ Added location below phone number -->
-        <li>
-            <a href="https://www.google.com/maps?q=13,+Maruti+Plaza,+Vidya+Vikas+Circle,+Gangapur+Rd,+Nashik,+Maharashtra+422005" target="_blank">
-                <i class="fas fa-map-marker-alt"></i> 13, Maruti Plaza, Vidya Vikas Circle, Gangapur Rd, Nashik, Maharashtra 422005
-            </a>
-        </li>
-    </ul>
-</div>
+                        <!-- ✅ Added location below phone number -->
+                        <li>
+                            <i class="fas fa-map-marker-alt"></i>
+                            <a href="https://www.google.com/maps/place/Rudhisoft+Private+Limited/@20.0089767,73.7638132,18z/data=!4m14!1m7!3m6!1s0x3bddebe593b45277:0x78a8e1b3f866db1f!2sRudhisoft+Private+Limited!8m2!3d20.0089057!4d73.7665634!16s%2Fg%2F11x83zdx67!3m5!1s0x3bddebe593b45277:0x78a8e1b3f866db1f!8m2!3d20.0089057!4d73.7665634!16s%2Fg%2F11x83zdx67?entry=ttu"
+                                target="_blank">
+                                Rudhisoft Private Limited, Nashik, Maharashtra 422005
+                            </a>
+                        </li>
+                    </ul>
+                </div>
     </footer>
 
     <script>
@@ -1586,10 +1685,10 @@
                 const animateCursor = () => {
                     const dx = mouseX - cursorX;
                     const dy = mouseY - cursorY;
-                    
+
                     cursorX += dx * 0.1;
                     cursorY += dy * 0.1;
-                    
+
                     cursor.style.transform = `translate(${cursorX - 10}px, ${cursorY - 10}px)`;
                     requestAnimationFrame(animateCursor);
                 };
@@ -1612,7 +1711,7 @@
 
             setupScrollProgress() {
                 const progressBar = document.getElementById('scrollProgress');
-                
+
                 window.addEventListener('scroll', () => {
                     const scrollTop = window.pageYOffset;
                     const docHeight = document.body.scrollHeight - window.innerHeight;
@@ -1623,7 +1722,7 @@
 
             setupParallax() {
                 const parallaxBg = document.querySelector('.parallax-bg');
-                
+
                 window.addEventListener('scroll', () => {
                     const scrolled = window.pageYOffset;
                     const speed = scrolled * 0.5;
@@ -1633,16 +1732,16 @@
 
             setupMagneticEffect() {
                 const magneticElements = document.querySelectorAll('.magnetic');
-                
+
                 magneticElements.forEach(el => {
                     el.addEventListener('mousemove', (e) => {
                         const rect = el.getBoundingClientRect();
                         const x = e.clientX - rect.left - rect.width / 2;
                         const y = e.clientY - rect.top - rect.height / 2;
-                        
+
                         el.style.transform = `translate(${x * 0.1}px, ${y * 0.1}px) scale(1.02)`;
                     });
-                    
+
                     el.addEventListener('mouseleave', () => {
                         el.style.transform = 'translate(0px, 0px) scale(1)';
                     });
@@ -1651,22 +1750,22 @@
 
             setupTiltEffect() {
                 const tiltElements = document.querySelectorAll('[data-tilt]');
-                
+
                 tiltElements.forEach(el => {
                     el.addEventListener('mousemove', (e) => {
                         const rect = el.getBoundingClientRect();
                         const x = e.clientX - rect.left;
                         const y = e.clientY - rect.top;
-                        
+
                         const centerX = rect.width / 2;
                         const centerY = rect.height / 2;
-                        
+
                         const rotateX = (y - centerY) / 10;
                         const rotateY = (centerX - x) / 10;
-                        
+
                         el.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02, 1.02, 1.02)`;
                     });
-                    
+
                     el.addEventListener('mouseleave', () => {
                         el.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)';
                     });
@@ -1705,15 +1804,15 @@
                     let start = 0;
                     const increment = target / (duration / 16);
                     const isDecimal = target.toString().includes('.');
-                    
+
                     const timer = setInterval(() => {
                         start += increment;
                         if (start >= target) {
                             element.textContent = isDecimal ? target : target.toLocaleString();
                             clearInterval(timer);
                         } else {
-                            element.textContent = isDecimal ? 
-                                start.toFixed(1) : 
+                            element.textContent = isDecimal ?
+                                start.toFixed(1) :
                                 Math.floor(start).toLocaleString();
                         }
                     }, 16);
@@ -1724,7 +1823,7 @@
                         if (entry.isIntersecting) {
                             const statNumber = entry.target.querySelector('.stat-number');
                             const target = parseFloat(statNumber.dataset.target);
-                            
+
                             if (!statNumber.dataset.animated) {
                                 statNumber.dataset.animated = 'true';
                                 statNumber.textContent = '0';
@@ -1752,7 +1851,7 @@
                     particle.style.top = Math.random() * 100 + '%';
                     particle.style.animationDelay = Math.random() * 20 + 's';
                     particle.style.animationDuration = (Math.random() * 10 + 10) + 's';
-                    
+
                     const keyframes = `
                         @keyframes particle${i} {
                             0% { transform: translateY(0px) translateX(0px); opacity: 0; }
@@ -1761,11 +1860,11 @@
                             100% { transform: translateY(-100vh) translateX(${(Math.random() - 0.5) * 200}px); opacity: 0; }
                         }
                     `;
-                    
+
                     const style = document.createElement('style');
                     style.textContent = keyframes;
                     document.head.appendChild(style);
-                    
+
                     particle.style.animation = `particle${i} ${Math.random() * 10 + 10}s linear infinite`;
                     hero.appendChild(particle);
                 }
@@ -1810,7 +1909,7 @@
                         if (target) {
                             const headerHeight = document.querySelector('.header').offsetHeight;
                             const targetPosition = target.offsetTop - headerHeight;
-                            
+
                             window.scrollTo({
                                 top: targetPosition,
                                 behavior: 'smooth'
@@ -1826,7 +1925,7 @@
 
                 window.addEventListener('scroll', () => {
                     const scrollY = window.scrollY;
-                    
+
                     if (scrollY > 100) {
                         header.classList.add('scrolled');
                     } else {
@@ -1839,7 +1938,7 @@
                     } else {
                         header.style.transform = 'translateY(0)';
                     }
-                    
+
                     lastScrollY = scrollY;
                 });
             }
@@ -1848,7 +1947,7 @@
                 const heroTitle = document.getElementById('heroTitle');
                 const text = heroTitle.textContent;
                 heroTitle.textContent = '';
-                
+
                 let i = 0;
                 const typeWriter = () => {
                     if (i < text.length) {
@@ -1857,23 +1956,23 @@
                         setTimeout(typeWriter, 50);
                     }
                 };
-                
+
                 setTimeout(typeWriter, 1000);
             }
 
             // Interactive Button Effects
             setupButtonEffects() {
                 const buttons = document.querySelectorAll('.btn');
-                
+
                 buttons.forEach(btn => {
                     // Ripple effect
-                    btn.addEventListener('click', function(e) {
+                    btn.addEventListener('click', function (e) {
                         const ripple = document.createElement('span');
                         const rect = this.getBoundingClientRect();
                         const size = Math.max(rect.width, rect.height);
                         const x = e.clientX - rect.left - size / 2;
                         const y = e.clientY - rect.top - size / 2;
-                        
+
                         ripple.style.cssText = `
                             position: absolute;
                             width: ${size}px;
@@ -1886,29 +1985,29 @@
                             animation: ripple 0.6s ease-out;
                             pointer-events: none;
                         `;
-                        
+
                         this.appendChild(ripple);
-                        
+
                         setTimeout(() => {
                             ripple.remove();
                         }, 600);
                     });
-                    
+
                     // Loading state for login/register buttons
                     if (btn.getAttribute('href') && (btn.getAttribute('href').includes('register') || btn.getAttribute('href').includes('login'))) {
-                        btn.addEventListener('click', function(e) {
+                        btn.addEventListener('click', function (e) {
                             // Add loading state
                             const originalText = this.innerHTML;
                             const icon = this.querySelector('i');
-                            
+
                             if (icon) {
                                 icon.className = 'loading';
                             }
-                            
+
                             // Show loading state briefly
                             this.style.pointerEvents = 'none';
                             this.style.opacity = '0.7';
-                            
+
                             // Allow navigation after short loading animation
                             setTimeout(() => {
                                 window.location.href = this.getAttribute('href');
@@ -1921,23 +2020,23 @@
             // Enhanced Feature Card Interactions
             setupFeatureCardEffects() {
                 const featureCards = document.querySelectorAll('.feature-card');
-                
+
                 featureCards.forEach(card => {
                     // Floating effect on hover
-                    card.addEventListener('mouseenter', function() {
+                    card.addEventListener('mouseenter', function () {
                         this.style.transition = 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)';
                         this.style.transform = 'translateY(-20px) scale(1.03) rotateX(5deg)';
                         this.style.boxShadow = '0 30px 60px rgba(0, 0, 0, 0.2)';
-                        
+
                         // Icon rotation
                         const icon = this.querySelector('.feature-icon');
                         icon.style.transform = 'scale(1.15) rotate(10deg)';
                     });
-                    
-                    card.addEventListener('mouseleave', function() {
+
+                    card.addEventListener('mouseleave', function () {
                         this.style.transform = 'translateY(0) scale(1) rotateX(0deg)';
                         this.style.boxShadow = '0 10px 30px rgba(0, 0, 0, 0.1)';
-                        
+
                         const icon = this.querySelector('.feature-icon');
                         icon.style.transform = 'scale(1) rotate(0deg)';
                     });
@@ -1947,11 +2046,11 @@
             // Glitch Effect for Special Elements
             setupGlitchEffects() {
                 const glitchElements = document.querySelectorAll('.glitch-effect');
-                
+
                 glitchElements.forEach(el => {
-                    el.addEventListener('mouseenter', function() {
+                    el.addEventListener('mouseenter', function () {
                         this.style.animation = 'glitch 0.3s ease-in-out';
-                        
+
                         setTimeout(() => {
                             this.style.animation = '';
                         }, 300);
@@ -1962,20 +2061,20 @@
             // Tech Stack Interactive Effects
             setupTechStackEffects() {
                 const techItems = document.querySelectorAll('.tech-item');
-                
+
                 techItems.forEach((item, index) => {
-                    item.addEventListener('mouseenter', function() {
+                    item.addEventListener('mouseenter', function () {
                         this.style.transform = 'translateY(-8px) scale(1.05) rotate(2deg)';
                         this.style.background = 'rgba(255, 255, 255, 0.25)';
                         this.style.boxShadow = '0 15px 30px rgba(0, 0, 0, 0.3)';
                     });
-                    
-                    item.addEventListener('mouseleave', function() {
+
+                    item.addEventListener('mouseleave', function () {
                         this.style.transform = 'translateY(0) scale(1) rotate(0deg)';
                         this.style.background = 'rgba(255, 255, 255, 0.1)';
                         this.style.boxShadow = 'none';
                     });
-                    
+
                     // Staggered animation on load
                     setTimeout(() => {
                         item.style.animation = 'fadeInUp 0.6s ease-out forwards';
@@ -1984,8 +2083,8 @@
             }
 
 
-       // Dynamic Background Effects
-       setupDynamicBackground() {
+            // Dynamic Background Effects
+            setupDynamicBackground() {
                 const hero = document.querySelector('.hero');
                 let mouseX = 0;
                 let mouseY = 0;
@@ -1993,7 +2092,7 @@
                 hero.addEventListener('mousemove', (e) => {
                     mouseX = (e.clientX / window.innerWidth) * 100;
                     mouseY = (e.clientY / window.innerHeight) * 100;
-                    
+
                     hero.style.background = `
                         radial-gradient(circle at ${mouseX}% ${mouseY}%, 
                         rgba(111, 66, 193, 0.8) 0%, 
@@ -2044,7 +2143,7 @@
         document.addEventListener('DOMContentLoaded', () => {
             const effects = new InteractiveEffects();
             effects.setupEnhancedEffects();
-            
+
             // Add some delay to hero animations for better effect
             setTimeout(() => {
                 document.getElementById('heroSubtitle').style.animation = 'fadeInUp 1s ease-out forwards';
@@ -2055,7 +2154,7 @@
 
         // Performance optimization
         let ticking = false;
-        
+
         function updateAnimations() {
             // Batch DOM updates here
             ticking = false;
@@ -2090,4 +2189,5 @@
         document.head.appendChild(focusStyle);
     </script>
 </body>
+
 </html>

@@ -7,7 +7,8 @@
     <div class="row">
         <div class="col-12">
             <!-- Header -->
-            <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4">
+            <div
+                class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4">
                 <div>
                     <h2 class="mb-1 d-flex align-items-center">
                         <i class="bi bi-journal-text me-2"></i>
@@ -15,15 +16,15 @@
                     </h2>
                     <p class="text-muted mb-0">
                         {% if user_role == 'admin' %}
-                            Viewing all reports visible to administrators
+                        Viewing all reports visible to administrators
                         {% elif user_role == 'manager' %}
-                            Viewing reports from your managed projects and team members
+                        Viewing reports from your managed projects and team members
                         {% else %}
-                            Viewing your submitted reports
+                        Viewing your submitted reports
                         {% endif %}
                     </p>
                 </div>
-                
+
                 <div class="mt-3 mt-md-0">
                     <a href="{{ url_for('new_daily_report') }}" class="btn btn-primary">
                         <i class="bi bi-plus me-2"></i>Submit New Report
@@ -34,310 +35,675 @@
             <!-- Filter Section -->
             <div class="card shadow-sm mb-4">
                 <div class="card-body">
-                    <form method="POST" action="{{ url_for('filter_daily_reports') }}" class="row g-3">
+                    <form method="POST" action="{{ url_for('filter_daily_reports') }}" id="filterForm" class="row g-3">
                         <div class="col-md-4">
                             <label for="start_date" class="form-label">Start Date</label>
-                            <input type="date" class="form-control" id="start_date" name="start_date" 
-                                   value="{{ start_date or '' }}" required>
+                            <input type="date" class="form-control" id="start_date" name="start_date"
+                                value="{{ start_date or '' }}" required>
                         </div>
                         <div class="col-md-4">
                             <label for="end_date" class="form-label">End Date</label>
-                            <input type="date" class="form-control" id="end_date" name="end_date" 
-                                   value="{{ end_date or '' }}" required>
+                            <input type="date" class="form-control" id="end_date" name="end_date"
+                                value="{{ end_date or '' }}" required>
                         </div>
-                        <div class="col-md-4 d-flex align-items-end">
-                            <button type="submit" class="btn btn-outline-primary me-2">
+                        <div class="col-md-4 d-flex align-items-end gap-2">
+                            <button type="submit" class="btn btn-outline-primary">
                                 <i class="bi bi-funnel me-1"></i>Filter
                             </button>
                             <a href="{{ url_for('daily_reports') }}" class="btn btn-outline-secondary">
                                 <i class="bi bi-x-circle me-1"></i>Clear
                             </a>
+                            {% if user_role == 'admin' and reports %}
+                            <button type="button" class="btn btn-success" id="downloadBtn">
+                                <i class="bi bi-download me-1"></i>Download
+                            </button>
+                            {% endif %}
                         </div>
                     </form>
                 </div>
             </div>
 
+            <!-- Bulk Actions for Admin -->
+            {% if user_role == 'admin' and reports %}
+            <div class="card shadow-sm mb-4 border-warning">
+                <div class="card-header bg-warning bg-opacity-10">
+                    <h6 class="mb-0">
+                        <i class="bi bi-lightning-fill text-warning me-2"></i>
+                        Admin Actions
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex gap-2 align-items-center flex-wrap">
+                        <button type="button" class="btn btn-outline-primary" id="selectAllBtn">
+                            <i class="bi bi-check-square me-1"></i>Select All
+                        </button>
+                        <button type="button" class="btn btn-outline-secondary" id="deselectAllBtn">
+                            <i class="bi bi-square me-1"></i>Deselect All
+                        </button>
+                        <button type="button" class="btn btn-danger" id="bulkDeleteBtn" disabled>
+                            <i class="bi bi-trash me-1"></i>Delete Selected (<span id="selectedCount">0</span>)
+                        </button>
+                        <div class="ms-auto text-muted">
+                            <small>Select reports to delete them in bulk</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
             <!-- Reports List -->
             {% if reports %}
-                <div class="row">
-                    {% for report in reports %}
-                    <div class="col-12 col-lg-6 col-xl-4 mb-4">
-                        <div class="card shadow-sm h-100 report-card" 
-                             style="cursor: pointer;" 
-                             data-href="{{ url_for('view_daily_report', report_id=report.id) }}"
-                             onclick="window.location=this.dataset.href;">
-                            <div class="card-header d-flex justify-content-between align-items-start">
-                                <div class="flex-grow-1" style="min-width: 0;">
-                                    <h6 class="mb-1 text-truncate" title="{{ report.work_title }}" style="word-wrap: break-word; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-                                        {{ report.work_title }}
-                                    </h6>
-                                    <small class="text-muted d-block">
-                                        <i class="bi bi-calendar me-1"></i>
-                                        {{ report.report_date.strftime('%B %d, %Y') if report.report_date else 'No date' }}
-                                    </small>
-                                </div>
-                                <div class="ms-2 flex-shrink-0">
-                                    <span class="badge bg-{{ 'success' if report.status == 'completed' else 'warning' if report.status == 'in_progress' else 'info' if report.status == 'pending' else 'danger' }}">
-                                        {{ report.status.replace('_', ' ').title() }}
-                                    </span>
+            <div class="row">
+                {% for report in reports %}
+                <div class="col-12 col-lg-6 col-xl-4 mb-4">
+                    <div class="card shadow-sm h-100 report-card" data-report-id="{{ report.id }}">
+                        {% if user_role == 'admin' %}
+                        <div class="card-header d-flex justify-content-between align-items-start bg-light">
+                            <div class="form-check">
+                                <input class="form-check-input report-checkbox" type="checkbox" value="{{ report.id }}"
+                                    id="report{{ report.id }}">
+                                <label class="form-check-label fw-bold" for="report{{ report.id }}">
+                                    Select
+                                </label>
+                            </div>
+                            <span
+                                class="badge bg-{{ 'success' if report.status == 'completed' else 'warning' if report.status == 'in_progress' else 'info' if report.status == 'pending' else 'danger' }}">
+                                {{ report.status.replace('_', ' ').title() }}
+                            </span>
+                        </div>
+                        {% endif %}
+
+                        <div class="card-header d-flex justify-content-between align-items-start">
+                            <div class="flex-grow-1" style="min-width: 0;">
+                                <h6 class="mb-1 text-truncate" title="{{ report.work_title }}"
+                                    style="word-wrap: break-word; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                                    {{ report.work_title }}
+                                </h6>
+                                <small class="text-muted d-block">
+                                    <i class="bi bi-calendar me-1"></i>
+                                    {{ report.report_date.strftime('%B %d, %Y') if report.report_date else 'No date' }}
+                                </small>
+                            </div>
+                            {% if user_role != 'admin' %}
+                            <div class="ms-2 flex-shrink-0">
+                                <span
+                                    class="badge bg-{{ 'success' if report.status == 'completed' else 'warning' if report.status == 'in_progress' else 'info' if report.status == 'pending' else 'danger' }}">
+                                    {{ report.status.replace('_', ' ').title() }}
+                                </span>
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <strong class="text-muted d-block mb-1">Submitted by:</strong>
+                                <span class="d-block text-truncate" title="{{ report.user_name }}">{{ report.user_name
+                                    }}</span>
+                            </div>
+
+                            {% if report.project_name %}
+                            <div class="mb-3">
+                                <strong class="text-muted d-block mb-1">Project:</strong>
+                                <span class="badge bg-primary text-truncate d-inline-block" style="max-width: 100%;"
+                                    title="{{ report.project_name }}">{{ report.project_name }}</span>
+                            </div>
+                            {% endif %}
+
+                            {% if report.work_description %}
+                            <div class="mb-3">
+                                <strong class="text-muted d-block mb-1">Description:</strong>
+                                <p class="mb-0 text-break"
+                                    style="overflow-wrap: break-word; word-wrap: break-word; word-break: break-word;">{{
+                                    report.work_description|truncate(150) }}</p>
+                            </div>
+                            {% endif %}
+
+                            {% if report.discussion %}
+                            <div class="mb-3">
+                                <strong class="text-muted d-block mb-1">Discussion:</strong>
+                                <p class="mb-0 text-break"
+                                    style="overflow-wrap: break-word; word-wrap: break-word; word-break: break-word;">{{
+                                    report.discussion|truncate(120) }}</p>
+                            </div>
+                            {% endif %}
+
+                            <div class="mb-3">
+                                <strong class="text-muted d-block mb-1">Visibility:</strong>
+                                <div class="mt-1">
+                                    {% if report.visible_to_manager %}
+                                    <span class="badge bg-info me-1">Managers</span>
+                                    {% endif %}
+                                    {% if report.visible_to_admin %}
+                                    <span class="badge bg-warning">Admins</span>
+                                    {% endif %}
                                 </div>
                             </div>
-                            
-                            <div class="card-body">
-                                <div class="mb-3">
-                                    <strong class="text-muted d-block mb-1">Submitted by:</strong>
-                                    <span class="d-block text-truncate" title="{{ report.user_name }}">{{ report.user_name }}</span>
-                                </div>
-                                
-                                {% if report.project_name %}
-                                <div class="mb-3">
-                                    <strong class="text-muted d-block mb-1">Project:</strong>
-                                    <span class="badge bg-primary text-truncate d-inline-block" style="max-width: 100%;" title="{{ report.project_name }}">{{ report.project_name }}</span>
-                                </div>
+
+                            <small class="text-muted d-block">
+                                <i class="bi bi-clock me-1"></i>
+                                Submitted {{ report.created_at.strftime('%B %d, %Y at %I:%M %p') if report.created_at
+                                else 'Unknown time' }}
+                            </small>
+
+                            <div class="mt-3 d-flex gap-2">
+                                <a href="{{ url_for('view_daily_report', report_id=report.id) }}"
+                                    class="btn btn-sm btn-outline-primary flex-grow-1">
+                                    <i class="bi bi-eye me-1"></i>View
+                                </a>
+
+                                <!-- Edit Button - Only show if report is from today and user owns it -->
+                                {% if report.user_id == session.user_id and report.report_date|to_date == today() %}
+                                <a href="{{ url_for('edit_daily_report', report_id=report.id) }}"
+                                    class="btn btn-sm btn-outline-warning" title="Edit report (same-day only)">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
                                 {% endif %}
-                                
-                                {% if report.work_description %}
-                                <div class="mb-3">
-                                    <strong class="text-muted d-block mb-1">Description:</strong>
-                                    <p class="mb-0 text-break" style="overflow-wrap: break-word; word-wrap: break-word; word-break: break-word;">{{ report.work_description|truncate(150) }}</p>
-                                </div>
+
+                                {% if user_role == 'admin' %}
+                                <button class="btn btn-sm btn-outline-danger delete-report-btn"
+                                    data-report-id="{{ report.id }}" data-report-title="{{ report.work_title }}">
+                                    <i class="bi bi-trash"></i>
+                                </button>
                                 {% endif %}
-                                
-                                {% if report.discussion %}
-                                <div class="mb-3">
-                                    <strong class="text-muted d-block mb-1">Discussion:</strong>
-                                    <p class="mb-0 text-break" style="overflow-wrap: break-word; word-wrap: break-word; word-break: break-word;">{{ report.discussion|truncate(120) }}</p>
-                                </div>
-                                {% endif %}
-                                
-                                <div class="mb-3">
-                                    <strong class="text-muted d-block mb-1">Visibility:</strong>
-                                    <div class="mt-1">
-                                        {% if report.visible_to_manager %}
-                                            <span class="badge bg-info me-1">Managers</span>
-                                        {% endif %}
-                                        {% if report.visible_to_admin %}
-                                            <span class="badge bg-warning">Admins</span>
-                                        {% endif %}
-                                    </div>
-                                </div>
-                                
-                                <small class="text-muted d-block">
-                                    <i class="bi bi-clock me-1"></i>
-                                    Submitted {{ report.created_at.strftime('%B %d, %Y at %I:%M %p') if report.created_at else 'Unknown time' }}
-                                </small>
-                                
-                                <div class="mt-3 text-center">
-                                    <small class="text-primary">
-                                        <i class="bi bi-eye me-1"></i>Click to view full report
-                                    </small>
-                                </div>
                             </div>
                         </div>
                     </div>
-                    {% endfor %}
                 </div>
-                
-                <!-- Pagination Info -->
-                <div class="text-center mt-4">
-                    <p class="text-muted">
-                        Showing {{ reports|length }} report{{ 's' if reports|length != 1 else '' }}
-                        {% if start_date and end_date %}
-                            from {{ start_date }} to {{ end_date }}
-                        {% endif %}
-                    </p>
-                </div>
-                
+                {% endfor %}
+            </div>
+
+            <!-- Pagination Info -->
+            <div class="text-center mt-4">
+                <p class="text-muted">
+                    Showing {{ reports|length }} report{{ 's' if reports|length != 1 else '' }}
+                    {% if start_date and end_date %}
+                    from {{ start_date }} to {{ end_date }}
+                    {% endif %}
+                </p>
+            </div>
+
             {% else %}
-                <!-- No Reports -->
-                <div class="text-center py-5">
-                    <div class="mb-4">
-                        <i class="bi bi-journal-text" style="font-size: 4rem; color: #dee2e6;"></i>
-                    </div>
-                    <h4 class="text-muted mb-3">No Reports Found</h4>
-                    <p class="text-muted mb-4">
-                        {% if start_date and end_date %}
-                            No daily reports found for the selected date range.
-                        {% else %}
-                            {% if user_role == 'admin' %}
-                                No daily reports are currently visible to administrators.
-                            {% elif user_role == 'manager' %}
-                                No daily reports found from your managed projects or team members.
-                            {% else %}
-                                You haven't submitted any daily reports yet.
-                            {% endif %}
-                        {% endif %}
-                    </p>
-                    <a href="{{ url_for('new_daily_report') }}" class="btn btn-primary">
-                        <i class="bi bi-plus me-2"></i>Submit Your First Report
-                    </a>
+            <!-- No Reports -->
+            <div class="text-center py-5">
+                <div class="mb-4">
+                    <i class="bi bi-journal-text" style="font-size: 4rem; color: #dee2e6;"></i>
                 </div>
+                <h4 class="text-muted mb-3">No Reports Found</h4>
+                <p class="text-muted mb-4">
+                    {% if start_date and end_date %}
+                    No daily reports found for the selected date range.
+                    {% else %}
+                    {% if user_role == 'admin' %}
+                    No daily reports are currently visible to administrators.
+                    {% elif user_role == 'manager' %}
+                    No daily reports found from your managed projects or team members.
+                    {% else %}
+                    You haven't submitted any daily reports yet.
+                    {% endif %}
+                    {% endif %}
+                </p>
+                <a href="{{ url_for('new_daily_report') }}" class="btn btn-primary">
+                    <i class="bi bi-plus me-2"></i>Submit Your First Report
+                </a>
+            </div>
             {% endif %}
         </div>
     </div>
 </div>
 
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="deleteModalLabel">
+                    <i class="bi bi-exclamation-triangle me-2"></i>Confirm Delete
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                    aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete this daily report?</p>
+                <p class="fw-bold" id="reportTitle"></p>
+                <p class="text-danger mb-0">
+                    <i class="bi bi-info-circle me-1"></i>
+                    This action cannot be undone.
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger" id="confirmDeleteBtn">
+                    <i class="bi bi-trash me-1"></i>Delete Report
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bulk Delete Confirmation Modal -->
+<div class="modal fade" id="bulkDeleteModal" tabindex="-1" aria-labelledby="bulkDeleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="bulkDeleteModalLabel">
+                    <i class="bi bi-exclamation-triangle me-2"></i>Confirm Bulk Delete
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                    aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete <strong id="bulkDeleteCount"></strong> selected report(s)?</p>
+                <p class="text-danger mb-0">
+                    <i class="bi bi-info-circle me-1"></i>
+                    This action cannot be undone and will permanently delete all selected reports.
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger" id="confirmBulkDeleteBtn">
+                    <i class="bi bi-trash me-1"></i>Delete All Selected
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <style>
-/* Responsive adjustments */
-@media (max-width: 768px) {
-    .card-header h6 {
-        font-size: 0.9rem;
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .card-header h6 {
+            font-size: 0.9rem;
+        }
+
+        .card-body {
+            padding: 1rem;
+        }
+
+        .badge {
+            font-size: 0.75rem;
+        }
     }
-    
+
+    /* Prevent text overflow in cards */
+    .card {
+        overflow: hidden;
+    }
+
+    .card-header {
+        overflow: hidden;
+    }
+
     .card-body {
+        overflow: hidden;
+    }
+
+    /* Text truncation and wrapping utilities */
+    .text-truncate {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .text-break {
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+        word-break: break-word;
+        hyphens: auto;
+    }
+
+    /* Card hover effects */
+    .card {
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+    }
+
+    /* Report card specific styles */
+    .report-card {
+        transition: all 0.3s ease;
+    }
+
+    .report-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15) !important;
+        border-color: #0d6efd;
+    }
+
+    .report-card.selected {
+        border-color: #dc3545;
+        border-width: 2px;
+        box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+    }
+
+    .report-card:hover .card-header:not(.bg-light) {
+        background: linear-gradient(135deg, #0d6efd, #0b5ed7) !important;
+        color: white;
+    }
+
+    /* Card header flex fix */
+    .card-header {
+        display: flex;
+        align-items: flex-start;
         padding: 1rem;
     }
-    
-    .badge {
-        font-size: 0.75rem;
+
+    .card-header .flex-grow-1 {
+        flex: 1 1 auto;
+        min-width: 0;
+        margin-right: 0.5rem;
     }
-}
 
-/* Prevent text overflow in cards */
-.card {
-    overflow: hidden;
-}
+    .card-header .flex-shrink-0 {
+        flex: 0 0 auto;
+    }
 
-.card-header {
-    overflow: hidden;
-}
+    /* Status badge colors */
+    .badge.bg-success {
+        background-color: #198754 !important;
+    }
 
-.card-body {
-    overflow: hidden;
-}
+    .badge.bg-warning {
+        background-color: #ffc107 !important;
+        color: #000 !important;
+    }
 
-/* Text truncation and wrapping utilities */
-.text-truncate {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
+    .badge.bg-info {
+        background-color: #0dcaf0 !important;
+    }
 
-.text-break {
-    word-wrap: break-word;
-    overflow-wrap: break-word;
-    word-break: break-word;
-    hyphens: auto;
-}
+    .badge.bg-danger {
+        background-color: #dc3545 !important;
+    }
 
-/* Card hover effects */
-.card {
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
+    .badge.bg-primary {
+        background-color: #0d6efd !important;
+    }
 
-.card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
-}
+    /* Ensure badges don't break layout */
+    .badge {
+        display: inline-block;
+        max-width: 100%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        vertical-align: middle;
+    }
 
-/* Report card specific styles */
-.report-card {
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
+    /* Better spacing in card body sections */
+    .card-body>div {
+        overflow: hidden;
+    }
 
-.report-card:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15) !important;
-    border-color: #0d6efd;
-}
+    /* Improve title display */
+    .card-header h6 {
+        margin-bottom: 0.25rem;
+        line-height: 1.3;
+        max-width: 100%;
+    }
 
-.report-card:hover .card-header {
-    background: linear-gradient(135deg, #0d6efd, #0b5ed7) !important;
-    color: white;
-}
-
-/* Card header flex fix */
-.card-header {
-    display: flex;
-    align-items: flex-start;
-    padding: 1rem;
-}
-
-.card-header .flex-grow-1 {
-    flex: 1 1 auto;
-    min-width: 0; /* Important for text truncation */
-    margin-right: 0.5rem;
-}
-
-.card-header .flex-shrink-0 {
-    flex: 0 0 auto;
-}
-
-/* Status badge colors */
-.badge.bg-success {
-    background-color: #198754 !important;
-}
-
-.badge.bg-warning {
-    background-color: #ffc107 !important;
-    color: #000 !important;
-}
-
-.badge.bg-info {
-    background-color: #0dcaf0 !important;
-}
-
-.badge.bg-danger {
-    background-color: #dc3545 !important;
-}
-
-.badge.bg-primary {
-    background-color: #0d6efd !important;
-}
-
-/* Ensure badges don't break layout */
-.badge {
-    display: inline-block;
-    max-width: 100%;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    vertical-align: middle;
-}
-
-/* Better spacing in card body sections */
-.card-body > div {
-    overflow: hidden;
-}
-
-/* Improve title display */
-.card-header h6 {
-    margin-bottom: 0.25rem;
-    line-height: 1.3;
-    max-width: 100%;
-}
+    /* Checkbox styling */
+    .form-check-input:checked {
+        background-color: #dc3545;
+        border-color: #dc3545;
+    }
 </style>
 {% endblock %}
 
 {% block scripts %}
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Set default date range to last 30 days if no dates are set
-    const startDateInput = document.getElementById('start_date');
-    const endDateInput = document.getElementById('end_date');
-    
-    if (!startDateInput.value && !endDateInput.value) {
-        const today = new Date();
-        const thirtyDaysAgo = new Date();
-        thirtyDaysAgo.setDate(today.getDate() - 30);
-        
-        startDateInput.value = thirtyDaysAgo.toISOString().split('T')[0];
-        endDateInput.value = today.toISOString().split('T')[0];
-    }
-    
-    // Ensure end date is not before start date
-    startDateInput.addEventListener('change', function() {
-        if (endDateInput.value && this.value > endDateInput.value) {
-            endDateInput.value = this.value;
+    document.addEventListener('DOMContentLoaded', function () {
+        // Set default date range to last 30 days if no dates are set
+        const startDateInput = document.getElementById('start_date');
+        const endDateInput = document.getElementById('end_date');
+
+        if (!startDateInput.value && !endDateInput.value) {
+            const today = new Date();
+            const thirtyDaysAgo = new Date();
+            thirtyDaysAgo.setDate(today.getDate() - 30);
+
+            startDateInput.value = thirtyDaysAgo.toISOString().split('T')[0];
+            endDateInput.value = today.toISOString().split('T')[0];
+        }
+
+        // Ensure end date is not before start date
+        startDateInput.addEventListener('change', function () {
+            if (endDateInput.value && this.value > endDateInput.value) {
+                endDateInput.value = this.value;
+            }
+        });
+
+        endDateInput.addEventListener('change', function () {
+            if (startDateInput.value && this.value < startDateInput.value) {
+                startDateInput.value = this.value;
+            }
+        });
+
+        // Download button functionality
+        const downloadBtn = document.getElementById('downloadBtn');
+        if (downloadBtn) {
+            downloadBtn.addEventListener('click', function (e) {
+                e.preventDefault();
+
+                // Create a temporary form for download
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = '{{ url_for("download_daily_reports") }}';
+
+                // Add date fields
+                const startDateField = document.createElement('input');
+                startDateField.type = 'hidden';
+                startDateField.name = 'start_date';
+                startDateField.value = startDateInput.value;
+                form.appendChild(startDateField);
+
+                const endDateField = document.createElement('input');
+                endDateField.type = 'hidden';
+                endDateField.name = 'end_date';
+                endDateField.value = endDateInput.value;
+                form.appendChild(endDateField);
+
+                document.body.appendChild(form);
+                form.submit();
+                document.body.removeChild(form);
+            });
+        }
+
+        // Checkbox functionality for bulk operations
+        const reportCheckboxes = document.querySelectorAll('.report-checkbox');
+        const selectAllBtn = document.getElementById('selectAllBtn');
+        const deselectAllBtn = document.getElementById('deselectAllBtn');
+        const bulkDeleteBtn = document.getElementById('bulkDeleteBtn');
+        const selectedCountSpan = document.getElementById('selectedCount');
+
+        function updateSelectedCount() {
+            const checkedBoxes = document.querySelectorAll('.report-checkbox:checked');
+            const count = checkedBoxes.length;
+
+            if (selectedCountSpan) {
+                selectedCountSpan.textContent = count;
+            }
+
+            if (bulkDeleteBtn) {
+                bulkDeleteBtn.disabled = count === 0;
+            }
+
+            // Update card styling
+            reportCheckboxes.forEach(checkbox => {
+                const card = checkbox.closest('.report-card');
+                if (checkbox.checked) {
+                    card.classList.add('selected');
+                } else {
+                    card.classList.remove('selected');
+                }
+            });
+        }
+
+        // Select all functionality
+        if (selectAllBtn) {
+            selectAllBtn.addEventListener('click', function () {
+                reportCheckboxes.forEach(checkbox => {
+                    checkbox.checked = true;
+                });
+                updateSelectedCount();
+            });
+        }
+
+        // Deselect all functionality
+        if (deselectAllBtn) {
+            deselectAllBtn.addEventListener('click', function () {
+                reportCheckboxes.forEach(checkbox => {
+                    checkbox.checked = false;
+                });
+                updateSelectedCount();
+            });
+        }
+
+        // Update count when checkboxes change
+        reportCheckboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', updateSelectedCount);
+        });
+
+        // Single delete functionality
+        const deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
+        const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+        let reportIdToDelete = null;
+
+        // Handle delete button clicks
+        document.querySelectorAll('.delete-report-btn').forEach(btn => {
+            btn.addEventListener('click', function (e) {
+                e.stopPropagation();
+                reportIdToDelete = this.dataset.reportId;
+                const reportTitle = this.dataset.reportTitle;
+
+                document.getElementById('reportTitle').textContent = reportTitle;
+                deleteModal.show();
+            });
+        });
+
+        // Confirm single delete
+        if (confirmDeleteBtn) {
+            confirmDeleteBtn.addEventListener('click', function () {
+                if (!reportIdToDelete) return;
+
+                // Show loading state
+                this.disabled = true;
+                this.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Deleting...';
+
+                // Send delete request
+                fetch(`/daily_reports/delete/${reportIdToDelete}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Show success message
+                            const alertDiv = document.createElement('div');
+                            alertDiv.className = 'alert alert-success alert-dismissible fade show';
+                            alertDiv.innerHTML = `
+                        <i class="bi bi-check-circle me-2"></i>${data.message}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    `;
+                            document.querySelector('.container-fluid').insertBefore(alertDiv, document.querySelector('.container-fluid').firstChild);
+
+                            // Reload page after a short delay
+                            setTimeout(() => {
+                                window.location.reload();
+                            }, 1000);
+                        } else {
+                            // Show error message
+                            alert('Error: ' + data.message);
+                            this.disabled = false;
+                            this.innerHTML = '<i class="bi bi-trash me-1"></i>Delete Report';
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('An error occurred while deleting the report.');
+                        this.disabled = false;
+                        this.innerHTML = '<i class="bi bi-trash me-1"></i>Delete Report';
+                    })
+                    .finally(() => {
+                        deleteModal.hide();
+                    });
+            });
+        }
+
+        // Bulk delete functionality
+        const bulkDeleteModal = new bootstrap.Modal(document.getElementById('bulkDeleteModal'));
+        const confirmBulkDeleteBtn = document.getElementById('confirmBulkDeleteBtn');
+
+        if (bulkDeleteBtn) {
+            bulkDeleteBtn.addEventListener('click', function () {
+                const checkedBoxes = document.querySelectorAll('.report-checkbox:checked');
+                const count = checkedBoxes.length;
+
+                if (count === 0) return;
+
+                document.getElementById('bulkDeleteCount').textContent = count;
+                bulkDeleteModal.show();
+            });
+        }
+
+        // Confirm bulk delete
+        if (confirmBulkDeleteBtn) {
+            confirmBulkDeleteBtn.addEventListener('click', function () {
+                const checkedBoxes = document.querySelectorAll('.report-checkbox:checked');
+                const reportIds = Array.from(checkedBoxes).map(cb => cb.value);
+
+                if (reportIds.length === 0) return;
+
+                // Show loading state
+                this.disabled = true;
+                this.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Deleting...';
+
+                // Send bulk delete request
+                fetch('/daily_reports/bulk-delete', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ report_ids: reportIds })
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Show success message
+                            const alertDiv = document.createElement('div');
+                            alertDiv.className = 'alert alert-success alert-dismissible fade show';
+                            alertDiv.innerHTML = `
+                        <i class="bi bi-check-circle me-2"></i>${data.message}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    `;
+                            document.querySelector('.container-fluid').insertBefore(alertDiv, document.querySelector('.container-fluid').firstChild);
+
+                            // Reload page after a short delay
+                            setTimeout(() => {
+                                window.location.reload();
+                            }, 1500);
+                        } else {
+                            // Show error message
+                            alert('Error: ' + data.message);
+                            this.disabled = false;
+                            this.innerHTML = '<i class="bi bi-trash me-1"></i>Delete All Selected';
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('An error occurred while deleting reports.');
+                        this.disabled = false;
+                        this.innerHTML = '<i class="bi bi-trash me-1"></i>Delete All Selected';
+                    })
+                    .finally(() => {
+                        bulkDeleteModal.hide();
+                    });
+            });
         }
     });
-    
-    endDateInput.addEventListener('change', function() {
-        if (startDateInput.value && this.value < startDateInput.value) {
-            startDateInput.value = this.value;
-        }
-    });
-});
 </script>
 {% endblock %}

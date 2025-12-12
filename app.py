@@ -11,7 +11,10 @@ from utils.db_helper import DatabaseHelper
 import config
 import branding_config
 import logging
-
+from flask import send_file, jsonify
+import io
+import csv
+from datetime import datetime
 # Set up logging
 logger = logging.getLogger(__name__)
 
@@ -608,7 +611,7 @@ def edit_task(id):
     )
 
 
-###################### Messages Routes
+###################### Messages Routes######################################
 @app.route('/messages')
 @login_required
 def messages():
@@ -1470,9 +1473,9 @@ def documents_download(doc_id):
         return redirect(url_for('documents_list'))
     
     # Check user permissions
-    if not db.can_user_view_document(session['user_id'], session['organization_id'], session['user_role'], document):
-        flash('Access denied.', 'error')
-        return redirect(url_for('documents_list'))
+    # if not db.can_user_view_document(session['user_id'], session['organization_id'], session['user_role'], document):
+    #     flash('Access denied.', 'error')
+    #     return redirect(url_for('documents_list'))
     
     try:
         # Construct file path using the filename field (stored_name)
@@ -1887,5 +1890,249 @@ if __name__ == '__main__':
     print("   Member:  member@demo.com / member")
     print("\n" + "="*50)
 
-    if __name__ == "__main__":
+
+
+@app.route('/daily_reports/download', methods=['POST'])
+def download_daily_reports():
+    """Download filtered daily reports as CSV (Admin only)"""
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    
+    user = db.get_user_by_id(session['user_id'])
+    if not user or user['role'] != 'admin':
+        flash('Access denied. Only administrators can download reports.', 'danger')
+        return redirect(url_for('daily_reports'))
+    
+    start_date = request.form.get('start_date')
+    end_date = request.form.get('end_date')
+    
+    # Get reports based on filters
+    if start_date and end_date:
+        reports = db.get_daily_reports_by_date_range(
+            user['organization_id'], 
+            start_date, 
+            end_date, 
+            user['role']
+        )
+    else:
+        reports = db.get_daily_reports_for_admins(user['organization_id'])
+    
+    # Create CSV in memory
+    output = io.StringIO()
+    writer = csv.writer(output)
+    
+    # Write header
+    writer.writerow([
+        'Report ID', 
+        'Date', 
+        'Submitted By', 
+        'Project', 
+        'Work Title', 
+        'Description', 
+        'Status', 
+        'Discussion',
+        'Visible to Manager',
+        'Visible to Admin',
+        'Submitted At'
+    ])
+    
+    # Write data
+    for report in reports:
+        writer.writerow([
+            report['id'],
+            report['report_date'].strftime('%Y-%m-%d') if report['report_date'] else '',
+            report['user_name'],
+            report['project_name'] or 'No Project',
+            report['work_title'],
+            report['work_description'] or '',
+            report['status'].replace('_', ' ').title(),
+            report['discussion'] or '',
+            'Yes' if report['visible_to_manager'] else 'No',
+            'Yes' if report['visible_to_admin'] else 'No',
+            report['created_at'].strftime('%Y-%m-%d %H:%M:%S') if report['created_at'] else ''
+        ])
+    
+    # Prepare file for download
+    output.seek(0)
+    
+    filename = f"daily_reports_{start_date or 'all'}_{end_date or 'all'}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"
+    
+    return send_file(
+        io.BytesIO(output.getvalue().encode('utf-8')),
+        mimetype='text/csv',
+        as_attachment=True,
+        download_name=filename
+    )
+
+@app.route('/daily_reports/delete/<int:report_id>', methods=['POST'])
+def delete_daily_report(report_id):
+    """Delete a daily report (Admin only)"""
+    if 'user_id' not in session:
+        return jsonify({'success': False, 'message': 'Not authenticated'}), 401
+    
+    user = db.get_user_by_id(session['user_id'])
+    if not user or user['role'] != 'admin':
+        return jsonify({'success': False, 'message': 'Access denied. Only administrators can delete reports.'}), 403
+    
+    # Get report to verify it exists and belongs to organization
+    report = db.get_daily_report_by_id(report_id, session['user_id'], user['organization_id'], user['role'])
+    
+    if not report:
+        return jsonify({'success': False, 'message': 'Report not found or access denied'}), 404
+    
+    # Delete the report
+    success = db.delete_daily_report(report_id)
+    
+    if success:
+        return jsonify({'success': True, 'message': 'Report deleted successfully'})
+    else:
+        return jsonify({'success': False, 'message': 'Failed to delete report'}), 500
+    
+@app.route('/daily_reports/bulk-delete', methods=['POST'])
+def bulk_delete_daily_reports():
+    """Bulk delete daily reports (Admin only)"""
+    if 'user_id' not in session:
+        return jsonify({'success': False, 'message': 'Not authenticated'}), 401
+    
+    user = db.get_user_by_id(session['user_id'])
+    if not user or user['role'] != 'admin':
+        return jsonify({'success': False, 'message': 'Access denied. Only administrators can delete reports.'}), 403
+    
+    data = request.get_json()
+    report_ids = data.get('report_ids', [])
+    
+    if not report_ids:
+        return jsonify({'success': False, 'message': 'No reports selected'}), 400
+    
+    # Delete each report
+    deleted_count = 0
+    failed_count = 0
+    
+    for report_id in report_ids:
+        # Verify report belongs to organization
+        report = db.get_daily_report_by_id(report_id, session['user_id'], user['organization_id'], user['role'])
+        
+        if not report:
+            failed_count += 1
+            continue
+        
+        if db.delete_daily_report(report_id):
+            deleted_count += 1
+        else:
+            failed_count += 1
+    
+    if deleted_count > 0:
+        message = f'Successfully deleted {deleted_count} report(s)'
+        if failed_count > 0:
+            message += f' ({failed_count} failed)'
+        return jsonify({'success': True, 'message': message, 'deleted_count': deleted_count})
+    else:
+        return jsonify({'success': False, 'message': 'Failed to delete reports'}), 500
+    
+
+@app.route('/daily-reports/<int:report_id>/edit', methods=['GET', 'POST'])
+@login_required
+def edit_daily_report(report_id):
+    """Edit daily report (only same day)"""
+    user_id = session['user_id']
+    org_id = session['organization_id']
+    user_role = session['user_role']
+    
+    # Check if user can edit this report
+    if not db.can_edit_daily_report(report_id, user_id):
+        flash('You can only edit reports submitted today.', 'error')
+        return redirect(url_for('daily_reports'))
+    
+    # Get the report
+    report = db.get_daily_report_by_id(report_id, user_id, org_id, user_role)
+    if not report:
+        flash('Report not found or access denied.', 'error')
+        return redirect(url_for('daily_reports'))
+    
+    if request.method == 'POST':
+        # Get arrays of work items (same as new report)
+        work_titles = request.form.getlist('work_title[]')
+        work_descriptions = request.form.getlist('work_description[]')
+        statuses = request.form.getlist('status[]')
+        discussions = request.form.getlist('discussion[]')
+        
+        # Validate that we have at least one work item
+        if not work_titles or not any(title.strip() for title in work_titles):
+            flash('At least one work item is required.', 'error')
+            return render_template('daily_reports/edit.html', 
+                                 report=report,
+                                 user=db.get_user_by_id(user_id), 
+                                 projects=db.get_user_projects(user_id, org_id))
+        
+        # Create the update data
+        data = {
+            'project_id': request.form.get('project_id') or None,
+            'report_date': request.form['report_date'],
+            'visible_to_manager': 'visible_to_manager' in request.form,
+            'visible_to_admin': 'visible_to_admin' in request.form
+        }
+        
+        # Process multiple work items (same logic as create)
+        work_items = []
+        for i in range(len(work_titles)):
+            if work_titles[i].strip():
+                work_items.append({
+                    'title': work_titles[i].strip(),
+                    'description': work_descriptions[i].strip() if i < len(work_descriptions) else '',
+                    'status': statuses[i] if i < len(statuses) else 'completed',
+                    'discussion': discussions[i].strip() if i < len(discussions) else ''
+                })
+        
+        if len(work_items) == 1:
+            data.update({
+                'work_title': work_items[0]['title'],
+                'work_description': work_items[0]['description'],
+                'status': work_items[0]['status'],
+                'discussion': work_items[0]['discussion']
+            })
+        else:
+            formatted_description = ""
+            for i, item in enumerate(work_items, 1):
+                formatted_description += f"{i}. {item['title']}\n"
+                if item['description']:
+                    formatted_description += f"{item['description']}\n"
+                if item['status']:
+                    formatted_description += f"Status: {item['status']}\n"
+                if item['discussion']:
+                    formatted_description += f"Discussion: {item['discussion']}\n"
+                formatted_description += "\n\n"
+            
+            data.update({
+                'work_title': work_items[0]['title'],
+                'work_description': formatted_description.strip(),
+                'status': work_items[0]['status'],
+                'discussion': work_items[0]['discussion']
+            })
+        
+        try:
+            if db.update_daily_report(report_id, data):
+                flash('Daily report updated successfully!', 'success')
+                return redirect(url_for('view_daily_report', report_id=report_id))
+            else:
+                flash('Failed to update daily report.', 'error')
+        except Exception as e:
+            flash(f'Error updating report: {str(e)}', 'error')
+    
+    # GET request - show edit form
+    user = db.get_user_by_id(user_id)
+    projects = db.get_user_projects(user_id, org_id)
+    
+    return render_template('daily_reports/edit.html', 
+                         report=report,
+                         user=user, 
+                         projects=projects)
+
+@app.route('/api/daily-reports/<int:report_id>/can-edit')
+@login_required
+def check_can_edit_report(report_id):
+    """API endpoint to check if report can be edited"""
+    can_edit = db.can_edit_daily_report(report_id, session['user_id'])
+    return jsonify({'can_edit': can_edit})
+
+if __name__ == "__main__":
         app.run(debug=False, host='0.0.0.0', port=5000)

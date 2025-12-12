@@ -3418,3 +3418,126 @@ class DatabaseHelper:
             return cursor.fetchall()
         finally:
             conn.close()
+
+
+    def delete_daily_report(self, report_id):
+        """Delete a daily report"""
+        conn = self.get_connection()
+        if not conn:
+            return False
+        
+        try:
+            cursor = conn.cursor()
+            cursor.execute("DELETE FROM daily_reports WHERE id = %s", (report_id,))
+            conn.commit()
+            return cursor.rowcount > 0
+        except Exception as e:
+            conn.rollback()
+            logger.error(f"Error deleting daily report: {e}")
+            return False
+        finally:
+            conn.close()
+            
+    
+    def update_daily_report(self, report_id, data):
+        """Update an existing daily report"""
+        conn = self.get_connection()
+        if not conn:
+            return False
+        
+        try:
+            cursor = conn.cursor()
+            
+            # Build update query based on provided data
+            update_fields = []
+            values = []
+            
+            if 'project_id' in data:
+                update_fields.append("project_id = %s")
+                values.append(data['project_id'])
+            
+            if 'report_date' in data:
+                update_fields.append("report_date = %s")
+                values.append(data['report_date'])
+            
+            if 'work_title' in data:
+                update_fields.append("work_title = %s")
+                values.append(data['work_title'])
+            
+            if 'work_description' in data:
+                update_fields.append("work_description = %s")
+                values.append(data['work_description'])
+            
+            if 'status' in data:
+                update_fields.append("status = %s")
+                values.append(data['status'])
+            
+            if 'discussion' in data:
+                update_fields.append("discussion = %s")
+                values.append(data['discussion'])
+            
+            if 'visible_to_manager' in data:
+                update_fields.append("visible_to_manager = %s")
+                values.append(data['visible_to_manager'])
+            
+            if 'visible_to_admin' in data:
+                update_fields.append("visible_to_admin = %s")
+                values.append(data['visible_to_admin'])
+            
+            if not update_fields:
+                return True  # No fields to update
+            
+            # Add updated_at timestamp
+            update_fields.append("updated_at = CURRENT_TIMESTAMP")
+            
+            values.append(report_id)
+            query = f"UPDATE daily_reports SET {', '.join(update_fields)} WHERE id = %s"
+            
+            cursor.execute(query, values)
+            conn.commit()
+            return cursor.rowcount > 0
+            
+        except Exception as e:
+            conn.rollback()
+            logger.error(f"Error updating daily report: {e}")
+            return False
+        finally:
+            conn.close()
+
+    def can_edit_daily_report(self, report_id, user_id):
+        """Check if user can edit a daily report (only on the same day)"""
+        conn = self.get_connection()
+        if not conn:
+            return False
+        
+        try:
+            cursor = conn.cursor(pymysql.cursors.DictCursor)
+            cursor.execute("""
+                SELECT user_id, report_date, DATE(created_at) as created_date
+                FROM daily_reports
+                WHERE id = %s
+            """, (report_id,))
+            
+            report = cursor.fetchone()
+            if not report:
+                return False
+            
+            # Check if user owns the report
+            if report['user_id'] != user_id:
+                return False
+            
+            # Check if report is from today
+            from datetime import date
+            today = date.today()
+            report_date = report['report_date']
+            
+            # Convert report_date to date object if it's a string
+            if isinstance(report_date, str):
+                from datetime import datetime
+                report_date = datetime.strptime(report_date, '%Y-%m-%d').date()
+            
+            # Report can only be edited if it was created today
+            return report_date == today
+            
+        finally:
+            conn.close()
