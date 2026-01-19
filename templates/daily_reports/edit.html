@@ -155,8 +155,8 @@ document.addEventListener('DOMContentLoaded', function() {
         discussion: `{{ report.discussion|safe }}`
     };
     
-    // Check if report has multiple work items
-    if (reportData.workDescription && (reportData.workDescription.includes('1.') || reportData.workDescription.includes('2.'))) {
+    // Check if report has multiple work items using the triple newline separator
+    if (reportData.workDescription && reportData.workDescription.includes('\n\n\n')) {
         parseAndLoadMultipleWorkItems(reportData.workDescription);
     } else {
         // Load single work item
@@ -164,55 +164,71 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     function parseAndLoadMultipleWorkItems(description) {
-        const lines = description.split('\n');
+        // Split by triple newlines (the separator used in backend)
+        const itemBlocks = description.split('\n\n\n').filter(block => block.trim());
         const workItems = [];
-        let currentItem = null;
         
-        for (let i = 0; i < lines.length; i++) {
-            const line = lines[i].trim();
-            if (!line) continue;
+        itemBlocks.forEach(block => {
+            const lines = block.split('\n').map(line => line.trim()).filter(line => line);
             
-            if (line.match(/^\d+\./)) {
-                if (currentItem) {
-                    workItems.push(currentItem);
-                }
+            if (lines.length === 0) return;
+            
+            // First line should be "Number. Title"
+            const firstLine = lines[0];
+            const match = firstLine.match(/^(\d+)\.\s*(.+)$/);
+            
+            if (!match) return; // Skip if doesn't match expected format
+            
+            const item = {
+                title: match[2],
+                description: '',
+                status: 'completed',
+                discussion: ''
+            };
+            
+            // Process remaining lines
+            for (let i = 1; i < lines.length; i++) {
+                const line = lines[i];
                 
-                const parts = line.split('.', 2);
-                currentItem = {
-                    title: parts[1] ? parts[1].trim() : '',
-                    description: '',
-                    status: 'completed',
-                    discussion: ''
-                };
-            } else if (currentItem) {
                 if (line.startsWith('Status:')) {
-                    currentItem.status = line.replace('Status:', '').trim();
+                    item.status = line.replace('Status:', '').trim();
                 } else if (line.startsWith('Discussion:')) {
-                    currentItem.discussion = line.replace('Discussion:', '').trim();
-                } else if (currentItem.title) {
-                    if (currentItem.description) {
-                        currentItem.description += '\n' + line;
+                    item.discussion = line.replace('Discussion:', '').trim();
+                } else {
+                    // This is description content
+                    if (item.description) {
+                        item.description += '\n' + line;
                     } else {
-                        currentItem.description = line;
+                        item.description = line;
                     }
                 }
             }
-        }
-        
-        if (currentItem) {
-            workItems.push(currentItem);
-        }
+            
+            workItems.push(item);
+        });
         
         // Load all items
-        workItems.forEach(item => {
-            if (item.title) {
-                addWorkItem(item.title, item.description, item.status, item.discussion);
-            }
-        });
+        if (workItems.length > 0) {
+            workItems.forEach(item => {
+                if (item.title) {
+                    addWorkItem(item.title, item.description, item.status, item.discussion);
+                }
+            });
+        } else {
+            // Fallback to single item if parsing fails
+            addWorkItem(reportData.workTitle, reportData.workDescription, reportData.status, reportData.discussion);
+        }
     }
     
     function addWorkItem(title = '', description = '', status = 'completed', discussion = '') {
         workItemCount++;
+        
+        // Escape HTML to prevent XSS
+        const escapeHtml = (text) => {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        };
         
         const workItemHtml = `
             <div class="work-item-card" data-item-id="${workItemCount}">
@@ -223,13 +239,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 <div class="mb-3">
                     <label class="form-label required">Work Title/Module</label>
                     <input type="text" class="form-control" name="work_title[]" 
-                           value="${title}" required placeholder="e.g., User Authentication Module">
+                           value="${escapeHtml(title)}" required placeholder="e.g., User Authentication Module">
                 </div>
                 
                 <div class="mb-3">
                     <label class="form-label">Description</label>
                     <textarea class="form-control" name="work_description[]" rows="3" 
-                              placeholder="Describe what you worked on...">${description}</textarea>
+                              placeholder="Describe what you worked on...">${escapeHtml(description)}</textarea>
                 </div>
                 
                 <div class="row">
@@ -246,7 +262,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     <div class="col-md-6 mb-3">
                         <label class="form-label">Discussion/Notes</label>
                         <textarea class="form-control" name="discussion[]" rows="3" 
-                                  placeholder="Any discussions or notes...">${discussion}</textarea>
+                                  placeholder="Any discussions or notes...">${escapeHtml(discussion)}</textarea>
                     </div>
                 </div>
             </div>

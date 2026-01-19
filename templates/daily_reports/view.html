@@ -22,7 +22,11 @@
                                 <i class="bi bi-journal-text me-2"></i>Daily Report
                             </h5>
                             <small class="opacity-75">
-                                <i class="bi bi-calendar me-1"></i>{{ report.report_date.strftime('%d-%m-%Y') if report.report_date else '' }}
+                                <i class="bi bi-calendar me-1"></i>{{ report.report_date.strftime('%d-%m-%Y') if
+                                report.report_date else '' }}
+                                {% if report.created_at %}
+                                <i class="bi bi-clock ms-3 me-1"></i>{{ report.created_at.strftime('%I:%M %p') }}
+                                {% endif %}
                                 <i class="bi bi-person ms-3 me-1"></i>{{ report.user_name }}
                             </small>
                         </div>
@@ -122,200 +126,217 @@
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const workDescription = `{{ report.work_description|safe }}`;
-    const workTitle = `{{ report.work_title|safe }}`;
-    const status = `{{ report.status|safe }}`;
-    const discussion = `{{ report.discussion|safe }}`;
-    
-    const tableBody = document.getElementById('workItemsTableBody');
-    const summaryCard = document.getElementById('summaryCard');
-    
-    // Check if this is a multiple work items report
-    if (workDescription && (workDescription.includes('1.') || workDescription.includes('2.'))) {
-        // Parse multiple work items
-        parseMultipleWorkItems(workDescription);
-    } else {
-        // Display single work item
-        displaySingleWorkItem(workTitle, workDescription, status, discussion);
-    }
-    
-    function parseMultipleWorkItems(description) {
-        const lines = description.split('\n');
-        const workItems = [];
-        let currentItem = null;
-        
-        for (let i = 0; i < lines.length; i++) {
-            const line = lines[i].trim();
-            if (!line) continue;
-            
-            // Check if this line starts a new work item
-            if (line.match(/^\d+\./)) {
-                // Save previous item if exists
-                if (currentItem) {
-                    workItems.push(currentItem);
-                }
-                
-                // Start new item
-                const parts = line.split('.', 2);
-                currentItem = {
-                    number: parts[0],
-                    title: parts[1] ? parts[1].trim() : '',
+    document.addEventListener('DOMContentLoaded', function () {
+        const workDescription = `{{ report.work_description|safe }}`;
+        const workTitle = `{{ report.work_title|safe }}`;
+        const status = `{{ report.status|safe }}`;
+        const discussion = `{{ report.discussion|safe }}`;
+
+        const tableBody = document.getElementById('workItemsTableBody');
+        const summaryCard = document.getElementById('summaryCard');
+
+        // Check if this is a multiple work items report
+        // Look for the pattern created by the backend: "1. Title\nDescription\nStatus: ...\nDiscussion: ...\n\n\n2. Title..."
+        if (workDescription && workDescription.includes('\n\n\n')) {
+            // Parse multiple work items using the triple newline separator
+            parseMultipleWorkItems(workDescription);
+        } else {
+            // Display single work item
+            displaySingleWorkItem(workTitle, workDescription, status, discussion);
+        }
+
+        function parseMultipleWorkItems(description) {
+            // Split by triple newlines (the separator used in backend)
+            const itemBlocks = description.split('\n\n\n').filter(block => block.trim());
+            const workItems = [];
+
+            itemBlocks.forEach(block => {
+                const lines = block.split('\n').map(line => line.trim()).filter(line => line);
+
+                if (lines.length === 0) return;
+
+                // First line should be "Number. Title"
+                const firstLine = lines[0];
+                const match = firstLine.match(/^(\d+)\.\s*(.+)$/);
+
+                if (!match) return; // Skip if doesn't match expected format
+
+                const item = {
+                    number: match[1],
+                    title: match[2],
                     description: '',
                     status: 'completed',
                     discussion: ''
                 };
-            } else if (currentItem) {
-                // Process line for current item
-                if (line.startsWith('Status:')) {
-                    currentItem.status = line.replace('Status:', '').trim();
-                } else if (line.startsWith('Discussion:')) {
-                    currentItem.discussion = line.replace('Discussion:', '').trim();
-                } else if (currentItem.title) {
-                    // This is description content
-                    if (currentItem.description) {
-                        currentItem.description += '\n' + line;
+
+                // Process remaining lines
+                for (let i = 1; i < lines.length; i++) {
+                    const line = lines[i];
+
+                    if (line.startsWith('Status:')) {
+                        item.status = line.replace('Status:', '').trim();
+                    } else if (line.startsWith('Discussion:')) {
+                        item.discussion = line.replace('Discussion:', '').trim();
                     } else {
-                        currentItem.description = line;
+                        // This is description content
+                        if (item.description) {
+                            item.description += '\n' + line;
+                        } else {
+                            item.description = line;
+                        }
                     }
                 }
+
+                workItems.push(item);
+            });
+
+            // Display all items
+            if (workItems.length > 0) {
+                displayWorkItems(workItems);
+                showSummary(workItems);
+            } else {
+                // Fallback to single item if parsing fails
+                displaySingleWorkItem(workTitle, workDescription, status, discussion);
             }
         }
-        
-        // Add the last item
-        if (currentItem) {
-            workItems.push(currentItem);
-        }
-        
-        // Display all items
-        displayWorkItems(workItems);
-        
-        // Show summary
-        showSummary(workItems);
-    }
-    
-    function displaySingleWorkItem(title, description, status, discussion) {
-        const row = document.createElement('tr');
-        row.innerHTML = `
+
+        function displaySingleWorkItem(title, description, status, discussion) {
+            const row = document.createElement('tr');
+            row.innerHTML = `
             <td class="fw-bold text-center">1</td>
-            <td class="fw-semibold">${title || 'No title'}</td>
-            <td style="white-space: pre-wrap; font-size: 0.9rem;">${description || 'No description'}</td>
+            <td class="fw-semibold">${escapeHtml(title || 'No title')}</td>
+            <td style="white-space: pre-wrap; font-size: 0.9rem;">${escapeHtml(description || 'No description')}</td>
             <td class="text-center">
                 <span class="badge bg-${getStatusBadgeClass(status)}">
                     ${getStatusDisplayText(status)}
                 </span>
             </td>
-            <td style="white-space: pre-wrap; font-size: 0.85rem;">${discussion || 'No discussion'}</td>
+            <td style="white-space: pre-wrap; font-size: 0.85rem;">${escapeHtml(discussion || 'No discussion')}</td>
         `;
-        tableBody.appendChild(row);
-    }
-    
-    function displayWorkItems(workItems) {
-        workItems.forEach(item => {
-            if (item.title) {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td class="fw-bold text-center">${item.number}</td>
-                    <td class="fw-semibold">${item.title}</td>
-                    <td style="white-space: pre-wrap; font-size: 0.9rem;">${item.description}</td>
+            tableBody.appendChild(row);
+        }
+
+        function displayWorkItems(workItems) {
+            workItems.forEach(item => {
+                if (item.title) {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                    <td class="fw-bold text-center">${escapeHtml(item.number)}</td>
+                    <td class="fw-semibold">${escapeHtml(item.title)}</td>
+                    <td style="white-space: pre-wrap; font-size: 0.9rem;">${escapeHtml(item.description)}</td>
                     <td class="text-center">
                         <span class="badge bg-${getStatusBadgeClass(item.status)}">
                             ${getStatusDisplayText(item.status)}
                         </span>
                     </td>
-                    <td style="white-space: pre-wrap; font-size: 0.85rem;">${item.discussion}</td>
+                    <td style="white-space: pre-wrap; font-size: 0.85rem;">${escapeHtml(item.discussion)}</td>
                 `;
-                tableBody.appendChild(row);
+                    tableBody.appendChild(row);
+                }
+            });
+        }
+
+        function showSummary(workItems) {
+            const totalItems = workItems.length;
+            const completedItems = workItems.filter(item => item.status === 'completed').length;
+            const inProgressItems = workItems.filter(item => item.status === 'in_progress').length;
+
+            document.getElementById('totalItems').textContent = totalItems;
+            document.getElementById('completedItems').textContent = completedItems;
+            document.getElementById('inProgressItems').textContent = inProgressItems;
+
+            summaryCard.style.display = 'block';
+        }
+
+        function getStatusBadgeClass(status) {
+            switch (status) {
+                case 'completed': return 'success';
+                case 'in_progress': return 'warning';
+                case 'blocked': return 'danger';
+                case 'pending': return 'secondary';
+                default: return 'secondary';
             }
-        });
-    }
-    
-    function showSummary(workItems) {
-        const totalItems = workItems.length;
-        const completedItems = workItems.filter(item => item.status === 'completed').length;
-        const inProgressItems = workItems.filter(item => item.status === 'in_progress').length;
-        
-        document.getElementById('totalItems').textContent = totalItems;
-        document.getElementById('completedItems').textContent = completedItems;
-        document.getElementById('inProgressItems').textContent = inProgressItems;
-        
-        summaryCard.style.display = 'block';
-    }
-    
-    function getStatusBadgeClass(status) {
-        switch(status) {
-            case 'completed': return 'success';
-            case 'in_progress': return 'warning';
-            case 'blocked': return 'danger';
-            default: return 'secondary';
         }
-    }
-    
-    function getStatusDisplayText(status) {
-        switch(status) {
-            case 'completed': return 'Done';
-            case 'in_progress': return 'In Progress';
-            case 'blocked': return 'Blocked';
-            default: return status ? status.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase()) : 'Unknown';
+
+        function getStatusDisplayText(status) {
+            switch (status) {
+                case 'completed': return 'Done';
+                case 'in_progress': return 'In Progress';
+                case 'blocked': return 'Blocked';
+                case 'pending': return 'Pending';
+                default: return status ? status.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase()) : 'Unknown';
+            }
         }
-    }
-});
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+    });
 </script>
 
 <style>
-/* Responsive adjustments */
-@media (max-width: 768px) {
-    .card-body {
-        padding: 1.5rem !important;
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .card-body {
+            padding: 1.5rem !important;
+        }
+
+        .badge.fs-6 {
+            font-size: 0.875rem !important;
+        }
+
+        .table-responsive {
+            font-size: 0.85rem;
+        }
     }
-    
-    .badge.fs-6 {
-        font-size: 0.875rem !important;
+
+    /* Spreadsheet-like borders */
+    .table-bordered> :not(caption)>*>* {
+        border-width: 1px;
     }
-    
-    .table-responsive {
-        font-size: 0.85rem;
+
+    /* Status badge colors */
+    .badge.bg-success {
+        background-color: #198754 !important;
     }
-}
 
-/* Spreadsheet-like borders */
-.table-bordered> :not(caption)>*>* { border-width: 1px; }
+    .badge.bg-warning {
+        background-color: #ffc107 !important;
+        color: #000 !important;
+    }
 
-/* Status badge colors */
-.badge.bg-success {
-    background-color: #198754 !important;
-}
+    .badge.bg-info {
+        background-color: #0dcaf0 !important;
+    }
 
-.badge.bg-warning {
-    background-color: #ffc107 !important;
-    color: #000 !important;
-}
+    .badge.bg-danger {
+        background-color: #dc3545 !important;
+    }
 
-.badge.bg-info {
-    background-color: #0dcaf0 !important;
-}
+    .badge.bg-primary {
+        background-color: #0d6efd !important;
+    }
 
-.badge.bg-danger {
-    background-color: #dc3545 !important;
-}
+    .badge.bg-secondary {
+        background-color: #6c757d !important;
+    }
 
-.badge.bg-primary { background-color: #0d6efd !important; }
-.badge.bg-secondary { background-color: #6c757d !important; }
+    /* Table improvements */
+    .table th {
+        background-color: #f8f9fa !important;
+        border-bottom: 2px solid #dee2e6;
+        font-weight: 600;
+    }
 
-/* Table improvements */
-.table th {
-    background-color: #f8f9fa !important;
-    border-bottom: 2px solid #dee2e6;
-    font-weight: 600;
-}
+    .table td {
+        vertical-align: middle;
+    }
 
-.table td {
-    vertical-align: middle;
-}
-
-/* Card improvements */
-.card-header {
-    border-bottom: 1px solid rgba(0,0,0,.125);
-}
+    /* Card improvements */
+    .card-header {
+        border-bottom: 1px solid rgba(0, 0, 0, .125);
+    }
 </style>
 {% endblock %}
