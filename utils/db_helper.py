@@ -2133,7 +2133,7 @@ class DatabaseHelper:
                     LEFT JOIN projects p ON pm_current.project_id = p.id AND p.status IN ('active', 'planning')
                     WHERE u.organization_id = %s 
                     AND u.is_active = TRUE
-                    AND u.role = 'member'
+                    AND u.role IN ('member', 'manager')
                     AND u.id NOT IN (
                         SELECT pm.user_id FROM project_members pm WHERE pm.project_id = %s
                     )
@@ -2150,7 +2150,7 @@ class DatabaseHelper:
                     LEFT JOIN projects p ON pm.project_id = p.id AND p.status IN ('active', 'planning')
                     WHERE u.organization_id = %s 
                     AND u.is_active = TRUE
-                    AND u.role = 'member'
+                    AND u.role IN ('member', 'manager') 
                     GROUP BY u.id, u.full_name, u.email, u.role
                     ORDER BY u.full_name
                 """, (org_id,))
