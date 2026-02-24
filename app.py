@@ -15,6 +15,7 @@ from flask import send_file, jsonify
 import io
 import csv
 from datetime import datetime
+from zoneinfo import ZoneInfo
 # Set up logging
 logger = logging.getLogger(__name__)
 
@@ -250,6 +251,18 @@ def register():
             flash(f'Registration failed: {str(e)}', 'error')
     
     return render_template('auth/register.html')
+
+
+IST = ZoneInfo('Asia/Kolkata')
+
+@app.template_filter('to_ist')
+def to_ist_filter(utc_dt):
+    if utc_dt is None:
+        return ''
+    if utc_dt.tzinfo is None:
+        from datetime import timezone
+        utc_dt = utc_dt.replace(tzinfo=timezone.utc)
+    return utc_dt.astimezone(IST)
 
 @app.route('/logout')
 def logout():
