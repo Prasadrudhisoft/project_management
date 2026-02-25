@@ -259,10 +259,23 @@ IST = ZoneInfo('Asia/Kolkata')
 def to_ist_filter(utc_dt):
     if utc_dt is None:
         return ''
+    if isinstance(utc_dt, str):
+        try:
+            utc_dt = datetime.strptime(utc_dt, '%Y-%m-%d %H:%M:%S')
+        except ValueError:
+            return utc_dt
+    from datetime import timezone
     if utc_dt.tzinfo is None:
-        from datetime import timezone
         utc_dt = utc_dt.replace(tzinfo=timezone.utc)
     return utc_dt.astimezone(IST)
+
+@app.template_filter('strftime')
+def strftime_filter(dt, fmt='%Y-%m-%d %H:%M:%S'):
+    if dt is None:
+        return ''
+    if hasattr(dt, 'strftime'):
+        return dt.strftime(fmt)
+    return str(dt)
 
 @app.route('/logout')
 def logout():
@@ -1665,7 +1678,7 @@ def new_daily_report():
     # Get current user info and available projects for the form
     user = db.get_user_by_id(session['user_id'])
     projects = db.get_user_projects(session['user_id'], session['organization_id'])
-    today = datetime.now().strftime('%Y-%m-%d')
+    today = datetime.now(IST).strftime('%Y-%m-%d')
     
     return render_template('daily_reports/new.html', user=user, projects=projects, today=today)
 
@@ -2134,11 +2147,14 @@ def edit_daily_report(report_id):
     # GET request - show edit form
     user = db.get_user_by_id(user_id)
     projects = db.get_user_projects(user_id, org_id)
+    today = datetime.now(IST).strftime('%Y-%m-%d')
     
     return render_template('daily_reports/edit.html', 
                          report=report,
                          user=user, 
-                         projects=projects)
+                         projects=projects,
+                         today=today
+                         )
 
 @app.route('/api/daily-reports/<int:report_id>/can-edit')
 @login_required

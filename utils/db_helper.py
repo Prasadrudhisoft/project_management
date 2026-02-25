@@ -13,7 +13,9 @@ class DatabaseHelper:
     def get_connection(self):
         """Get database connection"""
         try:
-            return pymysql.connect(**self.config)
+            config = self.config.copy()
+            config['init_command'] = "SET time_zone = '+00:00'"
+            return pymysql.connect(**config)
         except Exception as e:
             logger.error(f"Database connection failed: {e}")
             return None
@@ -3527,8 +3529,10 @@ class DatabaseHelper:
                 return False
             
             # Check if report is from today
-            from datetime import date
-            today = date.today()
+            from zoneinfo import ZoneInfo
+            from datetime import datetime
+            IST = ZoneInfo('Asia/Kolkata')
+            today = datetime.now(IST).date() 
             report_date = report['report_date']
             
             # Convert report_date to date object if it's a string
