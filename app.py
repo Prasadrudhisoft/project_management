@@ -1865,15 +1865,15 @@ def change_password():
     
     return render_template('profile/change_password.html', user=user)
 
-@app.route('/debug-session')
-def debug_session():
-    """Debug route to check session data"""
-    return {
-        'session_data': dict(session),
-        'user_id': session.get('user_id'),
-        'user_email': session.get('user_email'),
-        'user_created_at': session.get('user_created_at')
-    }
+# @app.route('/debug-session')
+# def debug_session():
+#     """Debug route to check session data"""
+#     return {
+#         'session_data': dict(session),
+#         'user_id': session.get('user_id'),
+#         'user_email': session.get('user_email'),
+#         'user_created_at': session.get('user_created_at')
+#     }
 
 # Serve uploaded avatars
 @app.route('/uploads/avatars/<path:filename>')
@@ -2162,6 +2162,384 @@ def check_can_edit_report(report_id):
     """API endpoint to check if report can be edited"""
     can_edit = db.can_edit_daily_report(report_id, session['user_id'])
     return jsonify({'can_edit': can_edit})
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# LEAVE MANAGEMENT ROUTES
+# Add these routes to your main app.py file
+# ═══════════════════════════════════════════════════════════════════════════════
+
+# ─────────────────────────────────────────────
+# LEAVE TYPES (Admin only)
+# ─────────────────────────────────────────────
+
+@app.route('/leave/types')
+@admin_only_required
+def leave_types():
+    types = db.get_leave_types(session['organization_id'], active_only=False)
+    return render_template('leave/types/list.html', leave_types=types)
+
+
+@app.route('/leave/types/new', methods=['GET', 'POST'])
+@admin_only_required
+def new_leave_type():
+    if request.method == 'POST':
+        name       = request.form.get('name', '').strip()
+        total_days = request.form.get('total_days', '0').strip()
+
+        if not name or not total_days:
+            flash('Name and total days are required.', 'error')
+            return render_template('leave/types/new.html')
+
+        try:
+            total_days = float(total_days)
+            if total_days <= 0:
+                raise ValueError
+        except ValueError:
+            flash('Total days must be a positive number.', 'error')
+            return render_template('leave/types/new.html')
+
+        lt_id = db.create_leave_type(session['organization_id'], name, total_days)
+        if lt_id:
+            flash(f'Leave type "{name}" created successfully! Balances auto-generated for all users.', 'success')
+            return redirect(url_for('leave_types'))
+        else:
+            flash('Failed to create leave type.', 'error')
+
+    return render_template('leave/types/new.html')
+
+
+@app.route('/leave/types/<int:lt_id>/edit', methods=['GET', 'POST'])
+@admin_only_required
+def edit_leave_type(lt_id):
+    lt = db.get_leave_type_by_id(lt_id)
+    if not lt or lt['organization_id'] != session['organization_id']:
+        flash('Leave type not found.', 'error')
+        return redirect(url_for('leave_types'))
+
+    if request.method == 'POST':
+        name       = request.form.get('name', '').strip()
+        total_days = request.form.get('total_days', '0').strip()
+        is_active  = 'is_active' in request.form
+
+        try:
+            total_days = float(total_days)
+            if total_days <= 0:
+                raise ValueError
+        except ValueError:
+            flash('Total days must be a positive number.', 'error')
+            return render_template('leave/types/edit.html', lt=lt)
+
+        if db.update_leave_type(lt_id, name, total_days, is_active):
+            flash('Leave type updated successfully!', 'success')
+            return redirect(url_for('leave_types'))
+        else:
+            flash('Failed to update leave type.', 'error')
+
+    return render_template('leave/types/edit.html', lt=lt)
+
+
+@app.route('/leave/types/<int:lt_id>/delete', methods=['POST'])
+@admin_only_required
+def delete_leave_type(lt_id):
+    lt = db.get_leave_type_by_id(lt_id)
+    if not lt or lt['organization_id'] != session['organization_id']:
+        flash('Leave type not found.', 'error')
+        return redirect(url_for('leave_types'))
+
+    db.delete_leave_type(lt_id)
+    flash(f'Leave type "{lt["name"]}" deactivated.', 'success')
+    return redirect(url_for('leave_types'))
+
+
+# ─────────────────────────────────────────────
+# HOLIDAYS (Admin only)
+# ─────────────────────────────────────────────
+
+@app.route('/leave/holidays')
+@admin_only_required
+def holidays():
+    from zoneinfo import ZoneInfo
+    year = request.args.get('year', datetime.now(ZoneInfo('Asia/Kolkata')).year, type=int)
+    holiday_list = db.get_holidays(session['organization_id'], year)
+    return render_template('leave/holidays/list.html', holidays=holiday_list, year=year)
+
+
+@app.route('/leave/holidays/new', methods=['GET', 'POST'])
+@admin_only_required
+def new_holiday():
+    if request.method == 'POST':
+        name         = request.form.get('name', '').strip()
+        holiday_date = request.form.get('holiday_date', '').strip()
+
+        if not name or not holiday_date:
+            flash('Holiday name and date are required.', 'error')
+            return render_template('leave/holidays/new.html')
+
+        hid = db.create_holiday(session['organization_id'], name, holiday_date)
+        if hid:
+            flash(f'Holiday "{name}" added successfully!', 'success')
+            return redirect(url_for('holidays'))
+        else:
+            flash('Failed to add holiday. It may already exist for this date.', 'error')
+
+    return render_template('leave/holidays/new.html')
+
+
+@app.route('/leave/holidays/<int:hid>/delete', methods=['POST'])
+@admin_only_required
+def delete_holiday(hid):
+    db.delete_holiday(hid, session['organization_id'])
+    flash('Holiday removed.', 'success')
+    return redirect(url_for('holidays'))
+
+
+# ─────────────────────────────────────────────
+# LEAVE BALANCES
+# ─────────────────────────────────────────────
+
+@app.route('/leave/balances')
+@login_required
+def leave_balances():
+    from zoneinfo import ZoneInfo
+    year = request.args.get('year', datetime.now(ZoneInfo('Asia/Kolkata')).year, type=int)
+    user_role = session['user_role']
+    org_id    = session['organization_id']
+
+    if user_role == 'admin':
+        balances = db.get_all_leave_balances(org_id, year)
+        # Group by user
+        grouped = {}
+        for b in balances:
+            uid = b['user_id']
+            if uid not in grouped:
+                grouped[uid] = {'user_name': b['user_name'], 'user_role': b['user_role'], 'balances': []}
+            grouped[uid]['balances'].append(b)
+        return render_template('leave/balances/admin.html',
+                               grouped=grouped, year=year)
+    else:
+        balances = db.get_leave_balances_for_user(session['user_id'], org_id, year)
+        return render_template('leave/balances/my.html', balances=balances, year=year)
+
+
+@app.route('/leave/balances/<int:balance_id>/adjust', methods=['POST'])
+@admin_only_required
+def adjust_leave_balance(balance_id):
+    total_days = request.form.get('total_days', '').strip()
+    try:
+        total_days = float(total_days)
+        if total_days < 0:
+            raise ValueError
+    except ValueError:
+        flash('Invalid days value.', 'error')
+        return redirect(url_for('leave_balances'))
+
+    if db.update_leave_balance_manual(balance_id, total_days):
+        flash('Leave balance updated.', 'success')
+    else:
+        flash('Failed to update balance.', 'error')
+    return redirect(url_for('leave_balances'))
+
+
+# ─────────────────────────────────────────────
+# LEAVE REQUESTS
+# ─────────────────────────────────────────────
+
+@app.route('/leave/requests')
+@login_required
+def leave_requests():
+    org_id    = session['organization_id']
+    user_role = session['user_role']
+    status_filter = request.args.get('status')
+
+    if user_role in ('admin'):
+        requests_list = db.get_all_leave_requests(org_id, status=status_filter)
+    else:
+        requests_list = db.get_leave_requests_for_user(session['user_id'], org_id)
+        if status_filter:
+            requests_list = [r for r in requests_list if r['status'] == status_filter]
+
+    if user_role in ('admin'):
+        summary = db.get_leave_summary_for_org(org_id)
+    else:
+        pending_count = len([r for r in requests_list if r['status'] == 'pending'])
+        summary = {'pending': pending_count}    
+    return render_template('leave/requests/list.html',
+                           requests=requests_list,
+                           summary=summary,
+                           status_filter=status_filter,
+                           user_role=user_role)
+
+
+@app.route('/leave/requests/new', methods=['GET', 'POST'])
+@login_required
+def new_leave_request():
+    if session.get('user_role') == 'admin':
+        flash('Admins cannot apply for leave.', 'warning')
+        return redirect(url_for('leave_dashboard'))
+
+    org_id  = session['organization_id']
+    user_id = session['user_id']
+
+    leave_types = db.get_leave_types(org_id, active_only=True)
+    from zoneinfo import ZoneInfo
+    year = datetime.now(ZoneInfo('Asia/Kolkata')).year
+    balances = db.get_leave_balances_for_user(user_id, org_id, year)
+    # map leave_type_id -> remaining
+    balance_map = {b['leave_type_id']: float(b['remaining_days']) for b in balances}
+
+    if request.method == 'POST':
+        data = {
+            'user_id':       user_id,
+            'org_id':        org_id,
+            'leave_type_id': request.form.get('leave_type_id'),
+            'from_date':     request.form.get('from_date'),
+            'to_date':       request.form.get('to_date'),
+            'day_type':      request.form.get('day_type', 'full_day'),
+            'reason':        request.form.get('reason', '').strip(),
+        }
+
+        if not data['leave_type_id'] or not data['from_date'] or not data['to_date']:
+            flash('Please fill in all required fields.', 'error')
+        else:
+            req_id, err = db.create_leave_request(data)
+            if req_id:
+                flash('Leave request submitted successfully!', 'success')
+                return redirect(url_for('leave_requests'))
+            else:
+                flash(err or 'Failed to submit leave request.', 'error')
+
+    return render_template('leave/requests/new.html',
+                           leave_types=leave_types,
+                           balance_map=balance_map)
+
+
+@app.route('/leave/requests/<int:req_id>')
+@login_required
+def view_leave_request(req_id):
+    req = db.get_leave_request_by_id(req_id, session['organization_id'])
+    if not req:
+        flash('Leave request not found.', 'error')
+        return redirect(url_for('leave_requests'))
+
+    # Members can only view their own
+    if session['user_role'] == 'member' and req['user_id'] != session['user_id']:
+        flash('Access denied.', 'error')
+        return redirect(url_for('leave_requests'))
+
+    return render_template('leave/requests/view.html', req=req)
+
+
+@app.route('/leave/requests/<int:req_id>/review', methods=['POST'])
+@admin_required
+def review_leave_request(req_id):
+    action = request.form.get('action')
+    if action not in ('approved', 'rejected'):
+        flash('Invalid action.', 'error')
+        return redirect(url_for('leave_requests'))
+
+    ok, err = db.review_leave_request(
+        req_id, session['organization_id'], session['user_id'], action
+    )
+    if ok:
+        flash(f'Leave request {action} successfully!', 'success')
+    else:
+        flash(err or 'Failed to process request.', 'error')
+
+    return redirect(url_for('view_leave_request', req_id=req_id))
+
+
+@app.route('/leave/requests/<int:req_id>/cancel', methods=['POST'])
+@login_required
+def cancel_leave_request(req_id):
+    ok, err = db.cancel_leave_request(req_id, session['user_id'], session['organization_id'])
+    if ok:
+        flash('Leave request cancelled.', 'success')
+    else:
+        flash(err or 'Failed to cancel request.', 'error')
+    return redirect(url_for('leave_requests'))
+
+
+# ─────────────────────────────────────────────
+# LEAVE DASHBOARD
+# ─────────────────────────────────────────────
+
+@app.route('/leave')
+@login_required
+def leave_dashboard():
+    org_id    = session['organization_id']
+    user_id   = session['user_id']
+    user_role = session['user_role']
+    from zoneinfo import ZoneInfo
+    year = datetime.now(ZoneInfo('Asia/Kolkata')).year
+
+    balances = db.get_leave_balances_for_user(user_id, org_id, year)
+    my_requests = db.get_leave_requests_for_user(user_id, org_id)[:5]
+    holidays = db.get_holidays(org_id, year)
+
+    summary = {}
+    pending_requests = []
+    if user_role in ('admin'):
+        summary = db.get_leave_summary_for_org(org_id)
+        pending_requests = db.get_all_leave_requests(org_id, status='pending')
+
+    return render_template('leave/dashboard.html',
+                           balances=balances,
+                           my_requests=my_requests,
+                           holidays=holidays,
+                           summary=summary,
+                           pending_requests=pending_requests,
+                           user_role=user_role,
+                           year=year)
+
+
+# ─────────────────────────────────────────────
+# API – holiday dates for date-picker disabling
+# ─────────────────────────────────────────────
+
+@app.route('/api/leave/holidays')
+@login_required
+def api_leave_holidays():
+    from zoneinfo import ZoneInfo
+    year = request.args.get('year', datetime.now(ZoneInfo('Asia/Kolkata')).year, type=int)
+    dates = list(db.get_holiday_dates_set(session['organization_id'], year))
+    return jsonify({'holidays': dates})
+
+
+@app.route('/api/leave/working-days')
+@login_required
+def api_working_days():
+    from_date = request.args.get('from_date')
+    to_date   = request.args.get('to_date')
+    day_type  = request.args.get('day_type', 'full_day')
+    if not from_date or not to_date:
+        return jsonify({'days': 0})
+    days = db._count_working_days(from_date, to_date, day_type, session['organization_id'])
+    return jsonify({'days': days})
+
+@app.route('/leave/holiday-calendar')
+@login_required
+def holiday_calendar():
+    from zoneinfo import ZoneInfo
+    year = request.args.get('year', datetime.now(ZoneInfo('Asia/Kolkata')).year, type=int)
+    holiday_list = db.get_holidays(session['organization_id'], year)
+    return render_template('leave/holidays/calendar.html', holidays=holiday_list, year=year)
+
+# @app.errorhandler(500)
+# def internal_error(error):
+#     import traceback
+#     return f"<pre>{traceback.format_exc()}</pre>", 500
+import logging
+
+log = logging.getLogger('werkzeug')
+
+class NoPollingFilter(logging.Filter):
+    def filter(self, record):
+        msg = record.getMessage()
+        return '/api/notifications/count' not in msg and \
+               '/api/messages/count' not in msg
+
+log.addFilter(NoPollingFilter())
 
 if __name__ == "__main__":
         app.run(debug=False, host='0.0.0.0', port=5000)

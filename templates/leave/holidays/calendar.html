@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+{% block title %}Holiday Calendar {{ year }}{% endblock %}
+
+{% block content %}
+<div class="container py-4" style="max-width:650px">
+
+  <!-- Header -->
+  <div class="d-flex align-items-center justify-content-between mb-4">
+    <div>
+      <a href="{{ url_for('leave_dashboard') }}" class="text-decoration-none text-muted small">
+        <i class="fas fa-arrow-left me-1"></i> Back to Leave
+      </a>
+      <h2 class="fw-bold mt-2 mb-0">
+        <i class="fas fa-calendar-day text-success me-2"></i>Holiday Calendar
+      </h2>
+      <p class="text-muted small mb-0">{{ holidays | length }} holiday(s) in {{ year }}</p>
+    </div>
+    <div class="d-flex align-items-center gap-2">
+      <a href="?year={{ year - 1 }}" class="btn btn-sm btn-outline-secondary rounded-circle" style="width:32px;height:32px;padding:0;line-height:30px;text-align:center;">
+        <i class="fas fa-chevron-left" style="font-size:11px;"></i>
+      </a>
+      <span class="fw-bold fs-5 px-2">{{ year }}</span>
+      <a href="?year={{ year + 1 }}" class="btn btn-sm btn-outline-secondary rounded-circle" style="width:32px;height:32px;padding:0;line-height:30px;text-align:center;">
+        <i class="fas fa-chevron-right" style="font-size:11px;"></i>
+      </a>
+    </div>
+  </div>
+
+  {% if holidays %}
+
+  <!-- Group holidays by month using a workaround -->
+  {% set months_seen = [] %}
+  {% for h in holidays %}
+    {% set month_key = h.holiday_date.strftime('%B') if h.holiday_date else '' %}
+
+    {% if month_key not in months_seen %}
+      {% if months_seen %}
+        </div> <!-- close previous month group -->
+      {% endif %}
+      {% if months_seen.append(month_key) %}{% endif %}
+
+      <!-- Month Header -->
+      <div class="d-flex align-items-center gap-2 mb-2 mt-3">
+        <span class="badge bg-success px-3 py-2 fs-6">{{ month_key }}</span>
+        <hr class="flex-grow-1 my-0">
+      </div>
+
+      <div class="d-flex flex-column gap-2">
+    {% endif %}
+
+    <!-- Holiday Card -->
+    <div class="card border-0 shadow-sm holiday-card" style="transition: transform 0.15s, box-shadow 0.15s; cursor:default;">
+      <div class="card-body py-3 px-4">
+        <div class="d-flex align-items-center justify-content-between">
+
+          <!-- Date Box -->
+          <div class="d-flex align-items-center gap-3">
+            <div class="rounded-3 text-white text-center d-flex flex-column align-items-center justify-content-center"
+                 style="width:52px;height:52px;background:linear-gradient(135deg,#198754,#20c997);">
+              <div class="fw-bold lh-1" style="font-size:1.3rem;">
+                {{ h.holiday_date.strftime('%d') if h.holiday_date else '' }}
+              </div>
+              <div style="font-size:0.65rem;opacity:0.9;text-transform:uppercase;letter-spacing:1px;">
+                {{ h.holiday_date.strftime('%b') if h.holiday_date else '' }}
+              </div>
+            </div>
+
+            <!-- Name & Day -->
+            <div>
+              <div class="fw-semibold text-dark">{{ h.name }}</div>
+              <div class="small text-muted">
+                <i class="fas fa-circle-dot me-1" style="font-size:8px;color:#20c997;"></i>
+                {{ h.holiday_date.strftime('%A') if h.holiday_date else '' }}
+              </div>
+            </div>
+          </div>
+
+          <!-- Right tag -->
+          <span class="badge rounded-pill text-bg-success bg-opacity-10 text-success border border-success-subtle px-3">
+            <i class="fas fa-leaf me-1"></i> Holiday
+          </span>
+
+        </div>
+      </div>
+    </div>
+
+  {% endfor %}
+  </div> <!-- close last month group -->
+
+  {% else %}
+  <div class="text-center py-5 text-muted">
+    <div class="mb-3">
+      <i class="fas fa-umbrella-beach fa-4x opacity-25"></i>
+    </div>
+    <h5 class="fw-semibold">No Holidays Yet</h5>
+    <p class="small">No holidays have been added for {{ year }}.</p>
+  </div>
+  {% endif %}
+
+</div>
+
+<style>
+.holiday-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.1) !important;
+}
+</style>
+{% endblock %}

@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% block title %}My Leave Balance{% endblock %}
+
+{% block content %}
+
+{% if session.get('user_role') == 'admin' %}
+<div class="container py-4" style="max-width:500px">
+  <div class="alert alert-warning mt-4">
+    <i class="fas fa-info-circle me-2"></i>
+    Admins do not have leave balances.
+    <a href="{{ url_for('leave_dashboard') }}" class="alert-link ms-2">Go back</a>
+  </div>
+</div>
+
+{% else %}
+<div class="container py-4" style="max-width:1000px">
+  <div class="d-flex align-items-center justify-content-between mb-4">
+    <div>
+      <h2 class="fw-bold mb-0"><i class="fas fa-wallet text-primary me-2"></i>My Leave Balance</h2>
+      <p class="text-muted mb-0">{{ year }}</p>
+    </div>
+    <div class="d-flex gap-2">
+      <a href="{{ url_for('leave_dashboard') }}" class="btn btn-outline-secondary">
+        <i class="fas fa-arrow-left me-1"></i> Back
+      </a>
+      {% if session.get('role') != 'admin' %}
+      <a href="{{ url_for('new_leave_request') }}" class="btn btn-primary">
+        <i class="fas fa-plus me-1"></i> Apply Leave
+      </a>
+      {% endif %}
+    </div>
+  </div>
+
+  {% if balances %}
+  <div class="row g-3">
+    {% for b in balances %}
+    <div class="col-md-6">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-body p-4">
+          <div class="d-flex align-items-center justify-content-between mb-3">
+            <h6 class="fw-bold mb-0">{{ b.leave_type_name }}</h6>
+            {% set pct = ((b.used_days / b.total_days) * 100) | int if b.total_days > 0 else 0 %}
+            <span class="small text-muted">{{ pct }}% used</span>
+          </div>
+
+          <div class="progress mb-3" style="height:10px;border-radius:8px;">
+            <div
+              class="progress-bar {% if pct > 80 %}bg-danger{% elif pct > 50 %}bg-warning{% else %}bg-primary{% endif %}"
+              style="width:{{ pct }}%;border-radius:8px;"></div>
+          </div>
+
+          <div class="row text-center g-0">
+            <div class="col-4">
+              <div class="fs-4 fw-bold text-dark">{{ b.total_days }}</div>
+              <div class="small text-muted">Total</div>
+            </div>
+            <div class="col-4 border-start border-end">
+              <div class="fs-4 fw-bold text-danger">{{ b.used_days }}</div>
+              <div class="small text-muted">Used</div>
+            </div>
+            <div class="col-4">
+              <div class="fs-4 fw-bold text-success">{{ b.remaining_days }}</div>
+              <div class="small text-muted">Left</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="text-center py-5 text-muted">
+    <i class="fas fa-wallet fa-3x mb-3 opacity-25"></i>
+    <p>No leave balances found. Please contact your administrator.</p>
+  </div>
+  {% endif %}
+</div>
+{% endif %}
+{% endblock %}

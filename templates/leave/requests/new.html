@@ -1,0 +1,202 @@
+{% extends "base.html" %}
+{% block title %}Apply for Leave{% endblock %}
+
+{% block content %}
+<div class="container py-4" style="max-width:1000px">
+  <div class="mb-4">
+    <a href="{{ url_for('leave_requests') }}" class="text-decoration-none text-muted small">
+      <i class="fas fa-arrow-left me-1"></i> Back to Requests
+    </a>
+    <h2 class="fw-bold mt-2 mb-0">Apply for Leave</h2>
+    <p class="text-muted">Apply for leave and provide the necessary details.</p>
+  </div>
+
+  <div class="card border-0 shadow-sm">
+    <div class="card-body p-4">
+      <form method="POST" id="leaveForm">
+
+        <!-- Leave Type -->
+        <div class="mb-4">
+          <label class="form-label fw-medium">Leave Type <span class="text-danger">*</span></label>
+          <select name="leave_type_id" id="leaveTypeSelect" class="form-select form-select-lg" required>
+            <option value="">Select leave type...</option>
+            {% for lt in leave_types %}
+            <option value="{{ lt.id }}" data-balance="{{ balance_map.get(lt.id, 0) }}" {% if
+              request.form.get('leave_type_id')==lt.id | string %}selected{% endif %}>
+              {{ lt.name }}
+            </option>
+            {% endfor %}
+          </select>
+          <!-- Balance indicator -->
+          <div id="balanceInfo" class="mt-2 d-none">
+            <span class="badge bg-success fs-6 px-3 py-2">
+              <i class="fas fa-wallet me-1"></i>
+              Available: <span id="balanceDays">0</span> days
+            </span>
+          </div>
+        </div>
+
+        <!-- Day Type -->
+        <div class="mb-4">
+          <label class="form-label fw-medium">Day Type <span class="text-danger">*</span></label>
+          <div class="d-flex gap-3">
+            <div class="form-check form-check-inline">
+              <input class="form-check-input" type="radio" name="day_type" id="fullDay" value="full_day" {% if
+                request.form.get('day_type', 'full_day' )=='full_day' %}checked{% endif %}>
+              <label class="form-check-label" for="fullDay">Full Day</label>
+            </div>
+            <div class="form-check form-check-inline">
+              <input class="form-check-input" type="radio" name="day_type" id="halfDay" value="half_day" {% if
+                request.form.get('day_type')=='half_day' %}checked{% endif %}>
+              <label class="form-check-label" for="halfDay">Half Day</label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Dates -->
+        <div class="row g-3 mb-4">
+          <div class="col-6">
+            <label class="form-label fw-medium">From Date <span class="text-danger">*</span></label>
+            <input type="date" name="from_date" id="fromDate" class="form-control form-control-lg"
+              value="{{ request.form.get('from_date', '') }}" required>
+          </div>
+          <div class="col-6" id="toDateCol">
+            <label class="form-label fw-medium">To Date <span class="text-danger">*</span></label>
+            <input type="date" name="to_date" id="toDate" class="form-control form-control-lg"
+              value="{{ request.form.get('to_date', '') }}" required>
+          </div>
+        </div>
+
+        <!-- Working Days Preview -->
+        <div id="daysPreview" class="alert alert-primary d-none mb-4 py-2">
+          <i class="fas fa-info-circle me-2"></i>
+          Working days: <strong id="workingDaysCount">0</strong>
+        </div>
+
+        <!-- Reason -->
+        <div class="mb-4">
+          <label class="form-label fw-medium">Reason</label>
+          <textarea name="reason" class="form-control" rows="3"
+            placeholder="Briefly describe the reason for leave...">{{ request.form.get('reason', '') }}</textarea>
+        </div>
+
+        <div class="d-flex gap-2">
+          <button type="submit" class="btn btn-primary px-4">
+            <i class="fas fa-paper-plane me-1"></i> Submit Request
+          </button>
+          <a href="{{ url_for('leave_requests') }}" class="btn btn-outline-secondary px-4">Cancel</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+<div id="balanceData" data-map="{{ balance_map | tojson | safe }}" style="display:none;"></div>
+
+<script>
+  const balanceMap = JSON.parse(document.getElementById('balanceData').dataset.map);
+  // ── ADD THIS ──
+  let holidayDates = new Set();
+  fetch(`/api/leave/holidays?year=${new Date().getFullYear()}`)
+    .then(r => r.json())
+    .then(data => { holidayDates = new Set(data.holidays); });
+
+  function isOffSaturday(dateStr) {
+    // Parse date parts directly to avoid timezone shift
+    const parts = dateStr.split('-');
+    const year = parseInt(parts[0]);
+    const month = parseInt(parts[1]) - 1;
+    const day = parseInt(parts[2]);
+    const d = new Date(year, month, day);
+
+    if (d.getDay() !== 6) return false;
+
+    // Find which Saturday of the month this is
+    let satCount = 0;
+    for (let i = 1; i <= day; i++) {
+      if (new Date(year, month, i).getDay() === 6) satCount++;
+    }
+    return satCount === 1 || satCount === 3;
+  }
+
+  function isNonWorkingDay(dateStr) {
+    if (!dateStr) return false;
+    const d = new Date(dateStr);
+    if (d.getDay() === 0) return 'Sunday is a non-working day.';
+    if (isOffSaturday(dateStr)) return 'This Saturday is a non-working day (1st or 3rd Saturday).';
+    if (holidayDates.has(dateStr)) return 'This date is a public holiday.';
+    return false;
+  }
+  const halfDayRadio = document.getElementById('halfDay');
+  const fullDayRadio = document.getElementById('fullDay');
+  const fromDate = document.getElementById('fromDate');
+  const toDate = document.getElementById('toDate');
+  const leaveTypeSelect = document.getElementById('leaveTypeSelect');
+
+  function updateBalanceInfo() {
+    const ltId = leaveTypeSelect.value;
+    const info = document.getElementById('balanceInfo');
+    const days = document.getElementById('balanceDays');
+    if (ltId && balanceMap[ltId] !== undefined) {
+      days.textContent = balanceMap[ltId];
+      info.classList.remove('d-none');
+    } else {
+      info.classList.add('d-none');
+    }
+  }
+
+  function syncToDate() {
+    if (halfDayRadio.checked) {
+      toDate.value = fromDate.value;
+      toDate.setAttribute('readonly', true);
+    } else {
+      toDate.removeAttribute('readonly');
+      if (toDate.value < fromDate.value) toDate.value = fromDate.value;
+    }
+
+    const err = isNonWorkingDay(fromDate.value);
+    if (err) {
+      alert(err + ' Please select a valid working day.');
+      fromDate.value = '';
+      toDate.value = '';
+      document.getElementById('daysPreview').classList.add('d-none');
+      return;
+    }
+    fetchWorkingDays();
+  }
+
+  function fetchWorkingDays() {
+    const fd = fromDate.value;
+    const td = toDate.value;
+    const dt = halfDayRadio.checked ? 'half_day' : 'full_day';
+    const preview = document.getElementById('daysPreview');
+    const count = document.getElementById('workingDaysCount');
+
+    if (!fd || !td) { preview.classList.add('d-none'); return; }
+
+    fetch(`/api/leave/working-days?from_date=${fd}&to_date=${td}&day_type=${dt}`)
+      .then(r => r.json())
+      .then(data => {
+        count.textContent = data.days;
+        preview.classList.remove('d-none');
+      });
+  }
+
+  leaveTypeSelect.addEventListener('change', updateBalanceInfo);
+  [halfDayRadio, fullDayRadio].forEach(r => r.addEventListener('change', syncToDate));
+  fromDate.addEventListener('change', syncToDate);
+  toDate.addEventListener('change', function () {
+    const err = isNonWorkingDay(toDate.value);
+    if (err) {
+      alert(err + ' Please select a valid end date.');
+      toDate.value = '';
+      document.getElementById('daysPreview').classList.add('d-none');
+      return;
+    }
+    fetchWorkingDays();
+  });
+
+  // Init
+  updateBalanceInfo();
+  fetchWorkingDays();
+</script>
+{% endblock %}

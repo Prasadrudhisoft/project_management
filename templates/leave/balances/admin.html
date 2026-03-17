@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+{% block title %}Leave Balances{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+  <div class="d-flex align-items-center justify-content-between mb-4">
+    <div>
+      <h2 class="fw-bold mb-0"><i class="fas fa-balance-scale text-primary me-2"></i>Leave Balances</h2>
+      <p class="text-muted mb-0">
+        <a href="?year={{ year - 1 }}" class="text-decoration-none me-2"><i class="fas fa-chevron-left"></i></a>
+        {{ year }}
+        <a href="?year={{ year + 1 }}" class="text-decoration-none ms-2"><i class="fas fa-chevron-right"></i></a>
+      </p>
+    </div>
+    <a href="{{ url_for('leave_dashboard') }}" class="btn btn-outline-secondary">
+      <i class="fas fa-arrow-left me-1"></i> Back
+    </a>
+  </div>
+
+  {% if grouped %}
+    {% for uid, info in grouped.items() %}
+    <div class="card border-0 shadow-sm mb-4">
+      <div class="card-header bg-white py-3 d-flex align-items-center justify-content-between">
+        <div class="d-flex align-items-center gap-2">
+          <div class="rounded-circle bg-primary bg-opacity-10 text-primary fw-bold d-flex align-items-center justify-content-center"
+               style="width:38px;height:38px;font-size:15px;">
+            {{ info.user_name[0] | upper }}
+          </div>
+          <div>
+            <div class="fw-bold">{{ info.user_name }}</div>
+            <div class="small text-muted text-capitalize">{{ info.user_role }}</div>
+          </div>
+        </div>
+      </div>
+      <div class="card-body p-0">
+        <div class="table-responsive">
+          <table class="table table-sm align-middle mb-0">
+            <thead class="table-light">
+              <tr>
+                <th class="px-4">Leave Type</th>
+                <th>Total</th>
+                <th>Used</th>
+                <th>Remaining</th>
+                <th>Progress</th>
+                <th class="text-end px-4">Adjust</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for b in info.balances %}
+              <tr>
+                <td class="px-4 fw-medium">{{ b.leave_type_name }}</td>
+                <td>{{ b.total_days }}</td>
+                <td class="text-danger">{{ b.used_days }}</td>
+                <td class="text-success fw-bold">{{ b.remaining_days }}</td>
+                <td style="width:180px;">
+                  {% set pct = ((b.used_days / b.total_days) * 100) | int if b.total_days > 0 else 0 %}
+                  <div class="progress" style="height:8px;">
+                    <div class="progress-bar {% if pct > 80 %}bg-danger{% elif pct > 50 %}bg-warning{% else %}bg-success{% endif %}"
+                         style="width:{{ pct }}%"></div>
+                  </div>
+                  <small class="text-muted">{{ pct }}% used</small>
+                </td>
+                <td class="text-end px-4">
+                  <button class="btn btn-sm btn-outline-secondary"
+                          onclick="showAdjust({{ b.id }}, '{{ b.leave_type_name }}', {{ b.total_days }})">
+                    <i class="fas fa-edit"></i>
+                  </button>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  {% else %}
+    <div class="text-center py-5 text-muted">
+      <i class="fas fa-balance-scale fa-3x mb-3 opacity-25"></i>
+      <p>No leave balances found.</p>
+    </div>
+  {% endif %}
+</div>
+
+<!-- Adjust Modal -->
+<div class="modal fade" id="adjustModal" tabindex="-1">
+  <div class="modal-dialog modal-sm modal-dialog-centered">
+    <div class="modal-content border-0 shadow">
+      <form method="POST" id="adjustForm" action="">
+        <div class="modal-header border-0 pb-0">
+          <h6 class="modal-title fw-bold">Adjust Balance</h6>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-1 small text-muted" id="adjustLabel"></div>
+          <div class="mb-3">
+            <label class="form-label fw-medium small">New Total Days</label>
+            <input type="number" name="total_days" id="adjustDays"
+                   class="form-control" min="0" step="0.5" required>
+          </div>
+        </div>
+        <div class="modal-footer border-0 pt-0">
+          <button type="submit" class="btn btn-primary btn-sm px-3">Update</button>
+          <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+function showAdjust(balanceId, typeName, currentDays) {
+  document.getElementById('adjustForm').action = '/leave/balances/' + balanceId + '/adjust';
+  document.getElementById('adjustLabel').textContent = typeName;
+  document.getElementById('adjustDays').value = currentDays;
+  new bootstrap.Modal(document.getElementById('adjustModal')).show();
+}
+</script>
+{% endblock %}

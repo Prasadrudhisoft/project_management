@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}Add Holiday{% endblock %}
+
+{% block content %}
+<div class="container py-4" style="max-width:1100px">
+  <div class="mb-4">
+    <a href="{{ url_for('holidays') }}" class="text-decoration-none text-muted small">
+      <i class="fas fa-arrow-left me-1"></i> Back to Holidays
+    </a>
+    <h2 class="fw-bold mt-2 mb-0">Add Holiday</h2>
+  </div>
+
+  <div class="card border-0 shadow-sm">
+    <div class="card-body p-4">
+      <form method="POST">
+        <div class="mb-4">
+          <label class="form-label fw-medium">Holiday Name <span class="text-danger">*</span></label>
+          <input type="text" name="name" class="form-control form-control-lg"
+                 placeholder="e.g. Republic Day" required
+                 value="{{ request.form.get('name', '') }}">
+        </div>
+
+        <div class="mb-4">
+          <label class="form-label fw-medium">Date <span class="text-danger">*</span></label>
+          <input type="date" name="holiday_date" class="form-control form-control-lg" required
+                 value="{{ request.form.get('holiday_date', '') }}">
+        </div>
+
+        <div class="d-flex gap-2">
+          <button type="submit" class="btn btn-primary px-4">
+            <i class="fas fa-plus me-1"></i> Add Holiday
+          </button>
+          <a href="{{ url_for('holidays') }}" class="btn btn-outline-secondary px-4">Cancel</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

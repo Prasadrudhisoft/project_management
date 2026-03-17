@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+{% block title %}Leave Request #{{ req.id }}{% endblock %}
+
+{% block content %}
+<div class="container py-4" style="max-width:680px">
+  <div class="mb-4">
+    <a href="{{ url_for('leave_requests') }}" class="text-decoration-none text-muted small">
+      <i class="fas fa-arrow-left me-1"></i> Back to Requests
+    </a>
+    <div class="d-flex align-items-center justify-content-between mt-2">
+      <h2 class="fw-bold mb-0">Leave Request #{{ req.id }}</h2>
+      <span class="badge fs-6 px-3 py-2
+        {% if req.status == 'approved' %}bg-success
+        {% elif req.status == 'rejected' %}bg-danger
+        {% else %}bg-warning text-dark{% endif %}">
+        {{ req.status | title }}
+      </span>
+    </div>
+  </div>
+
+  <div class="card border-0 shadow-sm">
+    <div class="card-body p-4">
+
+      <!-- Employee info (admin/manager view) -->
+      {% if session.user_role in ('admin') %}
+      <div class="d-flex align-items-center gap-3 mb-4 pb-4 border-bottom">
+        <div class="rounded-circle bg-primary bg-opacity-10 text-primary fw-bold d-flex align-items-center justify-content-center"
+             style="width:48px;height:48px;font-size:18px;">
+          {{ req.employee_name[0] | upper }}
+        </div>
+        <div>
+          <div class="fw-bold fs-5">{{ req.employee_name }}</div>
+          <div class="text-muted small">{{ req.employee_email }}</div>
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- Details Grid -->
+      <div class="row g-3 mb-4">
+        <div class="col-6">
+          <div class="small text-muted fw-medium text-uppercase mb-1">Leave Type</div>
+          <div class="fw-medium">{{ req.leave_type_name }}</div>
+        </div>
+        <div class="col-6">
+          <div class="small text-muted fw-medium text-uppercase mb-1">Day Type</div>
+          <div>
+            {% if req.day_type == 'half_day' %}
+              <span class="badge bg-info text-white">Half Day</span>
+            {% else %}
+              <span class="badge bg-secondary bg-opacity-10 text-secondary">Full Day</span>
+            {% endif %}
+          </div>
+        </div>
+        <div class="col-6">
+          <div class="small text-muted fw-medium text-uppercase mb-1">From Date</div>
+          <div class="fw-medium">{{ req.from_date.strftime('%d %B %Y') if req.from_date else 'N/A' }}</div>
+        </div>
+        <div class="col-6">
+          <div class="small text-muted fw-medium text-uppercase mb-1">To Date</div>
+          <div class="fw-medium">{{ req.to_date.strftime('%d %B %Y') if req.to_date else 'N/A' }}</div>
+        </div>
+        <div class="col-6">
+          <div class="small text-muted fw-medium text-uppercase mb-1">Total Days</div>
+          <div class="fw-bold fs-5 text-primary">{{ req.leave_days }}</div>
+        </div>
+        <div class="col-6">
+          <div class="small text-muted fw-medium text-uppercase mb-1">Applied On</div>
+          <div class="fw-medium">{{ req.created_at | to_ist | strftime('%d %b %Y, %I:%M %p') if req.created_at else '' }}</div>
+        </div>
+      </div>
+
+      {% if req.reason %}
+      <div class="mb-4 pb-4 border-bottom">
+        <div class="small text-muted fw-medium text-uppercase mb-1">Reason</div>
+        <div class="text-dark">{{ req.reason }}</div>
+      </div>
+      {% endif %}
+
+      <!-- Review info -->
+      {% if req.status != 'pending' and req.reviewed_by %}
+      <div class="alert alert-{% if req.status == 'approved' %}success{% else %}danger{% endif %} mb-4">
+        <i class="fas fa-{% if req.status == 'approved' %}check-circle{% else %}times-circle{% endif %} me-2"></i>
+        {{ req.status | title }} by <strong>{{ req.reviewed_by_name }}</strong>
+        {% if req.reviewed_at %}at {{ req.reviewed_at | to_ist | strftime('%d %b %Y, %I:%M %p') }}{% endif %}
+      </div>
+      {% endif %}
+
+      <!-- Actions -->
+      <div class="d-flex gap-2 flex-wrap">
+
+        {% if session.user_role in ('admin') and req.status == 'pending' %}
+          <form method="POST" action="{{ url_for('review_leave_request', req_id=req.id) }}">
+            <input type="hidden" name="action" value="approved">
+            <button type="submit" class="btn btn-success px-4"
+                    onclick="return confirm('Approve this leave request?')">
+              <i class="fas fa-check me-1"></i> Approve
+            </button>
+          </form>
+          <form method="POST" action="{{ url_for('review_leave_request', req_id=req.id) }}">
+            <input type="hidden" name="action" value="rejected">
+            <button type="submit" class="btn btn-danger px-4"
+                    onclick="return confirm('Reject this leave request?')">
+              <i class="fas fa-times me-1"></i> Reject
+            </button>
+          </form>
+        {% endif %}
+
+        {% if req.user_id == session.user_id and req.status == 'pending' %}
+          <form method="POST" action="{{ url_for('cancel_leave_request', req_id=req.id) }}">
+            <button type="submit" class="btn btn-outline-danger px-4"
+                    onclick="return confirm('Cancel this leave request?')">
+              <i class="fas fa-ban me-1"></i> Cancel Request
+            </button>
+          </form>
+        {% endif %}
+
+        <a href="{{ url_for('leave_requests') }}" class="btn btn-outline-secondary px-4">
+          <i class="fas fa-arrow-left me-1"></i> Back
+        </a>
+      </div>
+
+    </div>
+  </div>
+</div>
+{% endblock %}

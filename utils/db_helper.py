@@ -3545,3 +3545,616 @@ class DatabaseHelper:
             
         finally:
             conn.close()
+
+
+    # ─────────────────────────────────────────────
+# LEAVE TYPES
+# ─────────────────────────────────────────────
+
+    def get_leave_types(self, org_id, active_only=True):
+        """Get all leave types for an organization"""
+        conn = self.get_connection()
+        if not conn:
+            return []
+        try:
+            cursor = conn.cursor(pymysql.cursors.DictCursor)
+            query = "SELECT * FROM leave_types WHERE organization_id = %s"
+            params = [org_id]
+            if active_only:
+                query += " AND is_active = TRUE"
+            query += " ORDER BY name"
+            cursor.execute(query, params)
+            return cursor.fetchall()
+        finally:
+            conn.close()
+
+    def get_leave_type_by_id(self, leave_type_id):
+        conn = self.get_connection()
+        if not conn:
+            return None
+        try:
+            cursor = conn.cursor(pymysql.cursors.DictCursor)
+            cursor.execute("SELECT * FROM leave_types WHERE id = %s", (leave_type_id,))
+            return cursor.fetchone()
+        finally:
+            conn.close()
+
+    def create_leave_type(self, org_id, name, total_days):
+        """Create leave type and auto-generate balances for all org users"""
+        conn = self.get_connection()
+        if not conn:
+            return None
+        try:
+            cursor = conn.cursor()
+            cursor.execute(
+                "INSERT INTO leave_types (organization_id, name, total_days) VALUES (%s, %s, %s)",
+                (org_id, name, total_days)
+            )
+            lt_id = cursor.lastrowid
+
+            # Auto-create balance for every active user in the org
+            cursor.execute(
+                "SELECT id FROM users WHERE organization_id = %s AND is_active = TRUE",
+                (org_id,)
+            )
+            users = cursor.fetchall()
+            from zoneinfo import ZoneInfo
+            from datetime import datetime
+            year = datetime.now(ZoneInfo('Asia/Kolkata')).year
+            for (uid,) in users:
+                cursor.execute("""
+                    INSERT IGNORE INTO leave_balances
+                        (user_id, organization_id, leave_type_id, total_days, used_days, remaining_days, year)
+                    VALUES (%s, %s, %s, %s, 0, %s, %s)
+                """, (uid, org_id, lt_id, total_days, total_days, year))
+
+            conn.commit()
+            return lt_id
+        except Exception as e:
+            conn.rollback()
+            logger.error(f"Error creating leave type: {e}")
+            return None
+        finally:
+            conn.close()
+
+    def update_leave_type(self, leave_type_id, name, total_days, is_active):
+        conn = self.get_connection()
+        if not conn:
+            return False
+        try:
+            cursor = conn.cursor()
+            cursor.execute("""
+                UPDATE leave_types SET name=%s, total_days=%s, is_active=%s WHERE id=%s
+            """, (name, total_days, is_active, leave_type_id))
+            conn.commit()
+            return cursor.rowcount > 0
+        except Exception as e:
+            conn.rollback()
+            logger.error(f"Error updating leave type: {e}")
+            return False
+        finally:
+            conn.close()
+
+    def delete_leave_type(self, leave_type_id):
+        conn = self.get_connection()
+        if not conn:
+            return False
+        try:
+            cursor = conn.cursor()
+            cursor.execute("UPDATE leave_types SET is_active = FALSE WHERE id = %s", (leave_type_id,))
+            conn.commit()
+            return cursor.rowcount > 0
+        except Exception as e:
+            conn.rollback()
+            logger.error(f"Error deleting leave type: {e}")
+            return False
+        finally:
+            conn.close()
+
+# ─────────────────────────────────────────────
+# LEAVE BALANCES
+# ─────────────────────────────────────────────
+
+    def get_leave_balances_for_user(self, user_id, org_id, year=None):
+        conn = self.get_connection()
+        if not conn:
+            return []
+        try:
+            from datetime import date as _date
+            if year is None:
+                year = _date.today().year
+            cursor = conn.cursor(pymysql.cursors.DictCursor)
+            cursor.execute("""
+                SELECT lb.*, lt.name as leave_type_name, lt.total_days as type_total_days
+                FROM leave_balances lb
+                JOIN leave_types lt ON lb.leave_type_id = lt.id
+                WHERE lb.user_id = %s AND lb.organization_id = %s AND lb.year = %s
+                ORDER BY lt.name
+            """, (user_id, org_id, year))
+            return cursor.fetchall()
+        finally:
+            conn.close()
+
+    def get_all_leave_balances(self, org_id, year=None):
+        """Get leave balances for all users (admin view)"""
+        conn = self.get_connection()
+        if not conn:
+            return []
+        try:
+            # from datetime import date as _date
+            if year is None:
+                from zoneinfo import ZoneInfo
+                from datetime import datetime
+                year = datetime.now(ZoneInfo('Asia/Kolkata')).year
+            cursor = conn.cursor(pymysql.cursors.DictCursor)
+            cursor.execute("""
+                SELECT lb.*, lt.name as leave_type_name, u.full_name as user_name, u.role as user_role
+                FROM leave_balances lb
+                JOIN leave_types lt ON lb.leave_type_id = lt.id
+                JOIN users u ON lb.user_id = u.id
+                WHERE lb.organization_id = %s AND lb.year = %s AND u.is_active = TRUE AND u.role != 'admin'
+                ORDER BY u.full_name, lt.name
+            """, (org_id, year))
+            return cursor.fetchall()
+        finally:
+            conn.close()
+
+    def ensure_leave_balances_for_user(self, user_id, org_id):
+        """Called when new user is created – auto-creates leave balances"""
+        conn = self.get_connection()
+        if not conn:
+            return False
+        try:
+            from zoneinfo import ZoneInfo
+            from datetime import datetime
+            year = datetime.now(ZoneInfo('Asia/Kolkata')).year
+            cursor = conn.cursor()
+            cursor.execute(
+                "SELECT id, total_days FROM leave_types WHERE organization_id = %s AND is_active = TRUE",
+                (org_id,)
+            )
+            leave_types = cursor.fetchall()
+            for (lt_id, total_days) in leave_types:
+                cursor.execute("""
+                    INSERT IGNORE INTO leave_balances
+                        (user_id, organization_id, leave_type_id, total_days, used_days, remaining_days, year)
+                    VALUES (%s, %s, %s, %s, 0, %s, %s)
+                """, (user_id, org_id, lt_id, total_days, total_days, year))
+            conn.commit()
+            return True
+        except Exception as e:
+            conn.rollback()
+            logger.error(f"Error ensuring leave balances: {e}")
+            return False
+        finally:
+            conn.close()
+
+    def update_leave_balance_manual(self, balance_id, total_days):
+        """Admin manually adjusts total allocated days"""
+        conn = self.get_connection()
+        if not conn:
+            return False
+        try:
+            cursor = conn.cursor()
+            cursor.execute("""
+                UPDATE leave_balances
+                SET total_days = %s,
+                    remaining_days = %s - used_days
+                WHERE id = %s
+            """, (total_days, total_days, balance_id))
+            conn.commit()
+            return cursor.rowcount > 0
+        except Exception as e:
+            conn.rollback()
+            logger.error(f"Error updating leave balance: {e}")
+            return False
+        finally:
+            conn.close()
+
+# ─────────────────────────────────────────────
+# HOLIDAYS
+# ─────────────────────────────────────────────
+
+    def get_holidays(self, org_id, year=None):
+        conn = self.get_connection()
+        if not conn:
+            return []
+        try:
+            if year is None:
+                from zoneinfo import ZoneInfo
+                from datetime import datetime       
+                year = datetime.now(ZoneInfo('Asia/Kolkata')).year
+                
+            cursor = conn.cursor(pymysql.cursors.DictCursor)
+            cursor.execute("""
+                SELECT * FROM holidays
+                WHERE organization_id = %s AND YEAR(holiday_date) = %s
+                ORDER BY holiday_date
+            """, (org_id, year))
+            return cursor.fetchall()
+        finally:
+            conn.close()
+
+    def create_holiday(self, org_id, name, holiday_date):
+        conn = self.get_connection()
+        if not conn:
+            return None
+        try:
+            cursor = conn.cursor()
+            cursor.execute(
+                "INSERT INTO holidays (organization_id, name, holiday_date) VALUES (%s, %s, %s)",
+                (org_id, name, holiday_date)
+            )
+            holiday_id = cursor.lastrowid
+            conn.commit()
+            return holiday_id
+        except Exception as e:
+            conn.rollback()
+            logger.error(f"Error creating holiday: {e}")
+            return None
+        finally:
+            conn.close()
+
+    def delete_holiday(self, holiday_id, org_id):
+        conn = self.get_connection()
+        if not conn:
+            return False
+        try:
+            cursor = conn.cursor()
+            cursor.execute(
+                "DELETE FROM holidays WHERE id = %s AND organization_id = %s",
+                (holiday_id, org_id)
+            )
+            conn.commit()
+            return cursor.rowcount > 0
+        except Exception as e:
+            conn.rollback()
+            logger.error(f"Error deleting holiday: {e}")
+            return False
+        finally:
+            conn.close()
+
+    def get_holiday_dates_set(self, org_id, year=None):
+        """Returns a set of holiday date strings for quick lookup"""
+        holidays = self.get_holidays(org_id, year)
+        result = set()
+        for h in holidays:
+            d = h['holiday_date']
+            if hasattr(d, 'strftime'):
+                result.add(d.strftime('%Y-%m-%d'))
+            else:
+                result.add(str(d))
+        return result
+
+# ─────────────────────────────────────────────
+# LEAVE REQUESTS
+# ─────────────────────────────────────────────
+
+    def _is_off_saturday(self, date):
+        """Returns True if date is the 1st or 3rd Saturday of the month"""
+        import datetime as dt
+        if date.weekday() != 5:  # Not a Saturday
+            return False
+        # Find which Saturday of the month this is
+        # Count how many Saturdays have occurred up to and including this date
+        first_day = date.replace(day=1)
+        saturday_count = 0
+        current = first_day
+        while current <= date:
+            if current.weekday() == 5:
+                saturday_count += 1
+            current += dt.timedelta(days=1)
+        # 1st and 3rd Saturdays are off
+        return saturday_count in (1, 3)
+    
+    def _count_working_days(self, from_date, to_date, day_type, org_id):
+        """Count working days excluding Sundays, 1st & 3rd Saturdays, and holidays"""
+        import datetime as dt
+        holidays = self.get_holiday_dates_set(org_id)
+
+        if isinstance(from_date, str):
+            from_date = dt.date.fromisoformat(from_date)
+        if isinstance(to_date, str):
+            to_date = dt.date.fromisoformat(to_date)
+
+        if day_type == 'half_day':
+            # Still check if the single day itself is a working day
+            if from_date.weekday() == 6:  # Sunday
+                return 0
+            if self._is_off_saturday(from_date):
+                return 0
+            if from_date.strftime('%Y-%m-%d') in holidays:
+                return 0
+            return 0.5
+
+        total = 0.0
+        current = from_date
+        while current <= to_date:
+            # Skip Sundays
+            if current.weekday() == 6:
+                current += dt.timedelta(days=1)
+                continue
+            # Skip 1st and 3rd Saturdays
+            if self._is_off_saturday(current):
+                current += dt.timedelta(days=1)
+                continue
+            # Skip public holidays
+            if current.strftime('%Y-%m-%d') in holidays:
+                current += dt.timedelta(days=1)
+                continue
+            total += 1.0
+            current += dt.timedelta(days=1)
+        return total
+
+    
+           
+
+    def check_leave_overlap(self, user_id, from_date, to_date, exclude_request_id=None):
+        """Check if dates overlap with existing approved/pending leave"""
+        conn = self.get_connection()
+        if not conn:
+            return False
+        try:
+            cursor = conn.cursor()
+            query = """
+                SELECT id FROM leave_requests
+                WHERE user_id = %s
+                AND status IN ('pending', 'approved')
+                AND NOT (to_date < %s OR from_date > %s)
+            """
+            params = [user_id, from_date, to_date]
+            if exclude_request_id:
+                query += " AND id != %s"
+                params.append(exclude_request_id)
+            cursor.execute(query, params)
+            return cursor.fetchone() is not None
+        finally:
+            conn.close()
+
+    def create_leave_request(self, data):
+        """
+        data keys: user_id, org_id, leave_type_id, from_date, to_date,
+                day_type, reason
+        Returns (request_id, error_message)
+        """
+        import datetime as dt
+
+        from_date = data['from_date']
+        to_date   = data['to_date']
+        day_type  = data.get('day_type', 'full_day')
+        org_id    = data['org_id']
+        user_id   = data['user_id']
+
+        # Half-day only on single date
+        if day_type == 'half_day' and from_date != to_date:
+            return None, "Half day leave must be for a single date."
+        
+        import datetime as _dt
+        from zoneinfo import ZoneInfo
+        _IST = ZoneInfo('Asia/Kolkata')
+        _today = _dt.datetime.now(_IST).date()
+
+        _from = _dt.date.fromisoformat(from_date) if isinstance(from_date, str) else from_date
+        _to   = _dt.date.fromisoformat(to_date)   if isinstance(to_date, str)   else to_date
+
+        if _from < _today:
+            return None, "Leave start date cannot be in the past."
+        if _from > _to:
+            return None, "Start date cannot be after end date."
+        if _from.weekday() == 6:
+            return None, "You cannot apply for leave on a Sunday."
+        if self._is_off_saturday(_from):
+            return None, "This Saturday is a non-working day (1st or 3rd Saturday). Please select a valid working day."
+        if _to.weekday() == 6:
+            return None, "End date cannot be a Sunday."
+        if self._is_off_saturday(_to):
+            return None, "End date falls on a non-working Saturday."
+
+        # Overlap check
+        if self.check_leave_overlap(user_id, from_date, to_date):
+            return None, "Leave dates overlap with an existing request."
+
+        leave_days = self._count_working_days(from_date, to_date, day_type, org_id)
+        if leave_days == 0:
+            return None, "Selected dates fall on weekends or holidays."
+
+        # Balance check
+        from zoneinfo import ZoneInfo
+        from datetime import datetime as _datetime
+        year = _datetime.now(ZoneInfo('Asia/Kolkata')).year
+        conn = self.get_connection()
+        if not conn:
+            return None, "Database connection failed."
+        try:
+            cursor = conn.cursor(pymysql.cursors.DictCursor)
+            cursor.execute("""
+                SELECT * FROM leave_balances
+                WHERE user_id = %s AND leave_type_id = %s AND year = %s
+            """, (user_id, data['leave_type_id'], year))
+            balance = cursor.fetchone()
+
+            if not balance:
+                return None, "Leave balance not found for this leave type."
+            if balance['remaining_days'] < leave_days:
+                return None, (
+                    f"Insufficient leave balance. "
+                    f"Requested: {leave_days} day(s), Available: {balance['remaining_days']} day(s)."
+                )
+
+            cursor2 = conn.cursor()
+            cursor2.execute("""
+                INSERT INTO leave_requests
+                    (user_id, organization_id, leave_type_id, from_date, to_date,
+                    leave_days, day_type, reason, status)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, 'pending')
+            """, (
+                user_id, org_id, data['leave_type_id'],
+                from_date, to_date, leave_days,
+                day_type, data.get('reason', '')
+            ))
+            req_id = cursor2.lastrowid
+            conn.commit()
+            return req_id, None
+        except Exception as e:
+            conn.rollback()
+            logger.error(f"Error creating leave request: {e}")
+            return None, str(e)
+        finally:
+            conn.close()
+
+    def get_leave_requests_for_user(self, user_id, org_id):
+        conn = self.get_connection()
+        if not conn:
+            return []
+        try:
+            cursor = conn.cursor(pymysql.cursors.DictCursor)
+            cursor.execute("""
+                SELECT lr.*, lt.name as leave_type_name,
+                    u.full_name as reviewed_by_name
+                FROM leave_requests lr
+                JOIN leave_types lt ON lr.leave_type_id = lt.id
+                LEFT JOIN users u ON lr.reviewed_by = u.id
+                WHERE lr.user_id = %s AND lr.organization_id = %s
+                ORDER BY lr.created_at DESC
+            """, (user_id, org_id))
+            return cursor.fetchall()
+        finally:
+            conn.close()
+
+    def get_all_leave_requests(self, org_id, status=None):
+        """Admin/manager view of all leave requests"""
+        conn = self.get_connection()
+        if not conn:
+            return []
+        try:
+            cursor = conn.cursor(pymysql.cursors.DictCursor)
+            query = """
+                SELECT lr.*, lt.name as leave_type_name,
+                    u_emp.full_name as employee_name, u_emp.role as employee_role,
+                    u_rev.full_name as reviewed_by_name
+                FROM leave_requests lr
+                JOIN leave_types lt ON lr.leave_type_id = lt.id
+                JOIN users u_emp ON lr.user_id = u_emp.id
+                LEFT JOIN users u_rev ON lr.reviewed_by = u_rev.id
+                WHERE lr.organization_id = %s
+            """
+            params = [org_id]
+            if status:
+                query += " AND lr.status = %s"
+                params.append(status)
+            query += " ORDER BY lr.created_at DESC"
+            cursor.execute(query, params)
+            return cursor.fetchall()
+        finally:
+            conn.close()
+
+    def get_leave_request_by_id(self, request_id, org_id):
+        conn = self.get_connection()
+        if not conn:
+            return None
+        try:
+            cursor = conn.cursor(pymysql.cursors.DictCursor)
+            cursor.execute("""
+                SELECT lr.*, lt.name as leave_type_name,
+                    u_emp.full_name as employee_name, u_emp.email as employee_email,
+                    u_rev.full_name as reviewed_by_name
+                FROM leave_requests lr
+                JOIN leave_types lt ON lr.leave_type_id = lt.id
+                JOIN users u_emp ON lr.user_id = u_emp.id
+                LEFT JOIN users u_rev ON lr.reviewed_by = u_rev.id
+                WHERE lr.id = %s AND lr.organization_id = %s
+            """, (request_id, org_id))
+            return cursor.fetchone()
+        finally:
+            conn.close()
+
+    def review_leave_request(self, request_id, org_id, reviewer_id, action):
+        """action: 'approved' or 'rejected'"""
+        conn = self.get_connection()
+        if not conn:
+            return False, "Database connection failed."
+        try:
+            cursor = conn.cursor(pymysql.cursors.DictCursor)
+            cursor.execute("""
+                SELECT * FROM leave_requests WHERE id = %s AND organization_id = %s AND status = 'pending'
+            """, (request_id, org_id))
+            req = cursor.fetchone()
+            if not req:
+                return False, "Request not found or already reviewed."
+
+            cursor2 = conn.cursor()
+            cursor2.execute("""
+                UPDATE leave_requests
+                SET status = %s, reviewed_by = %s, reviewed_at = NOW()
+                WHERE id = %s
+            """, (action, reviewer_id, request_id))
+
+            if action == 'approved':
+                from zoneinfo import ZoneInfo
+                from datetime import datetime as _datetime
+                year = _datetime.now(ZoneInfo('Asia/Kolkata')).year
+                cursor2.execute("""
+                    UPDATE leave_balances
+                    SET used_days = used_days + %s,
+                        remaining_days = remaining_days - %s
+                    WHERE user_id = %s AND leave_type_id = %s AND year = %s
+                """, (req['leave_days'], req['leave_days'],
+                    req['user_id'], req['leave_type_id'], year))
+
+            conn.commit()
+            return True, None
+        except Exception as e:
+            conn.rollback()
+            logger.error(f"Error reviewing leave request: {e}")
+            return False, str(e)
+        finally:
+            conn.close()
+
+    def cancel_leave_request(self, request_id, user_id, org_id):
+        """Employee cancels their own pending request"""
+        conn = self.get_connection()
+        if not conn:
+            return False, "Database connection failed."
+        try:
+            cursor = conn.cursor(pymysql.cursors.DictCursor)
+            cursor.execute("""
+                SELECT * FROM leave_requests
+                WHERE id = %s AND user_id = %s AND organization_id = %s AND status = 'pending'
+            """, (request_id, user_id, org_id))
+            req = cursor.fetchone()
+            if not req:
+                return False, "Request not found or cannot be cancelled."
+
+            cursor2 = conn.cursor()
+            cursor2.execute(
+                "UPDATE leave_requests SET status = 'rejected' WHERE id = %s",
+                (request_id,)
+            )
+            conn.commit()
+            return True, None
+        except Exception as e:
+            conn.rollback()
+            logger.error(f"Error cancelling leave request: {e}")
+            return False, str(e)
+        finally:
+            conn.close()
+
+    def get_leave_summary_for_org(self, org_id):
+        """Dashboard summary counts"""
+        conn = self.get_connection()
+        if not conn:
+            return {}
+        try:
+            cursor = conn.cursor(pymysql.cursors.DictCursor)
+            cursor.execute("""
+                SELECT
+                    COUNT(*) as total,
+                    SUM(status='pending') as pending,
+                    SUM(status='approved') as approved,
+                    SUM(status='rejected') as rejected
+                FROM leave_requests
+                WHERE organization_id = %s
+            """, (org_id,))
+            return cursor.fetchone() or {}
+        finally:
+            conn.close()            

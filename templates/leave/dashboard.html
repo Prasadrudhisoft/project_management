@@ -1,0 +1,239 @@
+{% extends "base.html" %}
+{% block title %}Leave Management{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+
+  <!-- Header -->
+  <div class="d-flex align-items-center justify-content-between mb-4">
+    <div>
+      <h2 class="fw-bold mb-0">
+        <i class="fas fa-calendar-alt text-primary me-2"></i>Leave Management
+      </h2>
+      <p class="text-muted mb-0">{{ year }} &middot; Track and manage leave</p>
+    </div>
+    <div class="d-flex gap-2">
+      {% if user_role != 'admin' %}
+      <a href="{{ url_for('new_leave_request') }}" class="btn btn-primary">
+        <i class="fas fa-plus me-1"></i> Apply Leave
+      </a>
+      {% endif %}
+      {% if user_role == 'admin' %}
+      <a href="{{ url_for('new_leave_type') }}" class="btn btn-outline-secondary">
+        <i class="fas fa-plus-circle me-1"></i> New Leave Type
+      </a>
+      {% endif %}
+      <a href="{{ url_for('leave_requests') }}" class="btn btn-outline-primary">
+        <i class="fas fa-list me-1"></i> Leave Requests
+      </a>
+      {% if user_role == 'admin' %}
+      <div class="dropdown">
+        <button class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown">
+          <i class="fas fa-cog me-1"></i> Admin
+        </button>
+        <ul class="dropdown-menu dropdown-menu-end">
+          <li><a class="dropdown-item" href="{{ url_for('leave_types') }}">
+              <i class="fas fa-tags me-2 text-muted"></i>Manage Leave Types</a></li>
+          <li><a class="dropdown-item" href="{{ url_for('holidays') }}">
+              <i class="fas fa-calendar-day me-2 text-muted"></i>Manage Holidays</a></li>
+          <li><a class="dropdown-item" href="{{ url_for('leave_balances') }}">
+              <i class="fas fa-balance-scale me-2 text-muted"></i>View All Balances</a></li>
+        </ul>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Admin/Manager Summary Cards -->
+  {% if user_role in ('admin') and summary %}
+  <div class="row g-3 mb-4">
+    <div class="col-6 col-md-3">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-body text-center">
+          <div class="fs-2 fw-bold text-warning">{{ summary.pending or 0 }}</div>
+          <div class="small text-muted">Pending Requests</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-body text-center">
+          <div class="fs-2 fw-bold text-success">{{ summary.approved or 0 }}</div>
+          <div class="small text-muted">Approved</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-body text-center">
+          <div class="fs-2 fw-bold text-danger">{{ summary.rejected or 0 }}</div>
+          <div class="small text-muted">Rejected</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-body text-center">
+          <div class="fs-2 fw-bold text-primary">{{ summary.total or 0 }}</div>
+          <div class="small text-muted">Total This Year</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  <div class="row g-4">
+
+    <!-- My Leave Balances -->
+    <div class="col-lg-5">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-header bg-white border-bottom d-flex align-items-center justify-content-between py-3">
+          <h6 class="fw-bold mb-0"><i class="fas fa-wallet me-2 text-primary"></i>My Leave Balance</h6>
+          <a href="{{ url_for('leave_balances') }}" class="small text-primary text-decoration-none">View All</a>
+        </div>
+        <div class="card-body p-0">
+          {% if balances %}
+          {% for b in balances %}
+          <div class="px-4 py-3 border-bottom">
+            <div class="d-flex justify-content-between align-items-center mb-1">
+              <span class="fw-medium">{{ b.leave_type_name }}</span>
+              <span class="small">
+                <span class="text-success fw-bold">{{ b.remaining_days }}</span>
+                <span class="text-muted">/ {{ b.total_days }} days</span>
+              </span>
+            </div>
+            {% set pct = ((b.used_days / b.total_days) * 100) | int if b.total_days > 0 else 0 %}
+            <div class="progress" style="height:6px;">
+              <div class="progress-bar bg-primary" style="width: {{ pct }}%;"></div>
+            </div>
+            <div class="d-flex justify-content-between mt-1">
+              <small class="text-muted">Used: {{ b.used_days }}</small>
+              <small class="text-muted">Remaining: {{ b.remaining_days }}</small>
+            </div>
+          </div>
+          {% endfor %}
+          {% else %}
+          <div class="text-center py-5 text-muted">
+            <i class="fas fa-inbox fa-2x mb-2"></i>
+            <p class="mb-0 small">No leave balances found for {{ year }}</p>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Right column -->
+    <div class="col-lg-7">
+
+      <!-- Pending Requests for Admin/Manager -->
+      {% if user_role in ('admin',) and pending_requests %}
+      <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-white border-bottom d-flex align-items-center justify-content-between py-3">
+          <h6 class="fw-bold mb-0">
+            <i class="fas fa-hourglass-half me-2 text-warning"></i>
+            Pending Approvals
+            <span class="badge bg-warning text-dark ms-1">{{ pending_requests | length }}</span>
+          </h6>
+          <a href="{{ url_for('leave_requests', status='pending') }}"
+            class="small text-primary text-decoration-none">View All</a>
+        </div>
+        <div class="list-group list-group-flush">
+          {% for r in pending_requests[:5] %}
+          <a href="{{ url_for('view_leave_request', req_id=r.id) }}"
+            class="list-group-item list-group-item-action px-4 py-3">
+            <div class="d-flex justify-content-between">
+              <div>
+                <div class="fw-medium">{{ r.employee_name }}</div>
+                <div class="small text-muted">
+                  {{ r.leave_type_name }} &middot;
+                  {{ r.from_date.strftime('%d %b') if r.from_date else '' }}
+                  {% if r.from_date != r.to_date %} – {{ r.to_date.strftime('%d %b %Y') if r.to_date else '' }}{% else
+                  %} {{ r.from_date.strftime('%Y') if r.from_date else '' }}{% endif %}
+                  &middot; {{ r.leave_days }} day(s)
+                </div>
+              </div>
+              <span class="badge bg-warning text-dark align-self-center">Pending</span>
+            </div>
+          </a>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- My Recent Requests -->
+      <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-white border-bottom d-flex align-items-center justify-content-between py-3">
+          <h6 class="fw-bold mb-0"><i class="fas fa-history me-2 text-secondary"></i>My Recent Requests</h6>
+          <a href="{{ url_for('leave_requests') }}" class="small text-primary text-decoration-none">View All</a>
+        </div>
+        <div class="list-group list-group-flush">
+          {% if my_requests %}
+          {% for r in my_requests %}
+          <a href="{{ url_for('view_leave_request', req_id=r.id) }}"
+            class="list-group-item list-group-item-action px-4 py-3">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <div class="fw-medium">{{ r.leave_type_name }}</div>
+                <div class="small text-muted">
+                  {{ r.from_date.strftime('%d %b %Y') if r.from_date else '' }}
+                  {% if r.from_date != r.to_date %} – {{ r.to_date.strftime('%d %b %Y') if r.to_date else '' }}{% endif
+                  %}
+                  &middot; {{ r.leave_days }} day(s)
+                  {% if r.day_type == 'half_day' %}<span class="badge bg-info text-white ms-1">Half Day</span>{% endif
+                  %}
+                </div>
+              </div>
+              <span class="badge
+                  {% if r.status == 'approved' %}bg-success
+                  {% elif r.status == 'rejected' %}bg-danger
+                  {% else %}bg-warning text-dark{% endif %}">
+                {{ r.status | title }}
+              </span>
+            </div>
+          </a>
+          {% endfor %}
+          {% else %}
+          <div class="text-center py-4 text-muted">
+            <p class="mb-0 small">No leave requests yet.</p>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+
+
+
+      <!-- Upcoming Holidays -->
+      <div class="card-header bg-white border-bottom d-flex align-items-center justify-content-between py-3">
+        <h6 class="fw-bold mb-0"><i class="fas fa-umbrella-beach me-2 text-info"></i>Holidays {{ year }}</h6>
+        <div class="d-flex gap-2">
+          <a href="{{ url_for('holiday_calendar') }}" class="small text-info text-decoration-none">
+            <i class="fas fa-calendar-day me-1"></i>holiday calendar
+          </a>
+          {% if user_role == 'admin' %}
+          <span class="text-muted">|</span>
+          <a href="{{ url_for('holidays') }}" class="small text-primary text-decoration-none">Manage</a>
+          {% endif %}
+        </div>
+      </div>
+      <div class="card-body p-0">
+        {% if holidays %}
+        <div class="list-group list-group-flush">
+          {% for h in holidays %}
+          <div class="list-group-item px-4 py-2 d-flex justify-content-between align-items-center">
+            <span class="fw-medium small">{{ h.name }}</span>
+            <span class="text-muted small">{{ h.holiday_date.strftime('%d %b %Y') if h.holiday_date else '' }}</span>
+          </div>
+          {% endfor %}
+        </div>
+        {% else %}
+        <div class="text-center py-4 text-muted">
+          <p class="mb-0 small">No holidays added for {{ year }}.</p>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+
+  </div>
+</div>
+</div>
+{% endblock %}
