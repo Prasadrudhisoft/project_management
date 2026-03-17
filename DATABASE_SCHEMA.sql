@@ -355,7 +355,7 @@ CREATE TABLE IF NOT EXISTS `daily_report_tasks` (
 
 
 
-CREATE TABLE document_permissions (
+CREATE TABLE IF NOT EXISTS document_permissions (
     id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     document_id INT NOT NULL,
     user_id INT,
@@ -374,7 +374,7 @@ CREATE TABLE document_permissions (
 );
 
 
-CREATE TABLE documents (
+CREATE TABLE IF NOT EXISTS documents (
     id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     organization_id INT NOT NULL,
     project_id INT,
@@ -412,7 +412,7 @@ CREATE TABLE documents (
 
 
 --######### leave management tables ############
-CREATE TABLE leave_types (
+CREATE TABLE IF NOT EXISTS leave_types (
     id INT AUTO_INCREMENT PRIMARY KEY,
     organization_id INT NOT NULL,
     name VARCHAR(100) NOT NULL,
@@ -426,7 +426,7 @@ CREATE TABLE leave_types (
 );
 
 
-CREATE TABLE leave_balances (
+CREATE TABLE IF NOT EXISTS leave_balances (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
     organization_id INT NOT NULL,
@@ -445,7 +445,7 @@ CREATE TABLE leave_balances (
 );
 
 
-CREATE TABLE leave_requests (
+CREATE TABLE IF NOT EXISTS leave_requests (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
     organization_id INT NOT NULL,
@@ -469,7 +469,7 @@ CREATE TABLE leave_requests (
 );
 
 
-CREATE TABLE holidays (
+CREATE TABLE IF NOT EXISTS holidays (
     id INT AUTO_INCREMENT PRIMARY KEY,
     organization_id INT NOT NULL,
     name VARCHAR(120) NOT NULL,
