@@ -125,7 +125,7 @@
             white-space: nowrap;
             font-size: 0.9rem;
             gap: 20px;
-            
+
         }
 
         .navbar-nav .nav-link:hover {
@@ -381,6 +381,7 @@
                 opacity: 0;
                 transform: translateY(20px);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -396,7 +397,7 @@
             .navbar-brand {
                 font-size: 1.1rem;
             }
-            
+
             .brand-icon {
                 width: 30px;
                 height: 30px;
@@ -421,7 +422,10 @@
                 -webkit-overflow-scrolling: touch;
             }
 
-            .navbar-nav::-webkit-scrollbar { height: 6px; }
+            .navbar-nav::-webkit-scrollbar {
+                height: 6px;
+            }
+
             .navbar-nav::-webkit-scrollbar-thumb {
                 background: rgba(255, 255, 255, 0.25);
                 border-radius: 4px;
@@ -433,7 +437,9 @@
                 border-radius: 8px;
             }
 
-            .navbar-nav .nav-link span { white-space: nowrap; }
+            .navbar-nav .nav-link span {
+                white-space: nowrap;
+            }
 
             .dropdown-menu {
                 position: static !important;
@@ -580,7 +586,7 @@
                 margin-right: -0.375rem;
             }
 
-            .row > * {
+            .row>* {
                 padding-left: 0.375rem;
                 padding-right: 0.375rem;
             }
@@ -677,12 +683,29 @@
         }
 
         /* Utility Classes */
-        .text-primary { color: var(--primary-color) !important; }
-        .text-success { color: var(--success-color) !important; }
-        .text-warning { color: var(--warning-color) !important; }
-        .text-danger { color: var(--danger-color) !important; }
-        .bg-gradient-primary { background: linear-gradient(135deg, var(--primary-color), var(--primary-dark)) !important; }
-        .fw-semibold { font-weight: 600; }
+        .text-primary {
+            color: var(--primary-color) !important;
+        }
+
+        .text-success {
+            color: var(--success-color) !important;
+        }
+
+        .text-warning {
+            color: var(--warning-color) !important;
+        }
+
+        .text-danger {
+            color: var(--danger-color) !important;
+        }
+
+        .bg-gradient-primary {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark)) !important;
+        }
+
+        .fw-semibold {
+            font-weight: 600;
+        }
 
         /* Message/Notification Badge Positioning */
         .position-relative .badge {
@@ -727,149 +750,171 @@
                 <span class="navbar-toggler-icon"></span>
             </button>
 
-<div class="collapse navbar-collapse" id="navbarNav">
-    <ul class="navbar-nav me-auto">
-        <!-- Dashboard -->
-        <li class="nav-item">
-            <a class="nav-link" href="{{ url_for('dashboard') }}">
-                <i class="bi bi-house me-1"></i><span class="d-lg-inline">Dashboard</span>
-            </a>
-        </li>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <!-- Dashboard -->
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('dashboard') }}">
+                            <i class="bi bi-house me-1"></i><span class="d-lg-inline">Dashboard</span>
+                        </a>
+                    </li>
 
-        <!-- Projects -->
-        {% if session.user_role == 'manager' %}
-        <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" id="projectsDropdown" role="button"
-                data-bs-toggle="dropdown" aria-expanded="false">
-                <i class="bi bi-folder me-1"></i><span class="d-lg-inline">Projects</span>
-            </a>
-            <ul class="dropdown-menu" aria-labelledby="projectsDropdown">
-                <li><a class="dropdown-item" href="{{ url_for('projects') }}">
-                    <i class="bi bi-folder-fill me-2"></i>All Projects</a></li>
-                <li><a class="dropdown-item" href="{{ url_for('manager_project_selector') }}">
-                    <i class="bi bi-person-badge me-2"></i>My Assigned</a></li>
-            </ul>
-        </li>
-        {% else %}
-        <li class="nav-item">
-            <a class="nav-link" href="{{ url_for('projects') }}">
-                <i class="bi bi-folder me-1"></i><span class="d-lg-inline">Projects</span>
-            </a>
-        </li>
-        {% endif %}
+                    <!-- Projects -->
+                    {% if session.user_role == 'manager' %}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="projectsDropdown" role="button"
+                            data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-folder me-1"></i><span class="d-lg-inline">Projects</span>
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="projectsDropdown">
+                            <li><a class="dropdown-item" href="{{ url_for('projects') }}">
+                                    <i class="bi bi-folder-fill me-2"></i>All Projects</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('manager_project_selector') }}">
+                                    <i class="bi bi-person-badge me-2"></i>My Assigned</a></li>
+                        </ul>
+                    </li>
+                    {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('projects') }}">
+                            <i class="bi bi-folder me-1"></i><span class="d-lg-inline">Projects</span>
+                        </a>
+                    </li>
+                    {% endif %}
 
-        <!-- Tasks -->
-        <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" id="tasksDropdown" role="button"
-                data-bs-toggle="dropdown" aria-expanded="false">
-                <i class="bi bi-check2-square me-1"></i><span class="d-lg-inline">Tasks</span>
-            </a>
-            <ul class="dropdown-menu" aria-labelledby="tasksDropdown">
-                <li>
-                    <a class="dropdown-item" href="{{ url_for('tasks') }}">
-                        <i class="bi bi-person-check me-2"></i>My Tasks
-                    </a>
+                    <!-- Tasks -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="tasksDropdown" role="button"
+                            data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-check2-square me-1"></i><span class="d-lg-inline">Tasks</span>
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="tasksDropdown">
+                            <li>
+                                <a class="dropdown-item" href="{{ url_for('tasks') }}">
+                                    <i class="bi bi-person-check me-2"></i>My Tasks
+                                </a>
+                            </li>
+                            {% if session.user_role == 'admin' %}
+                            <li>
+                                <a class="dropdown-item" href="{{ url_for('all_tasks') }}">
+                                    <i class="bi bi-collection me-2"></i>All Tasks
+                                </a>
+                            </li>
+                            {% endif %}
+                        </ul>
+                    </li>
+
+                    <!-- Messages -->
+                    <li class="nav-item">
+                        <a class="nav-link position-relative" href="{{ url_for('messages') }}" id="messages-link">
+                            <i class="bi bi-envelope me-1"></i><span class="d-lg-inline">Messages</span>
+                            <span class="badge bg-danger message-count" id="message-badge"
+                                style="display: none;"></span>
+                        </a>
+                    </li>
+
+                    <!-- Daily Reports -->
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('daily_reports') }}">
+                            <i class="bi bi-journal-text me-1"></i><span class="d-lg-inline">Daily Reports</span>
+                        </a>
+                    </li>
+
+                    <!-- Attendance -->
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('my_attendance') }}">
+                            <i class="bi bi-clock me-1"></i><span class="d-lg-inline">Attendance</span>
+                        </a>
+                    </li>
+
+                    <!-- Leave -->
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('leave_dashboard') }}">
+                            <i class="bi bi-calendar-check me-1"></i><span class="d-lg-inline">Leave</span>
+                        </a>
+                    </li>
+
+                    <!-- Documents -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="docsDropdown" role="button"
+                            data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-file-earmark-text me-1"></i><span class="d-lg-inline">Documents</span>
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="docsDropdown">
+                            <li>
+                                <a class="dropdown-item" href="{{ url_for('documents_list') }}">
+                                    <i class="bi bi-files me-2"></i>All Documents
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="{{ url_for('documents_upload') }}">
+                                    <i class="bi bi-cloud-upload me-2"></i>Upload
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+
+                    <!-- Team -->
+                    {% if session.user_role in ['admin', 'manager'] %}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="usersDropdown" role="button"
+                            data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-people me-1"></i><span class="d-lg-inline">Team</span>
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="usersDropdown">
+                            <li><a class="dropdown-item" href="{{ url_for('users') }}">
+                                    <i class="bi bi-people-fill me-2"></i>Manage Users</a></li>
+                            {% if session.user_role == 'admin' %}
+                            <li><a class="dropdown-item" href="{{ url_for('team_assignments_overview') }}">
+                                    <i class="bi bi-diagram-3 me-2"></i>Team Assignments</a></li>
+                            {% endif %}
+                        </ul>
+                    </li>
+                    {% endif %}
+                </ul>
+
+                <!-- Right side nav -->
+                <ul class="navbar-nav">
+                    <!-- Notifications -->
+                    <li class="nav-item">
+                        <a class="nav-link position-relative" href="{{ url_for('notifications') }}"
+                            id="notifications-link">
+                            <i class="fas fa-bell me-1"></i><span class="d-lg-inline">Notifications</span>
+                            <span class="badge bg-danger notification-count" id="notification-badge"></span>
+                        </a>
+                    </li>
+
+                    <!-- User Menu -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
+                            data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-person-circle me-1"></i>
+                            <span class="d-none d-md-inline">{{ session.user_name }}</span>
+                            <span class="d-md-none">{{ session.user_name.split()[0] if session.user_name else 'User'
+                                }}</span>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                            <li>
+                                <span class="dropdown-item-text">Role:
+                                    <span class="badge bg-secondary">{{ session.user_role.title() }}</span>
+                                </span>
+                            </li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            {% if session.user_role == 'admin' %}
+                            <li><a class="dropdown-item" href="{{ url_for('attendance_config') }}">
+                                    <i class="bi bi-clock-history me-2"></i>Attendance Config</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('attendance_report') }}">
+                                    <i class="bi bi-bar-chart me-2"></i>Attendance Report</a></li>
+                            <hr class="dropdown-divider">
+                    </li>
+                    {% endif %}
+                    <li><a class="dropdown-item" href="{{ url_for('logout') }}">
+                            <i class="bi bi-box-arrow-right me-1"></i>Logout</a></li>
+                </ul>
                 </li>
-                {% if session.user_role == 'admin' %}
-                <li>
-                    <a class="dropdown-item" href="{{ url_for('all_tasks') }}">
-                        <i class="bi bi-collection me-2"></i>All Tasks
-                    </a>
-                </li>
-                {% endif %}
-            </ul>
-        </li>
-
-        <!-- Messages -->
-        <li class="nav-item">
-            <a class="nav-link position-relative" href="{{ url_for('messages') }}" id="messages-link">
-                <i class="bi bi-envelope me-1"></i><span class="d-lg-inline">Messages</span>
-                <span class="badge bg-danger message-count" id="message-badge" style="display: none;"></span>
-            </a>
-        </li>
-
-        <!-- Daily Reports -->
-        <li class="nav-item">
-            <a class="nav-link" href="{{ url_for('daily_reports') }}">
-                <i class="bi bi-journal-text me-1"></i><span class="d-lg-inline">Daily Reports</span>
-            </a>
-        </li>
-
-        <!-- Documents -->
-        <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" id="docsDropdown" role="button"
-                data-bs-toggle="dropdown" aria-expanded="false">
-                <i class="bi bi-file-earmark-text me-1"></i><span class="d-lg-inline">Documents</span>
-            </a>
-            <ul class="dropdown-menu" aria-labelledby="docsDropdown">
-                <li>
-                    <a class="dropdown-item" href="{{ url_for('documents_list') }}">
-                        <i class="bi bi-files me-2"></i>All Documents
-                    </a>
-                </li>
-                <li>
-                    <a class="dropdown-item" href="{{ url_for('documents_upload') }}">
-                        <i class="bi bi-cloud-upload me-2"></i>Upload
-                    </a>
-                </li>
-            </ul>
-        </li>
-
-        <!-- Team -->
-        {% if session.user_role in ['admin', 'manager'] %}
-        <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" id="usersDropdown" role="button"
-                data-bs-toggle="dropdown" aria-expanded="false">
-                <i class="bi bi-people me-1"></i><span class="d-lg-inline">Team</span>
-            </a>
-            <ul class="dropdown-menu" aria-labelledby="usersDropdown">
-                <li><a class="dropdown-item" href="{{ url_for('users') }}">
-                    <i class="bi bi-people-fill me-2"></i>Manage Users</a></li>
-                {% if session.user_role == 'admin' %}
-                <li><a class="dropdown-item" href="{{ url_for('team_assignments_overview') }}">
-                    <i class="bi bi-diagram-3 me-2"></i>Team Assignments</a></li>
-                {% endif %}
-            </ul>
-        </li>
-        {% endif %}
-    </ul>
-
-    <!-- Right side nav -->
-    <ul class="navbar-nav">
-        <!-- Notifications -->
-        <li class="nav-item">
-            <a class="nav-link position-relative" href="{{ url_for('notifications') }}" id="notifications-link">
-                <i class="fas fa-bell me-1"></i><span class="d-lg-inline">Notifications</span>
-                <span class="badge bg-danger notification-count" id="notification-badge"></span>
-            </a>
-        </li>
-
-        <!-- User Menu -->
-        <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
-                data-bs-toggle="dropdown" aria-expanded="false">
-                <i class="bi bi-person-circle me-1"></i>
-                <span class="d-none d-md-inline">{{ session.user_name }}</span>
-                <span class="d-md-none">{{ session.user_name.split()[0] if session.user_name else 'User' }}</span>
-            </a>
-            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-                <li>
-                    <span class="dropdown-item-text">Role:
-                        <span class="badge bg-secondary">{{ session.user_role.title() }}</span>
-                    </span>
-                </li>
-                <li><hr class="dropdown-divider"></li>
-                {% if session.user_role == 'admin' %}
-                <li><a class="dropdown-item" href="#">
-                    <i class="bi bi-gear me-1"></i>Admin Panel</a></li>
-                <li><hr class="dropdown-divider"></li>
-                {% endif %}
-                <li><a class="dropdown-item" href="{{ url_for('logout') }}">
-                    <i class="bi bi-box-arrow-right me-1"></i>Logout</a></li>
-            </ul>
-        </li>
-    </ul>
-</div>
+                </ul>
+            </div>
 
             {% endif %}
         </div>
@@ -979,22 +1024,22 @@
         });
 
         // Mobile menu auto-close on item click
-       // Mobile menu auto-close on item click (ignore dropdown toggles)
-document.addEventListener('DOMContentLoaded', function() {
-    const navbarCollapse = document.getElementById('navbarNav');
-    const navLinks = document.querySelectorAll('.navbar-nav .nav-link:not(.dropdown-toggle)');
-    
-    navLinks.forEach(function(link) {
-        link.addEventListener('click', function() {
-            if (window.innerWidth < 992) {
-                const bsCollapse = new bootstrap.Collapse(navbarCollapse, {
-                    toggle: false
+        // Mobile menu auto-close on item click (ignore dropdown toggles)
+        document.addEventListener('DOMContentLoaded', function () {
+            const navbarCollapse = document.getElementById('navbarNav');
+            const navLinks = document.querySelectorAll('.navbar-nav .nav-link:not(.dropdown-toggle)');
+
+            navLinks.forEach(function (link) {
+                link.addEventListener('click', function () {
+                    if (window.innerWidth < 992) {
+                        const bsCollapse = new bootstrap.Collapse(navbarCollapse, {
+                            toggle: false
+                        });
+                        bsCollapse.hide();
+                    }
                 });
-                bsCollapse.hide();
-            }
+            });
         });
-    });
-});
 
     </script>
 

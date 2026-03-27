@@ -4157,4 +4157,432 @@ class DatabaseHelper:
             """, (org_id,))
             return cursor.fetchone() or {}
         finally:
-            conn.close()            
+            conn.close()     
+
+    def get_attendance_config(self, org_id):
+        """Get attendance config for org. Returns defaults if not set."""
+        conn = self.get_connection()
+        try:
+            with conn.cursor(pymysql.cursors.DictCursor) as cur:
+                cur.execute(
+                    "SELECT * FROM attendance_config WHERE organization_id = %s",
+                    (org_id,)
+                )
+                row = cur.fetchone()
+                if row:
+                    return row
+                return {
+                    'checkin_time': '09:00:00',
+                    'checkout_time': '18:00:00',
+                    'grace_minutes': 15,
+                    'half_day_late_after_minutes': 120,
+                    'half_day_early_before_minutes': 120,
+                }
+        finally:
+            conn.close()
+
+    def save_attendance_config(self, org_id, data):
+        """Insert or update attendance config."""
+        conn = self.get_connection()
+        try:
+            with conn.cursor(pymysql.cursors.DictCursor) as cur:
+                cur.execute("""
+                    INSERT INTO attendance_config
+                        (organization_id, checkin_time, checkout_time, grace_minutes,
+                        half_day_late_after_minutes, half_day_early_before_minutes)
+                    VALUES (%s, %s, %s, %s, %s, %s)
+                    ON DUPLICATE KEY UPDATE
+                        checkin_time                  = VALUES(checkin_time),
+                        checkout_time                 = VALUES(checkout_time),
+                        grace_minutes                 = VALUES(grace_minutes),
+                        half_day_late_after_minutes   = VALUES(half_day_late_after_minutes),
+                        half_day_early_before_minutes = VALUES(half_day_early_before_minutes),
+                        updated_at                    = CURRENT_TIMESTAMP
+                """, (
+                    org_id,
+                    data['checkin_time'],
+                    data['checkout_time'],
+                    data['grace_minutes'],
+                    data['half_day_late_after_minutes'],
+                    data['half_day_early_before_minutes'],
+                ))
+                conn.commit()
+                return True, None
+        except Exception as e:
+            conn.rollback()
+            return False, str(e)
+        finally:
+            conn.close()
+
+    def get_or_create_attendance(self, user_id, org_id, date_str):
+        """Get today's attendance record, create if not exists."""
+        conn = self.get_connection()
+        try:
+            with conn.cursor(pymysql.cursors.DictCursor) as cur:
+                cur.execute(
+                    "SELECT * FROM attendance WHERE user_id=%s AND date=%s",
+                    (user_id, date_str)
+                )
+                row = cur.fetchone()
+                if row:
+                    return row
+                cur.execute("""
+                    INSERT INTO attendance (organization_id, user_id, date, status)
+                    VALUES (%s, %s, %s, 'absent')
+                """, (org_id, user_id, date_str))
+                conn.commit()
+                cur.execute(
+                    "SELECT * FROM attendance WHERE user_id=%s AND date=%s",
+                    (user_id, date_str)
+                )
+                return cur.fetchone()
+        finally:
+            conn.close()
+
+    def mark_checkin(self, user_id, org_id, checkin_dt):
+        """
+        Record check-in, compute late status.
+        checkin_dt: aware datetime in UTC (stored as UTC, compared in IST)
+        Returns (record_dict, error_str)
+        """
+        from zoneinfo import ZoneInfo
+        from datetime import datetime, timedelta
+
+        IST = ZoneInfo('Asia/Kolkata')
+        ist_now = checkin_dt.astimezone(IST)
+        date_str = ist_now.date().isoformat()
+
+        _check_date = ist_now.date()
+        if _check_date.weekday() == 6:
+            return None, "Cannot check in on Sunday."
+        if self._is_off_saturday(_check_date):
+            return None, "Today is a non-working Saturday (1st or 3rd). No attendance required."
+
+        config = self.get_attendance_config(org_id)
+
+        checkin_scheduled = datetime.strptime(
+            f"{date_str} {str(config['checkin_time'])[:5]}", "%Y-%m-%d %H:%M"
+        ).replace(tzinfo=IST)
+        grace_cutoff = checkin_scheduled + timedelta(minutes=int(config['grace_minutes']))
+
+        is_late = ist_now > grace_cutoff
+        late_minutes = max(0, int((ist_now - checkin_scheduled).total_seconds() / 60)) if is_late else 0
+
+        half_day_threshold = int(config['half_day_late_after_minutes'])
+        if late_minutes >= half_day_threshold:
+            status = 'half_day'
+        else:
+            status = 'present'
+
+        conn = self.get_connection()
+        try:
+            with conn.cursor(pymysql.cursors.DictCursor) as cur:
+                cur.execute(
+                    "SELECT id, checkin_time FROM attendance WHERE user_id=%s AND date=%s",
+                    (user_id, date_str)
+                )
+                existing = cur.fetchone()
+                if existing and existing['checkin_time']:
+                    return None, "Already checked in today."
+
+                cur.execute("""
+                    INSERT INTO attendance
+                        (organization_id, user_id, date, checkin_time, status,
+                        is_late, late_by_minutes)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s)
+                    ON DUPLICATE KEY UPDATE
+                        checkin_time    = VALUES(checkin_time),
+                        status          = VALUES(status),
+                        is_late         = VALUES(is_late),
+                        late_by_minutes = VALUES(late_by_minutes),
+                        updated_at      = CURRENT_TIMESTAMP
+                """, (
+                    org_id, user_id, date_str,
+                    checkin_dt.strftime('%Y-%m-%d %H:%M:%S'),
+                    status, int(is_late), late_minutes
+                ))
+                conn.commit()
+
+                cur.execute(
+                    "SELECT * FROM attendance WHERE user_id=%s AND date=%s",
+                    (user_id, date_str)
+                )
+                return cur.fetchone(), None
+        except Exception as e:
+            conn.rollback()
+            return None, str(e)
+        finally:
+            conn.close()
+
+    def mark_checkout(self, user_id, org_id, checkout_dt):
+        """
+        Record check-out, compute early departure and finalize status.
+        Returns (record_dict, error_str)
+        """
+        from zoneinfo import ZoneInfo
+        from datetime import datetime
+
+        IST = ZoneInfo('Asia/Kolkata')
+        ist_now = checkout_dt.astimezone(IST)
+        date_str = ist_now.date().isoformat()
+
+        config = self.get_attendance_config(org_id)
+
+        checkout_scheduled = datetime.strptime(
+            f"{date_str} {str(config['checkout_time'])[:5]}", "%Y-%m-%d %H:%M"
+        ).replace(tzinfo=IST)
+
+        is_early = ist_now < checkout_scheduled
+        early_minutes = max(0, int((checkout_scheduled - ist_now).total_seconds() / 60)) if is_early else 0
+
+        conn = self.get_connection()
+        try:
+            with conn.cursor(pymysql.cursors.DictCursor) as cur:
+                cur.execute(
+                    "SELECT * FROM attendance WHERE user_id=%s AND date=%s",
+                    (user_id, date_str)
+                )
+                record = cur.fetchone()
+
+                if not record or not record['checkin_time']:
+                    return None, "No check-in found for today. Please check in first."
+                if record['checkout_time']:
+                    return None, "Already checked out today."
+
+                half_day_threshold = int(config['half_day_early_before_minutes'])
+                current_status = record['status']
+
+                if early_minutes >= half_day_threshold:
+                    final_status = 'half_day'
+                elif current_status == 'half_day':
+                    final_status = 'half_day'
+                else:
+                    final_status = 'present'
+
+                cur.execute("""
+                    UPDATE attendance SET
+                        checkout_time       = %s,
+                        is_early_departure  = %s,
+                        early_by_minutes    = %s,
+                        status              = %s,
+                        updated_at          = CURRENT_TIMESTAMP
+                    WHERE user_id=%s AND date=%s
+                """, (
+                    checkout_dt.strftime('%Y-%m-%d %H:%M:%S'),
+                    int(is_early), early_minutes, final_status,
+                    user_id, date_str
+                ))
+                conn.commit()
+
+                cur.execute(
+                    "SELECT * FROM attendance WHERE user_id=%s AND date=%s",
+                    (user_id, date_str)
+                )
+                return cur.fetchone(), None
+        except Exception as e:
+            conn.rollback()
+            return None, str(e)
+        finally:
+            conn.close()
+
+    def get_my_attendance(self, user_id, org_id, year, month):
+        """Get attendance records for a user for a given month."""
+        conn = self.get_connection()
+        try:
+            with conn.cursor(pymysql.cursors.DictCursor) as cur:
+                cur.execute("""
+                    SELECT a.*
+                    FROM attendance a
+                    WHERE a.user_id = %s
+                    AND a.organization_id = %s
+                    AND YEAR(a.date) = %s
+                    AND MONTH(a.date) = %s
+                    ORDER BY a.date DESC
+                """, (user_id, org_id, year, month))
+                return cur.fetchall()
+        finally:
+            conn.close()
+
+    def get_attendance_report(self, org_id, year, month, user_id=None):
+        """Admin report: all employees for a given month."""
+        conn = self.get_connection()
+        try:
+            with conn.cursor(pymysql.cursors.DictCursor) as cur:
+                query = """
+                    SELECT a.*, u.full_name AS employee_name, u.email AS employee_email
+                    FROM attendance a
+                    JOIN users u ON u.id = a.user_id
+                    WHERE a.organization_id = %s
+                    AND YEAR(a.date) = %s
+                    AND MONTH(a.date) = %s
+                """
+                params = [org_id, year, month]
+                if user_id:
+                    query += " AND a.user_id = %s"
+                    params.append(user_id)
+                query += " ORDER BY a.date DESC, u.full_name ASC"
+                cur.execute(query, params)
+                return cur.fetchall()
+        finally:
+            conn.close()
+
+    def get_attendance_summary(self, org_id, year, month, user_id=None):
+        """Summary stats: present, half_day, late, early_departure counts."""
+        conn = self.get_connection()
+        try:
+            with conn.cursor(pymysql.cursors.DictCursor) as cur:
+                base = """
+                    FROM attendance
+                    WHERE organization_id = %s
+                    AND YEAR(date) = %s AND MONTH(date) = %s
+                """
+                params = [org_id, year, month]
+                if user_id:
+                    base += " AND user_id = %s"
+                    params.append(user_id)
+
+                cur.execute(f"""
+                    SELECT
+                        COUNT(*) AS total_days,
+                        SUM(status = 'present')     AS present,
+                        SUM(status = 'half_day')    AS half_day,
+                        SUM(status = 'on_leave')    AS on_leave,
+                        SUM(status = 'absent')      AS absent,
+                        SUM(is_late = 1)            AS late_count,
+                        SUM(is_early_departure = 1) AS early_count
+                    {base}
+                """, params)
+                return cur.fetchone()
+        finally:
+            conn.close()
+
+    def apply_leave_to_attendance(self, user_id, org_id, from_date, to_date):
+        """Called when a leave is approved. Marks all days as on_leave."""
+        from datetime import timedelta
+        import datetime as dt
+
+        conn = self.get_connection()
+        try:
+            with conn.cursor(pymysql.cursors.DictCursor) as cur:
+                current = from_date if isinstance(from_date, dt.date) else dt.date.fromisoformat(str(from_date))
+                end     = to_date   if isinstance(to_date,   dt.date) else dt.date.fromisoformat(str(to_date))
+
+                while current <= end:
+                    if current.weekday() != 6 and not self._is_off_saturday(current):
+                        cur.execute("""
+                            INSERT INTO attendance
+                                (organization_id, user_id, date, status, remarks)
+                            VALUES (%s, %s, %s, 'on_leave', 'Approved Leave')
+                            ON DUPLICATE KEY UPDATE
+                                status     = 'on_leave',
+                                remarks    = 'Approved Leave',
+                                updated_at = CURRENT_TIMESTAMP
+                        """, (org_id, user_id, current.isoformat()))
+                    current += timedelta(days=1)
+                conn.commit()
+                return True
+        except Exception as e:
+            conn.rollback()
+            return False
+        finally:
+            conn.close()
+
+    def get_all_employees_for_attendance(self, org_id):
+        """Returns all active non-admin users for attendance report filter."""
+        conn = self.get_connection()
+        try:
+            with conn.cursor(pymysql.cursors.DictCursor) as cur:
+                cur.execute("""
+                    SELECT id, full_name AS name, email, role
+                    FROM users
+                    WHERE organization_id = %s
+                    AND is_active = 1
+                    AND role != 'admin'
+                    ORDER BY full_name ASC
+                """, (org_id,))
+                return cur.fetchall()
+        finally:
+            conn.close()  
+
+# ─────────────────────────────────────────────────────────────────
+# ADD THESE 3 METHODS to DatabaseHelper in utils/db_helper.py
+# Place them right after get_all_employees_for_attendance()
+# ─────────────────────────────────────────────────────────────────
+
+    def get_attendance_report_yearly(self, org_id, year, user_id=None):
+        """Yearly attendance report — all months for a given year."""
+        conn = self.get_connection()
+        try:
+            with conn.cursor(pymysql.cursors.DictCursor) as cur:
+                query = """
+                    SELECT a.*, u.full_name AS employee_name, u.email AS employee_email
+                    FROM attendance a
+                    JOIN users u ON u.id = a.user_id
+                    WHERE a.organization_id = %s
+                    AND YEAR(a.date) = %s
+                """
+                params = [org_id, year]
+                if user_id:
+                    query += " AND a.user_id = %s"
+                    params.append(user_id)
+                query += " ORDER BY a.date DESC, u.full_name ASC"
+                cur.execute(query, params)
+                return cur.fetchall()
+        finally:
+            conn.close()
+
+    def get_attendance_report_all(self, org_id, user_id=None):
+        """Overall attendance report — all records ever."""
+        conn = self.get_connection()
+        try:
+            with conn.cursor(pymysql.cursors.DictCursor) as cur:
+                query = """
+                    SELECT a.*, u.full_name AS employee_name, u.email AS employee_email
+                    FROM attendance a
+                    JOIN users u ON u.id = a.user_id
+                    WHERE a.organization_id = %s
+                """
+                params = [org_id]
+                if user_id:
+                    query += " AND a.user_id = %s"
+                    params.append(user_id)
+                query += " ORDER BY a.date DESC, u.full_name ASC"
+                cur.execute(query, params)
+                return cur.fetchall()
+        finally:
+            conn.close()
+
+    def delete_attendance_records(self, org_id, user_id=None, year=None, month=None):
+        """
+        Delete attendance records with optional filters.
+        - user_id only  → all records for that employee
+        - year only     → all records for that year
+        - year + month  → records for that specific month
+        - user_id + year + month → records for that employee in that month
+        Always scoped to org_id for safety.
+        Returns (deleted_count, error_str)
+        """
+        conn = self.get_connection()
+        try:
+            with conn.cursor(pymysql.cursors.DictCursor) as cur:
+                query  = "DELETE FROM attendance WHERE organization_id = %s"
+                params = [org_id]
+                if user_id:
+                    query += " AND user_id = %s"
+                    params.append(user_id)
+                if year:
+                    query += " AND YEAR(date) = %s"
+                    params.append(year)
+                if month:
+                    query += " AND MONTH(date) = %s"
+                    params.append(month)
+                cur.execute(query, params)
+                deleted = cur.rowcount
+                conn.commit()
+                return deleted, None
+        except Exception as e:
+            conn.rollback()
+            return 0, str(e)
+        finally:
+            conn.close()             
+                    

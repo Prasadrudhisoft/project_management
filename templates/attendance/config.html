@@ -1,0 +1,494 @@
+{% extends "base.html" %}
+{% block title %}Attendance Configuration{% endblock %}
+
+{% block extra_css %}
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
+
+  :root {
+    --indigo: #4f46e5;
+    --indigo-dark: #3730a3;
+    --indigo-light: #e0e7ff;
+    --violet: #7c3aed;
+    --surface: #ffffff;
+    --surface-2: #f8fafc;
+    --border: #e2e8f0;
+    --border-focus: #4f46e5;
+    --text-primary: #0f172a;
+    --text-secondary: #475569;
+    --text-muted: #94a3b8;
+    --success: #059669;
+    --info-bg: #eff6ff;
+    --info-border: #bfdbfe;
+    --info-text: #1e40af;
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+    --shadow-md: 0 4px 16px rgba(79, 70, 229, 0.08), 0 1px 4px rgba(0, 0, 0, 0.04);
+    --shadow-lg: 0 10px 40px rgba(79, 70, 229, 0.12), 0 2px 8px rgba(0, 0, 0, 0.06);
+    --radius: 14px;
+    --radius-sm: 8px;
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: linear-gradient(160deg, #f0f4ff 0%, #faf5ff 50%, #f0fdf4 100%);
+    color: var(--text-primary);
+    min-height: 100vh;
+  }
+
+  /* ── Page wrapper ── */
+  .config-wrapper {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 2.5rem 2rem 4rem;
+  }
+
+  /* ── Breadcrumb / back link ── */
+  .back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    color: var(--text-muted);
+    text-decoration: none;
+    font-size: 0.82rem;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+    transition: color 0.2s;
+    margin-bottom: 1.25rem;
+  }
+
+  .back-link:hover {
+    color: var(--indigo);
+  }
+
+  .back-link i {
+    font-size: 0.75rem;
+  }
+
+  /* ── Page header ── */
+  .page-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+
+  .header-icon {
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #4f46e5, #7c3aed);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    box-shadow: 0 4px 14px rgba(79, 70, 229, 0.3);
+  }
+
+  .header-icon i {
+    color: white;
+    font-size: 1.3rem;
+  }
+
+  .header-text h2 {
+    font-size: 1.55rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0 0 0.25rem;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+  }
+
+  .header-text p {
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+    margin: 0;
+    line-height: 1.5;
+  }
+
+  /* ── Main card ── */
+  .config-card {
+    background: var(--surface);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-lg);
+    border: 1px solid rgba(79, 70, 229, 0.08);
+    overflow: hidden;
+  }
+
+  /* ── Section headers inside card ── */
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 1.25rem 2rem 0.75rem;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface-2);
+  }
+
+  .section-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #4f46e5, #7c3aed);
+    flex-shrink: 0;
+  }
+
+  .section-header span {
+    font-size: 0.78rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-secondary);
+  }
+
+  /* ── Form sections ── */
+  .form-section {
+    padding: 1.75rem 2rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .form-section:last-of-type {
+    border-bottom: none;
+  }
+
+  /* ── Field group (2-col) ── */
+  .field-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.75rem;
+  }
+
+  @media (max-width: 520px) {
+    .field-row {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  /* ── Individual field ── */
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+
+  .field label {
+    font-size: 0.835rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+  }
+
+  .field label .req {
+    color: #ef4444;
+    font-size: 0.75rem;
+  }
+
+  .field .hint {
+    font-size: 0.775rem;
+    color: var(--text-muted);
+    line-height: 1.4;
+    margin-top: 0.2rem;
+  }
+
+  /* ── Inputs ── */
+  .field input[type="time"],
+  .field input[type="number"] {
+    width: 100%;
+    padding: 0.7rem 1rem;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: var(--text-primary);
+    background: var(--surface-2);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+
+  .field input:focus {
+    border-color: var(--border-focus);
+    background: var(--surface);
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+  }
+
+  .field input:hover:not(:focus) {
+    border-color: #a5b4fc;
+  }
+
+  /* ── Minutes badge ── */
+  .input-with-badge {
+    position: relative;
+  }
+
+  .input-with-badge input {
+    padding-right: 4.5rem;
+  }
+
+  .input-badge {
+    position: absolute;
+    right: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: var(--indigo);
+    background: var(--indigo-light);
+    padding: 0.2rem 0.5rem;
+    border-radius: 20px;
+    pointer-events: none;
+    letter-spacing: 0.02em;
+  }
+
+  /* ── Info alert ── */
+  .info-alert {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    background: var(--info-bg);
+    border: 1px solid var(--info-border);
+    border-radius: var(--radius-sm);
+    padding: 0.9rem 1.1rem;
+    margin: 0 2rem 1.5rem;
+  }
+
+  .info-alert i {
+    color: var(--indigo);
+    font-size: 0.95rem;
+    margin-top: 0.05rem;
+    flex-shrink: 0;
+  }
+
+  .info-alert p {
+    font-size: 0.8rem;
+    color: var(--info-text);
+    margin: 0;
+    line-height: 1.5;
+  }
+
+  .info-alert strong {
+    font-weight: 600;
+  }
+
+  /* ── Footer / actions ── */
+  .form-footer {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1.25rem 2rem;
+    background: var(--surface-2);
+    border-top: 1px solid var(--border);
+    flex-wrap: wrap;
+  }
+
+  .btn-save {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.7rem 1.75rem;
+    background: linear-gradient(135deg, #4f46e5, #7c3aed);
+    color: white;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 4px 14px rgba(79, 70, 229, 0.3);
+    transition: transform 0.15s, box-shadow 0.15s, opacity 0.15s;
+    text-decoration: none;
+  }
+
+  .btn-save:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(79, 70, 229, 0.4);
+    color: white;
+  }
+
+  .btn-save:active {
+    transform: translateY(0);
+  }
+
+  .btn-cancel {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.7rem 1.25rem;
+    background: transparent;
+    color: var(--text-secondary);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    text-decoration: none;
+    transition: border-color 0.2s, color 0.2s, background 0.2s;
+  }
+
+  .btn-cancel:hover {
+    border-color: #a5b4fc;
+    color: var(--indigo);
+    background: var(--indigo-light);
+  }
+
+  /* ── Responsive tweaks ── */
+  @media (max-width: 640px) {
+    .config-wrapper {
+      padding: 1.5rem 1rem 3rem;
+    }
+
+    .form-section {
+      padding: 1.25rem 1.25rem;
+    }
+
+    .section-header {
+      padding: 1rem 1.25rem 0.6rem;
+    }
+
+    .info-alert {
+      margin: 0 1.25rem 1.25rem;
+    }
+
+    .form-footer {
+      padding: 1rem 1.25rem;
+    }
+
+    .btn-save,
+    .btn-cancel {
+      width: 100%;
+      justify-content: center;
+    }
+
+    .header-text h2 {
+      font-size: 1.3rem;
+    }
+  }
+
+  @media (max-width: 380px) {
+    .page-header {
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .header-icon {
+      width: 44px;
+      height: 44px;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="config-wrapper">
+
+  <!-- Back link -->
+  <a href="{{ url_for('dashboard') }}" class="back-link">
+    <i class="fas fa-arrow-left"></i> Back to Dashboard
+  </a>
+
+  <!-- Page header -->
+  <div class="page-header">
+    <div class="header-icon">
+      <i class="bi bi-gear-fill"></i>
+    </div>
+    <div class="header-text">
+      <h2>Attendance Configuration</h2>
+      <p>Set check-in / check-out times and late &amp; early-departure thresholds for your organization.</p>
+    </div>
+  </div>
+
+  <!-- Config card -->
+  <div class="config-card">
+    <form method="POST">
+
+      <!-- ── Section 1: Office Hours ── -->
+      <div class="section-header">
+        <div class="section-dot"></div>
+        <span>Office Hours</span>
+      </div>
+      <div class="form-section">
+        <div class="field-row">
+          <div class="field">
+            <label>Check-In Time <span class="req">*</span></label>
+            <input type="time" name="checkin_time" value="{{ config.checkin_time | string | truncate(5, true, '') }}"
+              required>
+            <span class="hint">Standard office check-in time</span>
+          </div>
+          <div class="field">
+            <label>Check-Out Time <span class="req">*</span></label>
+            <input type="time" name="checkout_time" value="{{ config.checkout_time | string | truncate(5, true, '') }}"
+              required>
+            <span class="hint">Standard office check-out time</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Section 2: Grace Period ── -->
+      <div class="section-header">
+        <div class="section-dot"></div>
+        <span>Grace Period</span>
+      </div>
+      <div class="form-section">
+        <div class="field">
+          <label>Grace Period</label>
+          <div class="input-with-badge">
+            <input type="number" name="grace_minutes" min="0" max="60" value="{{ config.grace_minutes }}">
+            <span class="input-badge">mins</span>
+          </div>
+          <span class="hint">Employee won't be marked late within this window after check-in time.</span>
+        </div>
+      </div>
+
+      <!-- ── Section 3: Half-Day Thresholds ── -->
+      <div class="section-header">
+        <div class="section-dot"></div>
+        <span>Half-Day Thresholds</span>
+      </div>
+      <div class="form-section">
+        <div class="field-row">
+          <div class="field">
+            <label>Late Arrival After</label>
+            <div class="input-with-badge">
+              <input type="number" name="half_day_late_after_minutes" min="0"
+                value="{{ config.half_day_late_after_minutes }}">
+              <span class="input-badge">mins</span>
+            </div>
+            <span class="hint">Mark as Half Day if employee arrives this many minutes late.</span>
+          </div>
+          <div class="field">
+            <label>Early Departure Before</label>
+            <div class="input-with-badge">
+              <input type="number" name="half_day_early_before_minutes" min="0"
+                value="{{ config.half_day_early_before_minutes }}">
+              <span class="input-badge">mins</span>
+            </div>
+            <span class="hint">Mark as Half Day if employee leaves this many minutes early.</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Timezone note ── -->
+      <div class="info-alert" style="margin-top:1.5rem;">
+        <i class="fas fa-info-circle"></i>
+        <p>All times are compared in <strong>IST (Asia/Kolkata)</strong> timezone.</p>
+      </div>
+
+      <!-- ── Footer ── -->
+      <div class="form-footer">
+        <button type="submit" class="btn-save">
+          <i class="fas fa-save"></i> Save Configuration
+        </button>
+        <a href="{{ url_for('dashboard') }}" class="btn-cancel">
+          Cancel
+        </a>
+      </div>
+
+    </form>
+  </div>
+
+</div>
+{% endblock %}

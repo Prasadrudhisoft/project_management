@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify
+from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify, Response
 from werkzeug.utils import secure_filename
 import pymysql
 import bcrypt
@@ -16,6 +16,7 @@ import io
 import csv
 from datetime import datetime
 from zoneinfo import ZoneInfo
+from datetime import timezone
 # Set up logging
 logger = logging.getLogger(__name__)
 
@@ -2442,6 +2443,15 @@ def review_leave_request(req_id):
         req_id, session['organization_id'], session['user_id'], action
     )
     if ok:
+        if action == 'approved':
+            req = db.get_leave_request_by_id(req_id, session['organization_id'])
+            if req:
+                db.apply_leave_to_attendance(
+                    user_id=req['user_id'],
+                    org_id=req['organization_id'],
+                    from_date=req['from_date'],
+                    to_date=req['to_date'],
+                )
         flash(f'Leave request {action} successfully!', 'success')
     else:
         flash(err or 'Failed to process request.', 'error')
@@ -2530,6 +2540,219 @@ def holiday_calendar():
 #     import traceback
 #     return f"<pre>{traceback.format_exc()}</pre>", 500
 import logging
+
+# ─────────────────────────────────────────────
+# ATTENDANCE ROUTES
+# ─────────────────────────────────────────────
+
+def _build_csv_response(records, filename):
+    """Helper: convert a list of attendance dicts to a CSV HTTP response."""
+    output = io.StringIO()
+    writer = csv.writer(output)
+    writer.writerow([
+        'Date', 'Employee Name', 'Email',
+        'Check-In (UTC)', 'Check-Out (UTC)',
+        'Status', 'Is Late', 'Late By (mins)',
+        'Early Departure', 'Early By (mins)', 'Remarks'
+    ])
+    for r in records:
+        writer.writerow([
+            r.get('date', ''),
+            r.get('employee_name', ''),
+            r.get('employee_email', ''),
+            r.get('checkin_time', '') or '',
+            r.get('checkout_time', '') or '',
+            r.get('status', ''),
+            'Yes' if r.get('is_late') else 'No',
+            r.get('late_by_minutes', 0) or 0,
+            'Yes' if r.get('is_early_departure') else 'No',
+            r.get('early_by_minutes', 0) or 0,
+            r.get('remarks', '') or '',
+        ])
+    output.seek(0)
+    return Response(
+        output.getvalue(),
+        mimetype='text/csv',
+        headers={'Content-Disposition': f'attachment; filename="{filename}"'}
+    )
+
+
+# ─────────────────────────────────────────────
+# ATTENDANCE ROUTES
+# ─────────────────────────────────────────────
+
+@app.route('/attendance/config', methods=['GET', 'POST'])
+@login_required
+def attendance_config():
+    if session.get('user_role') != 'admin':
+        flash('Access denied.', 'error')
+        return redirect(url_for('dashboard'))
+    org_id = session['organization_id']
+    config = db.get_attendance_config(org_id)
+    if request.method == 'POST':
+        data = {
+            'checkin_time':                  request.form.get('checkin_time'),
+            'checkout_time':                 request.form.get('checkout_time'),
+            'grace_minutes':                 int(request.form.get('grace_minutes', 15)),
+            'half_day_late_after_minutes':   int(request.form.get('half_day_late_after_minutes', 120)),
+            'half_day_early_before_minutes': int(request.form.get('half_day_early_before_minutes', 120)),
+        }
+        ok, err = db.save_attendance_config(org_id, data)
+        if ok:
+            flash('Attendance configuration saved.', 'success')
+            return redirect(url_for('attendance_config'))
+        else:
+            flash(err or 'Failed to save config.', 'error')
+    return render_template('attendance/config.html', config=config)
+
+
+@app.route('/attendance/')
+@login_required
+def my_attendance():
+    user_id = session['user_id']
+    org_id  = session['organization_id']
+    year  = request.args.get('year',  type=int, default=datetime.now(IST).year)
+    month = request.args.get('month', type=int, default=datetime.now(IST).month)
+    records      = db.get_my_attendance(user_id, org_id, year, month)
+    summary      = db.get_attendance_summary(org_id, year, month, user_id=user_id)
+    config       = db.get_attendance_config(org_id)
+    today_str    = datetime.now(IST).date().isoformat()
+    today_record = next((r for r in records if str(r['date']) == today_str), None)
+    months = [
+        (1,'January'),(2,'February'),(3,'March'),(4,'April'),
+        (5,'May'),(6,'June'),(7,'July'),(8,'August'),
+        (9,'September'),(10,'October'),(11,'November'),(12,'December')
+    ]
+    return render_template('attendance/my.html',
+        records=records, summary=summary, config=config,
+        today_record=today_record, year=year, month=month,
+        months=months, today=today_str)
+
+
+@app.route('/attendance/checkin', methods=['POST'])
+@login_required
+def attendance_checkin():
+    user_id = session['user_id']
+    org_id  = session['organization_id']
+    now_utc = datetime.now(timezone.utc)
+    record, err = db.mark_checkin(user_id, org_id, now_utc)
+    if err:
+        flash(err, 'error')
+    else:
+        msg = 'Checked in successfully.'
+        if record['is_late']:
+            msg += f' You are {record["late_by_minutes"]} minute(s) late.'
+        if record['status'] == 'half_day':
+            msg += ' Marked as Half Day due to late arrival.'
+        flash(msg, 'warning' if record['is_late'] else 'success')
+    return redirect(url_for('my_attendance'))
+
+
+@app.route('/attendance/checkout', methods=['POST'])
+@login_required
+def attendance_checkout():
+    user_id = session['user_id']
+    org_id  = session['organization_id']
+    now_utc = datetime.now(timezone.utc)
+    record, err = db.mark_checkout(user_id, org_id, now_utc)
+    if err:
+        flash(err, 'error')
+    else:
+        msg = 'Checked out successfully.'
+        if record['is_early_departure']:
+            msg += f' Early departure by {record["early_by_minutes"]} minute(s).'
+        if record['status'] == 'half_day':
+            msg += ' Marked as Half Day.'
+        flash(msg, 'warning' if record['is_early_departure'] else 'success')
+    return redirect(url_for('my_attendance'))
+
+
+@app.route('/attendance/report')
+@login_required
+def attendance_report():
+    if session.get('user_role') != 'admin':
+        flash('Access denied.', 'error')
+        return redirect(url_for('my_attendance'))
+    org_id         = session['organization_id']
+    year           = request.args.get('year',  type=int, default=datetime.now(IST).year)
+    month          = request.args.get('month', type=int, default=datetime.now(IST).month)
+    filter_user_id = request.args.get('user_id', type=int, default=None)
+    records   = db.get_attendance_report(org_id, year, month, user_id=filter_user_id)
+    summary   = db.get_attendance_summary(org_id, year, month, user_id=filter_user_id)
+    employees = db.get_all_employees_for_attendance(org_id)
+    months = [
+        (1,'January'),(2,'February'),(3,'March'),(4,'April'),
+        (5,'May'),(6,'June'),(7,'July'),(8,'August'),
+        (9,'September'),(10,'October'),(11,'November'),(12,'December')
+    ]
+    return render_template('attendance/report.html',
+        records=records, summary=summary, employees=employees,
+        year=year, month=month, months=months,
+        filter_user_id=filter_user_id)
+
+@app.route('/attendance/download')
+@login_required
+def attendance_download():
+    if session.get('user_role') != 'admin':
+        flash('Access denied.', 'error')
+        return redirect(url_for('my_attendance'))
+
+    org_id  = session['organization_id']
+    scope   = request.args.get('scope', 'monthly')
+    year    = request.args.get('year',  type=int, default=datetime.now(IST).year)
+    month   = request.args.get('month', type=int, default=datetime.now(IST).month)
+    user_id = request.args.get('user_id', type=int, default=None)
+
+    month_names = {
+        1:'January', 2:'February', 3:'March', 4:'April',
+        5:'May', 6:'June', 7:'July', 8:'August',
+        9:'September', 10:'October', 11:'November', 12:'December'
+    }
+
+    if scope == 'yearly':
+        records  = db.get_attendance_report_yearly(org_id, year, user_id=user_id)
+        filename = f'attendance_{year}.csv'
+    elif scope == 'all':
+        records  = db.get_attendance_report_all(org_id, user_id=user_id)
+        filename = 'attendance_all_time.csv'
+    else:
+        records  = db.get_attendance_report(org_id, year, month, user_id=user_id)
+        filename = f'attendance_{year}_{month_names.get(month, month)}.csv'
+
+    if user_id and records:
+        emp_name  = records[0].get('employee_name', f'emp_{user_id}')
+        safe_name = emp_name.replace(' ', '_').replace('/', '_')
+        filename  = f'{safe_name}_{filename}'
+
+    return _build_csv_response(records, filename)
+
+
+@app.route('/attendance/delete', methods=['POST'])
+@login_required
+def attendance_delete():
+    if session.get('user_role') != 'admin':
+        flash('Access denied.', 'error')
+        return redirect(url_for('my_attendance'))
+
+    org_id  = session['organization_id']
+    scope   = request.form.get('scope', 'monthly')
+    year    = request.form.get('year',    type=int) if request.form.get('year')    else None
+    month   = request.form.get('month',   type=int) if request.form.get('month')   else None
+    user_id = request.form.get('user_id', type=int) if request.form.get('user_id') else None
+
+    if scope == 'monthly':
+        deleted, err = db.delete_attendance_records(org_id, user_id=user_id, year=year, month=month)
+    elif scope == 'yearly':
+        deleted, err = db.delete_attendance_records(org_id, user_id=user_id, year=year)
+    else:
+        deleted, err = db.delete_attendance_records(org_id, user_id=user_id)
+
+    if err:
+        flash(f'Delete failed: {err}', 'error')
+    else:
+        flash(f'Successfully deleted {deleted} attendance record(s).', 'success')
+
+    return redirect(url_for('attendance_report'))
 
 log = logging.getLogger('werkzeug')
 

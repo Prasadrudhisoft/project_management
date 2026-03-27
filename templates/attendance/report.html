@@ -1,0 +1,891 @@
+{% extends 'base.html' %}
+{% block title %}Attendance Report{% endblock %}
+
+{% block extra_css %}
+<style>
+  :root {
+    --indigo: #4f46e5;
+    --indigo-dark: #3730a3;
+    --indigo-light: #e0e7ff;
+    --violet: #7c3aed;
+    --success: #059669;
+    --success-light: #d1fae5;
+    --warning: #d97706;
+    --warning-light: #fef3c7;
+    --danger: #dc2626;
+    --danger-light: #fee2e2;
+    --info: #0284c7;
+    --info-light: #e0f2fe;
+    --border: #e2e8f0;
+    --text-primary: #0f172a;
+    --text-secondary: #475569;
+    --text-muted: #94a3b8;
+    --surface: #ffffff;
+    --surface-2: #f8fafc;
+    --radius: 14px;
+    --radius-sm: 8px;
+    --shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 4px 16px rgba(79, 70, 229, 0.07);
+    --shadow-lg: 0 8px 32px rgba(79, 70, 229, 0.10), 0 2px 8px rgba(0, 0, 0, 0.05);
+  }
+
+  body {
+    background: linear-gradient(160deg, #f0f4ff 0%, #faf5ff 50%, #f0fdf4 100%);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    color: var(--text-primary);
+  }
+
+  .report-wrapper {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem 4rem;
+  }
+
+  /* ── Page header ── */
+  .page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 1.75rem;
+  }
+
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+  }
+
+  .header-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #4f46e5, #7c3aed);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+    flex-shrink: 0;
+  }
+
+  .header-icon i {
+    color: white;
+    font-size: 1.2rem;
+  }
+
+  .header-left h2 {
+    font-size: 1.45rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0 0 0.15rem;
+    letter-spacing: -0.02em;
+  }
+
+  .header-left p {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    margin: 0;
+  }
+
+  /* ── Cards ── */
+  .card {
+    background: var(--surface);
+    border-radius: var(--radius);
+    border: 1px solid rgba(79, 70, 229, 0.08);
+    box-shadow: var(--shadow);
+    margin-bottom: 1.5rem;
+    overflow: hidden;
+  }
+
+  .card-header-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    padding: 1rem 1.5rem;
+    background: var(--surface-2);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .card-header-bar h5 {
+    font-size: 0.82rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--text-secondary);
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .card-header-bar h5 .dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #4f46e5, #7c3aed);
+  }
+
+  .card-body {
+    padding: 1.5rem;
+  }
+
+  /* ── Filter form ── */
+  .filter-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 1rem;
+    align-items: end;
+  }
+
+  .filter-field label {
+    display: block;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-bottom: 0.35rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .filter-field select,
+  .filter-field input {
+    width: 100%;
+    padding: 0.6rem 0.85rem;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-size: 0.875rem;
+    color: var(--text-primary);
+    background: var(--surface-2);
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+
+  .filter-field select:focus,
+  .filter-field input:focus {
+    border-color: var(--indigo);
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+    background: var(--surface);
+  }
+
+  .btn-filter {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.6rem 1.25rem;
+    background: linear-gradient(135deg, #4f46e5, #7c3aed);
+    color: white;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 3px 10px rgba(79, 70, 229, 0.25);
+    transition: transform 0.15s, box-shadow 0.15s;
+    white-space: nowrap;
+  }
+
+  .btn-filter:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 5px 16px rgba(79, 70, 229, 0.35);
+    color: white;
+    text-decoration: none;
+  }
+
+  /* ── Summary stat cards ── */
+  .summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 1rem;
+  }
+
+  .stat-pill {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 1rem 0.75rem;
+    text-align: center;
+    transition: transform 0.15s, box-shadow 0.15s;
+  }
+
+  .stat-pill:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  }
+
+  .stat-pill .val {
+    font-size: 1.75rem;
+    font-weight: 800;
+    line-height: 1;
+    margin-bottom: 0.3rem;
+  }
+
+  .stat-pill .lbl {
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-muted);
+  }
+
+  .stat-pill.present .val {
+    color: var(--success);
+  }
+
+  .stat-pill.half .val {
+    color: var(--warning);
+  }
+
+  .stat-pill.leave .val {
+    color: var(--info);
+  }
+
+  .stat-pill.absent .val {
+    color: var(--danger);
+  }
+
+  .stat-pill.late .val {
+    color: #b45309;
+  }
+
+  .stat-pill.early .val {
+    color: #6d28d9;
+  }
+
+  .stat-pill.total .val {
+    color: var(--indigo);
+  }
+
+  /* ── Download & Delete toolbar ── */
+  .action-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 1rem 1.5rem;
+    background: linear-gradient(135deg, #f5f3ff, #eff6ff);
+    border-bottom: 1px solid rgba(79, 70, 229, 0.1);
+  }
+
+  .toolbar-label {
+    font-size: 0.775rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--text-muted);
+    margin-right: 0.25rem;
+  }
+
+  .btn-dl {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.45rem 0.95rem;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s;
+    border: none;
+  }
+
+  .btn-dl:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.12);
+  }
+
+  .btn-dl.monthly {
+    background: var(--indigo-light);
+    color: var(--indigo);
+  }
+
+  .btn-dl.yearly {
+    background: #ddd6fe;
+    color: #5b21b6;
+  }
+
+  .btn-dl.overall {
+    background: #d1fae5;
+    color: #065f46;
+  }
+
+  .toolbar-sep {
+    width: 1px;
+    height: 22px;
+    background: rgba(79, 70, 229, 0.15);
+    margin: 0 0.25rem;
+  }
+
+  /* Delete button — opens modal */
+  .btn-del {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.45rem 0.95rem;
+    background: #fee2e2;
+    color: var(--danger);
+    border: none;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s;
+  }
+
+  .btn-del:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 3px 10px rgba(220, 38, 38, 0.18);
+  }
+
+  /* ── Table ── */
+  .table-wrap {
+    overflow-x: auto;
+  }
+
+  table.att-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.865rem;
+  }
+
+  .att-table thead th {
+    padding: 0.75rem 1rem;
+    background: var(--surface-2);
+    border-bottom: 2px solid var(--border);
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-secondary);
+    white-space: nowrap;
+  }
+
+  .att-table tbody tr {
+    transition: background 0.15s;
+  }
+
+  .att-table tbody tr:hover {
+    background: #f5f3ff;
+  }
+
+  .att-table tbody td {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid #f1f5f9;
+    color: var(--text-primary);
+    vertical-align: middle;
+  }
+
+  .att-table tbody tr:last-child td {
+    border-bottom: none;
+  }
+
+  .emp-name {
+    font-weight: 600;
+    color: var(--indigo);
+  }
+
+  .emp-email {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+  }
+
+  .time-val {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.82rem;
+    color: var(--text-secondary);
+  }
+
+  /* Status badges */
+  .badge-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.25rem 0.65rem;
+    border-radius: 20px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+
+  .badge-status.present {
+    background: var(--success-light);
+    color: #065f46;
+  }
+
+  .badge-status.half_day {
+    background: var(--warning-light);
+    color: #78350f;
+  }
+
+  .badge-status.on_leave {
+    background: var(--info-light);
+    color: #0c4a6e;
+  }
+
+  .badge-status.absent {
+    background: var(--danger-light);
+    color: #7f1d1d;
+  }
+
+  .badge-late {
+    background: #fef3c7;
+    color: #92400e;
+    padding: 0.15rem 0.5rem;
+    border-radius: 20px;
+    font-size: 0.68rem;
+    font-weight: 600;
+  }
+
+  .badge-early {
+    background: #ede9fe;
+    color: #4c1d95;
+    padding: 0.15rem 0.5rem;
+    border-radius: 20px;
+    font-size: 0.68rem;
+    font-weight: 600;
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 3rem 1.5rem;
+    color: var(--text-muted);
+  }
+
+  .empty-state i {
+    font-size: 2.5rem;
+    opacity: 0.3;
+    display: block;
+    margin-bottom: 0.75rem;
+  }
+
+  /* ── Delete Modal ── */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 1050;
+    background: rgba(15, 23, 42, 0.45);
+    backdrop-filter: blur(3px);
+    align-items: center;
+    justify-content: center;
+  }
+
+  .modal-overlay.active {
+    display: flex;
+  }
+
+  .modal-box {
+    background: var(--surface);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-lg);
+    padding: 2rem;
+    width: 100%;
+    max-width: 460px;
+    margin: 1rem;
+    border-top: 4px solid var(--danger);
+  }
+
+  .modal-box h4 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--danger);
+    margin: 0 0 0.4rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .modal-box p {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    margin: 0 0 1.25rem;
+  }
+
+  .modal-form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.85rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .modal-form-grid .filter-field select {
+    background: var(--surface-2);
+  }
+
+  .modal-actions {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+  }
+
+  .btn-confirm-del {
+    padding: 0.6rem 1.25rem;
+    background: var(--danger);
+    color: white;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+
+  .btn-confirm-del:hover {
+    background: #b91c1c;
+  }
+
+  .btn-modal-cancel {
+    padding: 0.6rem 1.1rem;
+    background: transparent;
+    color: var(--text-secondary);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: border-color 0.15s, color 0.15s;
+  }
+
+  .btn-modal-cancel:hover {
+    border-color: #94a3b8;
+    color: var(--text-primary);
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 640px) {
+    .report-wrapper {
+      padding: 1.25rem 1rem 3rem;
+    }
+
+    .page-header {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .filter-grid {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .card-body {
+      padding: 1.1rem;
+    }
+
+    .action-toolbar {
+      gap: 0.5rem;
+    }
+
+    .modal-form-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 420px) {
+    .filter-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="report-wrapper">
+
+  <!-- Page header -->
+  <div class="page-header">
+    <div class="header-left">
+      <div class="header-icon"><i class="bi bi-bar-chart-fill"></i></div>
+      <div>
+        <h2>Attendance Report</h2>
+        <p>View, download and manage attendance records</p>
+      </div>
+    </div>
+    <a href="{{ url_for('dashboard') }}" class="btn-filter"
+      style="background:transparent;color:var(--text-secondary);box-shadow:none;border:1.5px solid var(--border);">
+      <i class="fas fa-arrow-left"></i> Dashboard
+    </a>
+  </div>
+
+  <!-- Filter card -->
+  <div class="card">
+    <div class="card-header-bar">
+      <h5><span class="dot"></span>Filter Records</h5>
+    </div>
+    <div class="card-body">
+      <form method="GET" action="{{ url_for('attendance_report') }}">
+        <div class="filter-grid">
+          <div class="filter-field">
+            <label>Employee</label>
+            <select name="user_id">
+              <option value="">All Employees</option>
+              {% for emp in employees %}
+              <option value="{{ emp.id }}" {% if filter_user_id==emp.id %}selected{% endif %}>
+                {{ emp.name }}
+              </option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="filter-field">
+            <label>Month</label>
+            <select name="month">
+              {% for m_num, m_name in months %}
+              <option value="{{ m_num }}" {% if month==m_num %}selected{% endif %}>{{ m_name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="filter-field">
+            <label>Year</label>
+            <input type="number" name="year" value="{{ year }}" min="2020" max="2099">
+          </div>
+          <div class="filter-field">
+            <label>&nbsp;</label>
+            <button type="submit" class="btn-filter">
+              <i class="fas fa-search"></i> Apply Filter
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Summary card -->
+  {% if summary %}
+  <div class="card">
+    <div class="card-header-bar">
+      <h5><span class="dot"></span>Monthly Summary</h5>
+      <span style="font-size:0.78rem;color:var(--text-muted);">
+        {{ months|selectattr(0, 'equalto', month)|map(attribute=1)|first }} {{ year }}
+      </span>
+    </div>
+    <div class="card-body">
+      <div class="summary-grid">
+        <div class="stat-pill total">
+          <div class="val">{{ summary.total_days or 0 }}</div>
+          <div class="lbl">Total Days</div>
+        </div>
+        <div class="stat-pill present">
+          <div class="val">{{ summary.present or 0 }}</div>
+          <div class="lbl">Present</div>
+        </div>
+        <div class="stat-pill half">
+          <div class="val">{{ summary.half_day or 0 }}</div>
+          <div class="lbl">Half Day</div>
+        </div>
+        <div class="stat-pill leave">
+          <div class="val">{{ summary.on_leave or 0 }}</div>
+          <div class="lbl">On Leave</div>
+        </div>
+        <div class="stat-pill absent">
+          <div class="val">{{ summary.absent or 0 }}</div>
+          <div class="lbl">Absent</div>
+        </div>
+        <div class="stat-pill late">
+          <div class="val">{{ summary.late_count or 0 }}</div>
+          <div class="lbl">Late</div>
+        </div>
+        <div class="stat-pill early">
+          <div class="val">{{ summary.early_count or 0 }}</div>
+          <div class="lbl">Early Out</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Records card with toolbar -->
+  <div class="card">
+
+    <!-- Download + Delete toolbar -->
+    <div class="action-toolbar">
+      <span class="toolbar-label">Download:</span>
+
+      <!-- Monthly download -->
+      <a href="{{ url_for('attendance_download', scope='monthly', year=year, month=month, user_id=filter_user_id or '') }}"
+        class="btn-dl monthly">
+        <i class="fas fa-download"></i> This Month
+      </a>
+
+      <!-- Yearly download -->
+      <a href="{{ url_for('attendance_download', scope='yearly', year=year, user_id=filter_user_id or '') }}"
+        class="btn-dl yearly">
+        <i class="fas fa-download"></i> This Year ({{ year }})
+      </a>
+
+      <!-- Overall download -->
+      <a href="{{ url_for('attendance_download', scope='all', user_id=filter_user_id or '') }}" class="btn-dl overall">
+        <i class="fas fa-download"></i> All Time
+      </a>
+
+      <div class="toolbar-sep"></div>
+
+      <!-- Delete trigger -->
+      <button type="button" class="btn-del" onclick="openDeleteModal()">
+        <i class="fas fa-trash-alt"></i> Delete Records
+      </button>
+    </div>
+
+    <div class="card-header-bar">
+      <h5><span class="dot"></span>Records</h5>
+      <span style="font-size:0.78rem;color:var(--text-muted);">{{ records|length }} record(s)</span>
+    </div>
+
+    <div class="table-wrap">
+      {% if records %}
+      <table class="att-table">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Employee</th>
+            <th>Check-In</th>
+            <th>Check-Out</th>
+            <th>Status</th>
+            <th>Late / Early</th>
+            <th>Remarks</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for r in records %}
+          <tr>
+            <td style="white-space:nowrap;font-weight:500;">{{ r.date }}</td>
+            <td>
+              <div class="emp-name">{{ r.employee_name }}</div>
+              <div class="emp-email">{{ r.employee_email }}</div>
+            </td>
+            <td>
+              {% if r.checkin_time %}
+              <span class="time-val">{{ r.checkin_time }}</span>
+              {% else %}<span style="color:var(--text-muted);">—</span>{% endif %}
+            </td>
+            <td>
+              {% if r.checkout_time %}
+              <span class="time-val">{{ r.checkout_time }}</span>
+              {% else %}<span style="color:var(--text-muted);">—</span>{% endif %}
+            </td>
+            <td>
+              <span class="badge-status {{ r.status }}">
+                {% if r.status == 'present' %}✓ Present
+                {% elif r.status == 'half_day' %}½ Half Day
+                {% elif r.status == 'on_leave' %}🏖 On Leave
+                {% elif r.status == 'absent' %}✗ Absent
+                {% else %}{{ r.status.replace('_',' ').title() }}{% endif %}
+              </span>
+            </td>
+            <td>
+              {% if r.is_late %}
+              <span class="badge-late">Late {{ r.late_by_minutes }}m</span>
+              {% endif %}
+              {% if r.is_early_departure %}
+              <span class="badge-early">Early {{ r.early_by_minutes }}m</span>
+              {% endif %}
+              {% if not r.is_late and not r.is_early_departure %}
+              <span style="color:var(--text-muted);font-size:0.8rem;">—</span>
+              {% endif %}
+            </td>
+            <td style="color:var(--text-muted);font-size:0.8rem;">
+              {{ r.remarks or '—' }}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <div class="empty-state">
+        <i class="fas fa-calendar-times"></i>
+        <p>No attendance records found for the selected filters.</p>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+</div>
+
+<!-- ── Delete Modal ── -->
+<div class="modal-overlay" id="deleteModal">
+  <div class="modal-box">
+    <h4><i class="fas fa-exclamation-triangle"></i> Delete Attendance Records</h4>
+    <p>Select the scope of deletion. This action is <strong>permanent</strong> and cannot be undone.</p>
+
+    <form method="POST" action="{{ url_for('attendance_delete') }}" id="deleteForm">
+
+      <div class="modal-form-grid">
+        <div class="filter-field">
+          <label>Employee</label>
+          <select name="user_id" id="del_user_id">
+            <option value="">All Employees</option>
+            {% for emp in employees %}
+            <option value="{{ emp.id }}" {% if filter_user_id==emp.id %}selected{% endif %}>
+              {{ emp.name }}
+            </option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="filter-field">
+          <label>Scope</label>
+          <select name="scope" id="del_scope" onchange="toggleDeleteFields()">
+            <option value="monthly">This Month</option>
+            <option value="yearly">This Year</option>
+            <option value="all">All Time</option>
+          </select>
+        </div>
+        <div class="filter-field" id="del_year_field">
+          <label>Year</label>
+          <input type="number" name="year" id="del_year" value="{{ year }}" min="2020" max="2099">
+        </div>
+        <div class="filter-field" id="del_month_field">
+          <label>Month</label>
+          <select name="month" id="del_month">
+            {% for m_num, m_name in months %}
+            <option value="{{ m_num }}" {% if month==m_num %}selected{% endif %}>{{ m_name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="btn-modal-cancel" onclick="closeDeleteModal()">Cancel</button>
+        <button type="submit" class="btn-confirm-del"
+          onclick="return confirm('Are you sure? This will permanently delete the selected records.')">
+          <i class="fas fa-trash-alt me-1"></i> Confirm Delete
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  function openDeleteModal() {
+    document.getElementById('deleteModal').classList.add('active');
+  }
+  function closeDeleteModal() {
+    document.getElementById('deleteModal').classList.remove('active');
+  }
+  // Close on overlay click
+  document.getElementById('deleteModal').addEventListener('click', function (e) {
+    if (e.target === this) closeDeleteModal();
+  });
+
+  function toggleDeleteFields() {
+    const scope = document.getElementById('del_scope').value;
+    const yearField = document.getElementById('del_year_field');
+    const monthField = document.getElementById('del_month_field');
+    if (scope === 'all') {
+      yearField.style.display = 'none';
+      monthField.style.display = 'none';
+    } else if (scope === 'yearly') {
+      yearField.style.display = '';
+      monthField.style.display = 'none';
+    } else {
+      yearField.style.display = '';
+      monthField.style.display = '';
+    }
+  }
+  // Run on page load to set correct state
+  toggleDeleteFields();
+</script>
+{% endblock %}
