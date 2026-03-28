@@ -4261,7 +4261,7 @@ class DatabaseHelper:
         config = self.get_attendance_config(org_id)
 
         checkin_scheduled = datetime.strptime(
-            f"{date_str} {str(config['checkin_time'])[:5]}", "%Y-%m-%d %H:%M"
+            f"{date_str} {self._parse_time_field(config['checkin_time'])}", "%Y-%m-%d %H:%M"
         ).replace(tzinfo=IST)
         grace_cutoff = checkin_scheduled + timedelta(minutes=int(config['grace_minutes']))
 
@@ -4329,7 +4329,7 @@ class DatabaseHelper:
         config = self.get_attendance_config(org_id)
 
         checkout_scheduled = datetime.strptime(
-            f"{date_str} {str(config['checkout_time'])[:5]}", "%Y-%m-%d %H:%M"
+            f"{date_str} {self._parse_time_field(config['checkout_time'])}", "%Y-%m-%d %H:%M"
         ).replace(tzinfo=IST)
 
         is_early = ist_now < checkout_scheduled
@@ -4586,3 +4586,24 @@ class DatabaseHelper:
         finally:
             conn.close()             
                     
+
+    def _parse_time_field(self, time_val):
+        """
+        Safely convert a MySQL TIME field to 'HH:MM' string.
+        MySQL TIME columns come back as datetime.timedelta via PyMySQL.
+        str(timedelta(seconds=32400)) → '9:00:00'  (no leading zero!)
+        We need '09:00' for strptime.
+        """
+        from datetime import timedelta
+        if isinstance(time_val, timedelta):
+            total_seconds = int(time_val.total_seconds())
+            hours   = total_seconds // 3600
+            minutes = (total_seconds % 3600) // 60
+            return f"{hours:02d}:{minutes:02d}"
+        # If it's already a string like '09:00:00' or '09:00'
+        s = str(time_val).strip()
+        # Take only HH:MM
+        parts = s.split(':')
+        if len(parts) >= 2:
+            return f"{int(parts[0]):02d}:{int(parts[1]):02d}"
+        return s
