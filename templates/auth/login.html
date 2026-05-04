@@ -1,48 +1,36 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - Project Manager</title>
-    
+
     <style>
-        /* Optimized CSS with hardware acceleration and performance improvements */
         * {
             box-sizing: border-box;
         }
-        
+
+        html {
+            height: 100%;
+            overflow: hidden;
+        }
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
             line-height: 1.6;
             color: #212529;
-            background: white;
-            background-size: 300% 300%;
-            background-attachment: fixed;
-            animation: blueGradientShift 8s ease infinite;
+            background: url('/static/images/login.jpg') center center / cover no-repeat fixed;
             margin: 0;
             padding: 0;
-            min-height: 100vh;
+            height: 100%;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
             position: relative;
-            overflow-x: hidden;
-            /* Hardware acceleration */
-            transform: translateZ(0);
-            -webkit-transform: translateZ(0);
-            will-change: background-position;
         }
-        
-        @keyframes blueGradientShift {
-            0% { 
-                background-position: 0% 50%;
-            }
-            50% { 
-                background-position: 100% 50%;
-            }
-            100% { 
-                background-position: 0% 50%;
-            }
-        }
-        
-        /* Optimized background particles - reduced complexity */
+
         body::before {
             content: '';
             position: fixed;
@@ -50,184 +38,86 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: 
-                radial-gradient(circle at 20% 80%, rgba(30, 60, 114, 0.3) 0%, transparent 50%),
-                radial-gradient(circle at 80% 20%, rgba(52, 152, 219, 0.4) 0%, transparent 45%),
-                radial-gradient(circle at 40% 40%, rgba(93, 173, 226, 0.3) 0%, transparent 40%);
-            animation: blueFloat 10s ease-in-out infinite;
-            pointer-events: none;
-            transform: translateZ(0);
-            will-change: transform, opacity;
-        }
-        
-        /* Simplified project grid background */
-        body::after {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: 
-                linear-gradient(90deg, rgba(52, 152, 219, 0.08) 1px, transparent 1px),
-                linear-gradient(rgba(52, 152, 219, 0.08) 1px, transparent 1px);
-            background-size: 60px 60px;
-            animation: projectGrid 15s linear infinite;
-            pointer-events: none;
-            opacity: 0.5;
-            z-index: 0;
-            transform: translateZ(0);
-            will-change: background-position;
-        }
-        
-        @keyframes projectGrid {
-            0% { background-position: 0 0; }
-            100% { background-position: 60px 60px; }
-        }
-        
-        @keyframes blueFloat {
-            0%, 100% { 
-                opacity: 0.6; 
-                transform: translateZ(0) scale(1);
-            }
-            50% { 
-                opacity: 0.9; 
-                transform: translateZ(0) scale(1.05);
-            }
-        }
-        
-        /* Optimized floating icons - reduced and simplified */
-        .project-icons {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(2px);
+            -webkit-backdrop-filter: blur(2px);
             pointer-events: none;
             z-index: 0;
-            overflow: hidden;
-            transform: translateZ(0);
         }
-        
-        .project-icon {
-            position: absolute;
-            font-size: 20px;
-            color: rgba(52, 152, 219, 0.25);
-            animation: float-icons 12s linear infinite;
-            opacity: 0;
-            transform: translateZ(0);
-            will-change: transform, opacity;
-        }
-        
-        .project-icon:nth-child(1) { left: 10%; animation-delay: 0s; }
-        .project-icon:nth-child(2) { left: 30%; animation-delay: -3s; }
-        .project-icon:nth-child(3) { left: 50%; animation-delay: -6s; }
-        .project-icon:nth-child(4) { left: 70%; animation-delay: -9s; }
-        .project-icon:nth-child(5) { left: 90%; animation-delay: -12s; }
-        
-        @keyframes float-icons {
-            0% {
-                transform: translateY(100vh) translateZ(0);
-                opacity: 0;
-            }
-            10% {
-                opacity: 1;
-            }
-            90% {
-                opacity: 1;
-            }
-            100% {
-                transform: translateY(-100px) translateZ(0);
-                opacity: 0;
-            }
-        }
-        
+
         .container {
             max-width: 1200px;
             margin: 0 auto;
             padding: 0 15px;
             position: relative;
             z-index: 1;
+            width: 100%;
         }
-        
+
         .row {
             display: flex;
             flex-wrap: wrap;
             margin-right: -15px;
             margin-left: -15px;
         }
-        
+
         .justify-content-center {
             justify-content: center;
         }
-        
+
         .col-md-6 {
             flex: 0 0 50%;
             max-width: 50%;
             padding: 0 15px;
         }
-        
+
         .col-lg-4 {
             flex: 0 0 33.333333%;
             max-width: 33.333333%;
         }
-        
+
         .mt-5 {
-            margin-top: 3rem;
+            margin-top: 0 !important;
         }
-        
+
         .mt-3 {
-            margin-top: 1rem;
+            margin-top: 0 !important;
         }
-        
+
         .mb-3 {
             margin-bottom: 1rem;
         }
-        
+
         .mb-0 {
             margin-bottom: 0;
         }
-        
+
         .me-2 {
             margin-right: 0.5rem;
         }
-        
+
         .card {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.97);
+            border: 1px solid rgba(0, 0, 0, 0.08);
             border-radius: 20px;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
             transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s ease;
             transform: translateZ(0);
-            animation: slideInUp 0.6s ease-out;
             will-change: transform, box-shadow;
         }
-        
-        @keyframes slideInUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px) translateZ(0);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0) translateZ(0);
-            }
-        }
-        
+
         .card:hover {
             transform: translateY(-5px) translateZ(0);
-            box-shadow: 0 25px 50px rgba(0,0,0,0.15);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
         }
-        
+
         .shadow {
-            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
         }
-        
+
         .card-header {
             padding: 1.5rem 1rem;
-            background: linear-gradient(135deg, #6f42c1, #e83e8c);
+            background: linear-gradient(135deg, #2e3192, #4f46e5);
             border-bottom: none;
             border-top-left-radius: 20px;
             border-top-right-radius: 20px;
@@ -235,7 +125,7 @@
             overflow: hidden;
             transform: translateZ(0);
         }
-        
+
         .card-header::before {
             content: '';
             position: absolute;
@@ -243,58 +133,58 @@
             left: -50%;
             width: 200%;
             height: 200%;
-            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.15), transparent);
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.15), transparent);
             transform: translateX(-100%) translateY(-100%) rotate(45deg) translateZ(0);
-            animation: blueShimmer 2s linear infinite;
-            will-change: transform;
         }
-        
-        @keyframes blueShimmer {
-            0% { transform: translateX(-100%) translateY(-100%) rotate(45deg) translateZ(0); }
-            100% { transform: translateX(100%) translateY(100%) rotate(45deg) translateZ(0); }
-        }
-        
+
         .card-body {
             padding: 2rem 1.5rem;
+            background: rgba(255, 255, 255, 0.97);
+            border-radius: 0 0 0 0;
         }
-        
+
         .card-footer {
             padding: 1rem 1.5rem;
-            background: linear-gradient(135deg, rgba(30, 60, 114, 0.1), rgba(52, 152, 219, 0.05));
-            border-top: 1px solid rgba(52, 152, 219, 0.2);
+            background: #ffffff;
+            border-top: 1px solid rgba(79, 70, 229, 0.1);
+            box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.03);
             border-bottom-left-radius: 20px;
             border-bottom-right-radius: 20px;
+            color: #374151;
         }
-        
-        .bg-primary {
-            background: linear-gradient(135deg, #1e3c72 0%, #3498db 50%, #2980b9 100%) !important;
+
+        .card-footer p {
+            color: #374151;
+            margin: 0;
+            font-size: 0.9rem;
         }
-        
+
         .text-white {
             color: #fff !important;
         }
-        
+
         .text-center {
             text-align: center;
         }
-        
+
         .text-muted {
             color: #6c757d;
         }
-        
-        h4, h6 {
+
+        h4,
+        h6 {
             margin: 0;
             position: relative;
             z-index: 1;
         }
-        
+
         .form-label {
             margin-bottom: 0.5rem;
             font-weight: 600;
             color: #495057;
             transition: color 0.2s ease;
         }
-        
+
         .form-control {
             display: block;
             width: 100%;
@@ -310,8 +200,7 @@
             transform: translateZ(0);
             will-change: border-color, box-shadow, transform;
         }
-        
-        /* Enhanced password input styling for better dot visibility */
+
         input[type="password"] {
             font-family: "Courier New", monospace !important;
             letter-spacing: 0.2em !important;
@@ -323,8 +212,7 @@
             position: relative;
             z-index: 2;
         }
-        
-        /* Webkit browsers - force visible password dots */
+
         input[type="password"]::-webkit-input-placeholder {
             color: #6c757d;
             letter-spacing: normal;
@@ -332,7 +220,7 @@
             font-family: "Segoe UI", sans-serif;
             font-size: 1rem;
         }
-        
+
         input[type="password"]::-moz-placeholder {
             color: #6c757d;
             letter-spacing: normal;
@@ -340,7 +228,7 @@
             font-family: "Segoe UI", sans-serif;
             font-size: 1rem;
         }
-        
+
         input[type="password"]::placeholder {
             color: #6c757d;
             letter-spacing: normal;
@@ -348,131 +236,63 @@
             font-family: "Segoe UI", sans-serif;
             font-size: 1rem;
         }
-        
-        /* Force high contrast for password dots */
+
         input[type="password"]:focus {
             color: #000000 !important;
             background-color: #ffffff !important;
             text-shadow: none !important;
         }
-        
-        .form-control:focus {
-            color: #212529;
-            background-color: rgba(255, 255, 255, 1);
-            border-color: #3498db;
-            outline: 0;
-            box-shadow: 0 0 0 0.25rem rgba(52, 152, 219, 0.25);
-            transform: translateY(-1px) translateZ(0);
-        }
-        
-        .form-control:hover:not(:focus) {
-            border-color: #5dade2;
-            transform: translateY(-1px) translateZ(0);
-        }
-        
+
         .input-group {
-            position: relative;
             margin-bottom: 1.5rem;
         }
-        
-        /* Password input with icon styling */
+
         .password-input-group {
             position: relative;
         }
-        
+
         .password-input-group .form-control {
             padding-right: 3rem;
         }
-        
+
         .password-toggle {
             position: absolute;
-            right: 1rem;
+            right: 0.75rem;
             top: 50%;
             transform: translateY(-50%);
             background: none;
             border: none;
-            color: #6c757d;
+            color: #9ca3af;
             cursor: pointer;
-            font-size: 1.1rem;
-            padding: 0.25rem;
-            border-radius: 50%;
+            padding: 0.3rem;
+            border-radius: 6px;
             width: 2rem;
             height: 2rem;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: color 0.2s ease, background-color 0.2s ease;
             z-index: 4;
+            outline: none;
         }
-        
+
         .password-toggle:hover {
-            color: #3498db;
-            background-color: rgba(52, 152, 219, 0.1);
-            transform: translateY(-50%) scale(1.1);
+            color: #4f46e5;
+            background-color: rgba(79, 70, 229, 0.08);
         }
-        
-        .password-toggle:active {
-            transform: translateY(-50%) scale(0.95);
-        }
-        
+
+        .password-toggle:active,
         .password-toggle:focus {
-            outline: 2px solid rgba(52, 152, 219, 0.4);
-            outline-offset: 2px;
+            color: #4f46e5;
+            background-color: rgba(79, 70, 229, 0.12);
+            outline: none;
+            box-shadow: none;
         }
-        
-        /* Eye icon animations */
-        .password-toggle .eye-icon {
-            transition: all 0.2s ease;
+
+        .password-toggle.password-visible {
+            color: #4f46e5;
         }
-        
-        .password-toggle.password-visible .eye-icon {
-            transform: scale(1.1);
-            color: #3498db;
-        }
-        
-        .floating-label {
-            position: absolute;
-            left: 1rem;
-            top: 0.75rem;
-            color: #6c757d;
-            font-size: 1rem;
-            pointer-events: none;
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-            background: rgba(255, 255, 255, 0.9);
-            padding: 0 0.5rem;
-            border-radius: 4px;
-            transform: translateZ(0);
-            will-change: transform, font-size, color;
-            z-index: 1;
-        }
-        
-        .form-control:focus + .floating-label,
-        .form-control:not(:placeholder-shown) + .floating-label {
-            top: -0.5rem;
-            left: 0.75rem;
-            font-size: 0.875rem;
-            color: #3498db;
-            font-weight: 600;
-            transform: translateZ(0);
-            z-index: 3;
-        }
-        
-        /* Adjust floating label for password input */
-        .password-input-group .floating-label {
-            z-index: 1;
-        }
-        
-        .password-input-group .form-control:focus + .floating-label,
-        .password-input-group .form-control:not(:placeholder-shown) + .floating-label {
-            z-index: 3;
-        }
-        
-        /* Ensure password input has higher z-index than label */
-        .password-input-group .form-control {
-            position: relative;
-            z-index: 2;
-        }
-        
+
         .btn {
             display: inline-block;
             font-weight: 600;
@@ -492,7 +312,7 @@
             transform: translateZ(0);
             will-change: transform, box-shadow;
         }
-        
+
         .btn::before {
             content: '';
             position: absolute;
@@ -500,46 +320,45 @@
             left: -100%;
             width: 100%;
             height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
             transition: left 0.4s ease;
             transform: translateZ(0);
         }
-        
+
         .btn:hover::before {
             left: 100%;
         }
-        
+
         .btn-primary {
             color: #fff;
-            background: linear-gradient(135deg, #6f42c1, #e83e8c);
-            box-shadow: 0 4px 15px rgba(52, 152, 219, 0.4);
+            background: linear-gradient(135deg, #2e3192, #4f46e5);
+            box-shadow: 0 4px 15px rgba(79, 70, 229, 0.4);
         }
-        
+
         .btn-primary:hover {
             transform: translateY(-2px) translateZ(0);
-            box-shadow: 0 8px 25px rgba(52, 152, 219, 0.6);
+            box-shadow: 0 8px 25px rgba(79, 70, 229, 0.6);
         }
-        
+
         .btn-primary:active {
             transform: translateY(-1px) translateZ(0);
         }
-        
+
         .btn-secondary {
             color: #fff;
             background: #2e3192;
-            box-shadow: 0 4px 15px rgba(52, 73, 94, 0.4);
-        
+            box-shadow: 0 4px 15px rgba(46, 49, 146, 0.4);
         }
-        
+
         .btn-secondary:hover {
             transform: translateY(-2px) translateZ(0);
-            box-shadow: 0 8px 25px rgba(52, 73, 94, 0.6);
+            box-shadow: 0 8px 25px rgba(46, 49, 146, 0.6);
         }
-        
+
         .w-100 {
             width: 100%;
         }
-        
+
         .alert {
             position: relative;
             padding: 1rem 1.5rem;
@@ -547,48 +366,47 @@
             border: none;
             border-radius: 12px;
             animation: slideInDown 0.4s ease;
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
             transform: translateZ(0);
         }
-        
+
         @keyframes slideInDown {
             from {
                 opacity: 0;
                 transform: translateY(-20px) translateZ(0);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0) translateZ(0);
             }
         }
-        
+
         .alert-danger {
             color: #721c24;
             background: rgba(248, 215, 218, 0.9);
             border-left: 4px solid #dc3545;
         }
-        
+
         .alert-success {
             color: #0f5132;
             background: rgba(209, 237, 221, 0.9);
             border-left: 4px solid #198754;
         }
-        
+
         .alert-info {
             color: #055160;
             background: rgba(209, 236, 241, 0.9);
             border-left: 4px solid #0dcaf0;
         }
-        
+
         a {
-            color: #3498db;
+            color: #4f46e5;
             text-decoration: none;
             font-weight: 600;
             transition: all 0.2s ease;
             position: relative;
         }
-        
+
         a::before {
             content: '';
             position: absolute;
@@ -596,69 +414,53 @@
             height: 2px;
             bottom: -2px;
             left: 50%;
-            background: linear-gradient(90deg, #3498db, #5dade2);
+            background: linear-gradient(90deg, #2e3192, #4f46e5);
             transition: all 0.2s ease;
         }
-        
+
         a:hover {
-            color: #2980b9;
+            color: #2e3192;
             text-decoration: none;
             transform: translateY(-1px);
         }
-        
+
         a:hover::before {
             width: 100%;
             left: 0;
         }
-        
-        /* Icons using CSS symbols */
+
         .bi::before {
             display: inline-block;
             width: 1em;
             height: 1em;
             vertical-align: -0.125em;
         }
-        
+
         .bi-box-arrow-in-right::before {
             content: "→";
         }
-        
+
         .bi-house::before {
             content: "🏠";
         }
-        
-        .bi-eye::before {
-            content: "👁";
+
+        .eye-svg {
+            width: 18px;
+            height: 18px;
+            display: block;
+            stroke: currentColor;
+            fill: none;
+            stroke-width: 1.8;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            transition: stroke 0.2s ease;
         }
-        
-        .bi-eye-slash::before {
-            content: "🙈";
-        }
-        
-        /* Demo credentials styling */
-        .demo-item {
-            cursor: pointer;
-            padding: 0.75rem;
-            border-radius: 8px;
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-            margin-bottom: 0.5rem;
-            border: 1px solid transparent;
-            transform: translateZ(0);
-            will-change: transform, background-color, border-color;
-        }
-        
-        .demo-item:hover {
-            background: linear-gradient(135deg, rgba(52, 152, 219, 0.15), rgba(93, 173, 226, 0.1));
-            border-color: rgba(52, 152, 219, 0.4);
-            transform: translateX(5px) translateZ(0);
-        }
-        
-        /* Loading animation */
+
         .btn-loading {
             position: relative;
             pointer-events: none;
         }
-        
+
         .btn-loading::after {
             content: '';
             position: absolute;
@@ -675,82 +477,105 @@
             right: 0;
             transform: translateZ(0);
         }
-        
+
         @keyframes spin {
-            0% { transform: rotate(0deg) translateZ(0); }
-            100% { transform: rotate(360deg) translateZ(0); }
+            0% {
+                transform: rotate(0deg) translateZ(0);
+            }
+
+            100% {
+                transform: rotate(360deg) translateZ(0);
+            }
         }
-        
-        /* Success animation */
+
         .success-animation {
             animation: pulse 0.5s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        
+
         @keyframes pulse {
-            0% { transform: scale(1) translateZ(0); }
-            50% { transform: scale(1.03) translateZ(0); }
-            100% { transform: scale(1) translateZ(0); }
+            0% {
+                transform: scale(1) translateZ(0);
+            }
+
+            50% {
+                transform: scale(1.03) translateZ(0);
+            }
+
+            100% {
+                transform: scale(1) translateZ(0);
+            }
         }
-        
-        /* Shake animation */
+
         @keyframes shake {
-            0%, 100% { transform: translateX(0) translateZ(0); }
-            25% { transform: translateX(-5px) translateZ(0); border-color: #e74c3c !important; }
-            75% { transform: translateX(5px) translateZ(0); border-color: #e74c3c !important; }
+
+            0%,
+            100% {
+                transform: translateX(0) translateZ(0);
+            }
+
+            25% {
+                transform: translateX(-5px) translateZ(0);
+                border-color: #e74c3c !important;
+            }
+
+            75% {
+                transform: translateX(5px) translateZ(0);
+                border-color: #e74c3c !important;
+            }
         }
-        
-        /* Back to home button enhancement */
+
         .back-home {
             animation: fadeInDown 0.8s cubic-bezier(0.4, 0, 0.2, 1) 0.2s both;
         }
-        
+
         @keyframes fadeInDown {
             from {
                 opacity: 0;
                 transform: translateY(-20px) translateZ(0);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0) translateZ(0);
             }
         }
-        
-        /* Enhanced Responsive Design */
+
+        /* ── Responsive ── */
         @media (max-width: 575.98px) {
             .container {
                 padding: 0 10px;
             }
-            
-            .col-md-6, .col-lg-4 {
+
+            .col-md-6,
+            .col-lg-4 {
                 flex: 0 0 100%;
                 max-width: 100%;
                 padding: 0 5px;
             }
-            
+
             .card {
                 margin: 0.5rem 0;
                 border-radius: 15px;
             }
-            
+
             .card-body {
                 padding: 1.5rem 1rem;
             }
-            
+
             .card-header {
                 padding: 1rem 0.75rem;
                 border-radius: 15px 15px 0 0;
             }
-            
+
             .card-header h4 {
                 font-size: 1.1rem;
             }
-            
+
             .form-control {
                 padding: 0.6rem 0.8rem;
                 font-size: 16px;
             }
-            
-            /* Enhanced password input for mobile */
+
             input[type="password"] {
                 font-size: 18px !important;
                 letter-spacing: 0.25em !important;
@@ -758,61 +583,48 @@
                 color: #000000 !important;
                 background-color: #ffffff !important;
             }
-            
+
             .password-input-group .form-control {
                 padding-right: 2.8rem;
             }
-            
+
             .password-toggle {
                 right: 0.8rem;
                 width: 1.8rem;
                 height: 1.8rem;
                 font-size: 1rem;
             }
-            
+
             .floating-label {
                 font-size: 0.9rem;
                 left: 0.8rem;
             }
-            
+
             .btn {
                 padding: 0.7rem 1.5rem;
                 font-size: 0.95rem;
             }
-            
-            .project-icon {
-                font-size: 16px;
-            }
-            
-            /* Reduce animations on mobile */
-            body::before,
-            body::after {
-                animation-duration: 15s;
-            }
-            
-            .project-icons {
-                display: none;
-            }
         }
-        
+
         @media (min-width: 576px) and (max-width: 767.98px) {
-            .col-md-6, .col-lg-4 {
+
+            .col-md-6,
+            .col-lg-4 {
                 flex: 0 0 100%;
                 max-width: 100%;
             }
-            
+
             .card {
                 margin: 0 1rem;
                 max-width: 450px;
                 margin-left: auto;
                 margin-right: auto;
             }
-            
+
             .form-control {
                 font-size: 16px;
             }
-            
-            /* Enhanced password input for tablets */
+
             input[type="password"] {
                 font-size: 18px !important;
                 letter-spacing: 0.2em !important;
@@ -820,106 +632,137 @@
                 color: #000000 !important;
                 background-color: #ffffff !important;
             }
-            
-            .project-icon {
-                font-size: 18px;
-            }
         }
-        
+
         @media (min-width: 768px) and (max-width: 991.98px) {
             .col-md-6 {
                 flex: 0 0 75%;
                 max-width: 75%;
             }
-            
+
             .col-lg-4 {
                 flex: 0 0 60%;
                 max-width: 60%;
             }
-            
+
             .card {
                 max-width: 500px;
             }
-            
-            .project-icon {
-                font-size: 20px;
-            }
         }
-        
+
         @media (min-width: 992px) and (max-width: 1199.98px) {
             .col-lg-4 {
                 flex: 0 0 40%;
                 max-width: 40%;
             }
-            
-            .project-icon {
-                font-size: 22px;
-            }
         }
-        
+
         @media (min-width: 1200px) {
             .col-lg-4 {
                 flex: 0 0 33.333333%;
                 max-width: 33.333333%;
             }
-            
+
             .container {
                 max-width: 1400px;
             }
-            
+
             .card {
                 max-width: 420px;
             }
-            
-            .project-icon {
-                font-size: 24px;
-            }
         }
-        
+
         /* Dark mode support */
         @media (prefers-color-scheme: dark) {
+            body {
+                background: url('/static/images/login.jpg') center center / cover no-repeat fixed !important;
+                color: #212529;
+            }
+
             .card {
-                background: rgba(30, 30, 30, 0.95);
-                color: #f8f9fa;
+                background: rgba(255, 255, 255, 0.97) !important;
+                color: #212529 !important;
             }
-            
+
+            .card-header {
+                background: linear-gradient(135deg, #2e3192, #4f46e5) !important;
+                color: #fff !important;
+            }
+
+            .card-body {
+                background: rgba(255, 255, 255, 0.97) !important;
+                color: #212529 !important;
+            }
+
+            .card-footer {
+                background: rgba(255, 255, 255, 0.97) !important;
+                color: #212529 !important;
+            }
+
             .form-control {
-                background-color: rgba(40, 40, 40, 0.9);
-                color: #f8f9fa;
-                border-color: #495057;
+                background-color: #ffffff !important;
+                color: #212529 !important;
+                border-color: #e9ecef !important;
             }
-            
-            /* Enhanced password dots visibility in dark mode */
+
+            .form-label {
+                color: #495057 !important;
+            }
+
             input[type="password"] {
-                color: #ffffff !important;
-                background-color: rgba(60, 60, 60, 1) !important;
-                text-shadow: 0 0 1px rgba(255, 255, 255, 0.8) !important;
-                border-color: #6c757d !important;
+                color: #000000 !important;
+                background-color: #ffffff !important;
             }
-            
-            input[type="password"]:focus {
-                color: #ffffff !important;
-                background-color: rgba(70, 70, 70, 1) !important;
-                border-color: #3498db !important;
+
+            a {
+                color: #4f46e5 !important;
             }
-            
-            .floating-label {
-                color: #adb5bd;
-                background: rgba(30, 30, 30, 0.9);
-            }
-            
-            .password-toggle {
-                color: #adb5bd;
-            }
-            
-            .password-toggle:hover {
-                color: #3498db;
-                background-color: rgba(52, 152, 219, 0.2);
+
+            .text-muted {
+                color: #6c757d !important;
             }
         }
-        
+
+        .btn-back-home {
+            color: #fff !important;
+            background: #2e3192;
+            box-shadow: 0 4px 15px rgba(46, 49, 146, 0.4);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 2.8rem;
+            height: 2.8rem;
+            padding: 0;
+            border-radius: 50%;
+            font-size: 1.3rem;
+            line-height: 1;
+        }
+
+        .btn-back-home::before {
+            display: none !important;
+        }
+
+        .btn-back-home:hover {
+            color: #fff !important;
+            background: #3d42b8;
+            box-shadow: 0 8px 25px rgba(46, 49, 146, 0.6);
+            transform: translateY(-2px) !important;
+            text-decoration: none !important;
+        }
+
+        .btn-back-home:active,
+        .btn-back-home:focus {
+            color: #fff !important;
+            background: #252875;
+            box-shadow: 0 2px 8px rgba(46, 49, 146, 0.4);
+            transform: translateY(0px) !important;
+            outline: none;
+            text-decoration: none !important;
+        }
+
         /* Reduced motion preference */
         @media (prefers-reduced-motion: reduce) {
+
             *,
             *::before,
             *::after {
@@ -927,67 +770,69 @@
                 animation-iteration-count: 1 !important;
                 transition-duration: 0.01ms !important;
             }
-            
-            .project-icons {
-                display: none;
-            }
-            
-            body::before,
-            body::after {
-                animation: none;
-            }
         }
     </style>
 </head>
+
 <body>
-    <!-- Optimized Project Management Floating Icons -->
-    <div class="project-icons">
-        <div class="project-icon">📋</div>
-        <div class="project-icon">📊</div>
-        <div class="project-icon">⏰</div>
-        <div class="project-icon">🎯</div>
-        <div class="project-icon">📈</div>
-    </div>
-    
+
     <!-- Flash Messages -->
     {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            <div class="container mt-3">
-                {% for category, message in messages %}
-                    <div class="alert alert-{{ 'danger' if category == 'error' else 'success' if category == 'success' else 'info' }}" id="flash-message">
-                        {{ message }}
-                    </div>
-                {% endfor %}
-            </div>
-        {% endif %}
+    {% if messages %}
+    <div class="container" style="position:relative;z-index:2;margin-bottom:0.5rem;">
+        {% for category, message in messages %}
+        <div class="alert alert-{{ 'danger' if category == 'error' else 'success' if category == 'success' else 'info' }}"
+            id="flash-message">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
     {% endwith %}
-    
+
+    <!-- Back to Home - Fixed Top Left -->
+    <div style="position: fixed; top: 1rem; left: 1rem; z-index: 10;">
+        <a href="{{ url_for('landing') }}" class="btn btn-back-home">
+            ←
+        </a>
+    </div>
+
     <div class="container">
-        <div class="row justify-content-center mt-3">
+        <div class="row justify-content-center">
             <div class="col-md-6 col-lg-4">
-                <!-- Back to Home Button -->
-                <div class="text-center mb-3 back-home">
-                    <a href="{{ url_for('landing') }}" class="btn btn-secondary">
-                        <i class="bi bi-house me-2"></i>Back to Home
-                    </a>
-                </div>
+                <!-- Back to Home Button moved to top left -->
                 <div class="card shadow">
-                    <div class="card-header text-center bg-warning text-white">
-                        <h4><i class="bi bi-box-arrow-in-right me-2"></i>Project Manager Login</h4>
-                        <small style="opacity: 0.9;">Manage your projects efficiently</small>
+                    <div class="card-header text-center text-white">
+                        <h4><i class="bi bi-box-arrow-in-right me-2"></i>Project Management Login</h4>
+                        <!-- <small style="opacity: 0.9;">Manage your projects efficiently</small> -->
                     </div>
                     <div class="card-body">
                         <form method="POST" id="loginForm">
                             <div class="input-group">
-                                <input type="email" class="form-control" id="email" name="email" placeholder="Enter your Email " required>
-                                <label for="email" class="floating-label">Email Address</label>
+                                <input type="email" class="form-control" id="email" name="email"
+                                    placeholder="Email Address" required>
                             </div>
                             <div class="input-group password-input-group">
-                                <input type="password" class="form-control" id="password" name="password" placeholder="Password" required>
-                                <button type="button" class="password-toggle" id="passwordToggle" aria-label="Toggle password visibility">
-                                    <span class="eye-icon bi bi-eye"></span>
+                                <input type="password" class="form-control" id="password" name="password"
+                                    placeholder="Password" required>
+                                <button type="button" class="password-toggle" id="passwordToggle"
+                                    aria-label="Toggle password visibility">
+                                    <!-- Eye Open SVG -->
+                                    <svg id="eyeOpen" class="eye-svg" viewBox="0 0 24 24"
+                                        xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                                        <circle cx="12" cy="12" r="3" />
+                                    </svg>
+                                    <!-- Eye Closed SVG -->
+                                    <svg id="eyeClosed" class="eye-svg" viewBox="0 0 24 24"
+                                        xmlns="http://www.w3.org/2000/svg" style="display:none;">
+                                        <path
+                                            d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94" />
+                                        <path
+                                            d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19" />
+                                        <line x1="1" y1="1" x2="23" y2="23" />
+                                    </svg>
                                 </button>
-                                <label for="password" class="floating-label">Password</label>
                             </div>
                             <button type="submit" class="btn btn-primary w-100" id="submitBtn">
                                 <i class="bi bi-box-arrow-in-right me-2"></i>
@@ -999,102 +844,77 @@
                         <p class="mb-0">Don't have an account? <a href="{{ url_for('register') }}">Register here</a></p>
                     </div>
                 </div>
-                
-                
             </div>
         </div>
     </div>
-    
+
     <script>
-        // Performance optimization variables
         let isAnimating = false;
         let animationFrame;
-        
-        // Password visibility toggle functionality
+
         function initializePasswordToggle() {
             const passwordInput = document.getElementById('password');
             const passwordToggle = document.getElementById('passwordToggle');
-            const eyeIcon = passwordToggle.querySelector('.eye-icon');
-            
-            passwordToggle.addEventListener('click', function(e) {
+            const eyeOpen = document.getElementById('eyeOpen');
+            const eyeClosed = document.getElementById('eyeClosed');
+
+            passwordToggle.addEventListener('click', function (e) {
                 e.preventDefault();
                 e.stopPropagation();
-                
+
                 const isPassword = passwordInput.type === 'password';
-                
-                // Toggle input type
                 passwordInput.type = isPassword ? 'text' : 'password';
-                
-                // Toggle icon and styling
+
                 if (isPassword) {
-                    eyeIcon.className = 'eye-icon bi bi-eye-slash';
+                    eyeOpen.style.display = 'none';
+                    eyeClosed.style.display = 'block';
                     passwordToggle.classList.add('password-visible');
                     passwordToggle.setAttribute('aria-label', 'Hide password');
                 } else {
-                    eyeIcon.className = 'eye-icon bi bi-eye';
+                    eyeOpen.style.display = 'block';
+                    eyeClosed.style.display = 'none';
                     passwordToggle.classList.remove('password-visible');
                     passwordToggle.setAttribute('aria-label', 'Show password');
                 }
-                
-                // Add a subtle animation
-                passwordToggle.style.transform = 'translateY(-50%) scale(0.9)';
-                setTimeout(() => {
-                    passwordToggle.style.transform = 'translateY(-50%) scale(1)';
-                }, 100);
-                
-                // Keep focus on password input
+
                 passwordInput.focus();
             });
-            
-            // Handle keyboard navigation for password toggle
-            passwordToggle.addEventListener('keydown', function(e) {
+
+            passwordToggle.addEventListener('keydown', function (e) {
                 if (e.key === 'Enter' || e.key === ' ') {
                     e.preventDefault();
                     this.click();
                 }
             });
-            
-            // Add hover effects for better UX
-            passwordToggle.addEventListener('mouseenter', function() {
-                this.style.transform = 'translateY(-50%) scale(1.1)';
-            });
-            
-            passwordToggle.addEventListener('mouseleave', function() {
-                this.style.transform = 'translateY(-50%) scale(1)';
-            });
+
         }
-        
-        // Optimized auto-hide flash messages
-        document.addEventListener('DOMContentLoaded', function() {
+
+        document.addEventListener('DOMContentLoaded', function () {
             const flashMessage = document.getElementById('flash-message');
             if (flashMessage) {
-                setTimeout(function() {
+                setTimeout(function () {
                     flashMessage.style.transform = 'translateY(-20px)';
                     flashMessage.style.opacity = '0';
-                    setTimeout(function() {
+                    setTimeout(function () {
                         flashMessage.remove();
                     }, 300);
                 }, 5000);
             }
-            
-            // Initialize optimized features
+
             initializeOptimizedFeatures();
             initializePasswordToggle();
         });
-        
-        // Optimized credentials filling with smooth animation
+
         function fillCredentials(email, password) {
             const emailField = document.getElementById('email');
             const passwordField = document.getElementById('password');
-            
-            // Clear fields first
+
             emailField.value = '';
             passwordField.value = '';
-            
-            // Use requestAnimationFrame for smooth animation
+
             let emailIndex = 0;
             let passwordIndex = 0;
-            
+
             function typeEmail() {
                 if (emailIndex < email.length) {
                     emailField.value += email[emailIndex];
@@ -1104,14 +924,13 @@
                     typePassword();
                 }
             }
-            
+
             function typePassword() {
                 if (passwordIndex < password.length) {
                     passwordField.value += password[passwordIndex];
                     passwordIndex++;
                     setTimeout(typePassword, 80);
                 } else {
-                    // Final animation
                     emailField.classList.add('success-animation');
                     passwordField.classList.add('success-animation');
                     setTimeout(() => {
@@ -1120,45 +939,36 @@
                     }, 500);
                 }
             }
-            
+
             typeEmail();
         }
-        
-        // Optimized form validation with better performance
-        document.getElementById('loginForm').addEventListener('submit', function(e) {
+
+        document.getElementById('loginForm').addEventListener('submit', function (e) {
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
             const submitBtn = document.getElementById('submitBtn');
             const btnText = document.getElementById('btnText');
-            
+
             if (!email || !password) {
                 e.preventDefault();
-                
-                // Optimized shake animation for empty fields
+
                 if (!email) {
                     const emailField = document.getElementById('email');
                     emailField.style.animation = 'shake 0.4s ease-in-out';
-                    setTimeout(() => {
-                        emailField.style.animation = '';
-                    }, 400);
+                    setTimeout(() => { emailField.style.animation = ''; }, 400);
                 }
                 if (!password) {
                     const passwordField = document.getElementById('password');
                     passwordField.style.animation = 'shake 0.4s ease-in-out';
-                    setTimeout(() => {
-                        passwordField.style.animation = '';
-                    }, 400);
+                    setTimeout(() => { passwordField.style.animation = ''; }, 400);
                 }
-                
                 return;
             }
-            
-            // Add loading state to button
+
             submitBtn.classList.add('btn-loading');
             btnText.textContent = 'Logging in...';
             submitBtn.disabled = true;
-            
-            // Remove loading state if form submission fails (timeout)
+
             setTimeout(() => {
                 if (submitBtn.classList.contains('btn-loading')) {
                     submitBtn.classList.remove('btn-loading');
@@ -1167,183 +977,79 @@
                 }
             }, 10000);
         });
-        
-        // Optimized input interactions with throttled events
+
         function initializeOptimizedFeatures() {
             const formControls = document.querySelectorAll('.form-control');
-            
-            // Use passive event listeners for better performance
+
             formControls.forEach(input => {
-                input.addEventListener('focus', function() {
-                    if (!isAnimating) {
-                        isAnimating = true;
-                        this.parentElement.style.transform = 'translateY(-1px)';
-                        setTimeout(() => isAnimating = false, 200);
-                    }
-                }, { passive: true });
-                
-                input.addEventListener('blur', function() {
-                    this.parentElement.style.transform = 'translateY(0)';
-                }, { passive: true });
-                
-                // Throttled input event
                 let inputTimeout;
-                input.addEventListener('input', function() {
+                input.addEventListener('input', function () {
                     clearTimeout(inputTimeout);
                     inputTimeout = setTimeout(() => {
                         if (this.value) {
-                            this.style.borderColor = '#3498db';
+                            this.style.borderColor = '#4f46e5';
                         } else {
                             this.style.borderColor = '';
                         }
                     }, 100);
                 }, { passive: true });
             });
-            
-            // Optimized card hover effects for desktop only
+
             if (window.innerWidth > 767) {
                 const card = document.querySelector('.card');
                 let hoverTimeout;
-                
-                card.addEventListener('mouseenter', function() {
+
+                card.addEventListener('mouseenter', function () {
                     clearTimeout(hoverTimeout);
                     this.style.transform = 'translateY(-5px)';
-                    this.style.boxShadow = '0 25px 50px rgba(52, 152, 219, 0.2)';
+                    this.style.boxShadow = '0 25px 50px rgba(79, 70, 229, 0.15)';
                 }, { passive: true });
-                
-                card.addEventListener('mouseleave', function() {
+
+                card.addEventListener('mouseleave', function () {
                     hoverTimeout = setTimeout(() => {
                         this.style.transform = 'translateY(0)';
                         this.style.boxShadow = '0 15px 35px rgba(0,0,0,0.1)';
                     }, 50);
                 }, { passive: true });
             }
-            
-            // Initialize button animations
-            initializeButtonAnimations();
         }
-        
-        // Optimized button animations
-        function initializeButtonAnimations() {
-            const buttons = document.querySelectorAll('.btn');
-            buttons.forEach((button, index) => {
-                setTimeout(() => {
-                    button.style.animation = `pulse 0.6s cubic-bezier(0.4, 0, 0.2, 1)`;
-                    setTimeout(() => {
-                        button.style.animation = '';
-                    }, 600);
-                }, index * 150);
-            });
-        }
-        
-        // Optimized resize handler with throttling
+
         let resizeTimeout;
-        window.addEventListener('resize', function() {
+        window.addEventListener('resize', function () {
             clearTimeout(resizeTimeout);
             resizeTimeout = setTimeout(handleResize, 250);
         }, { passive: true });
-        
+
         function handleResize() {
-            // Re-initialize features on significant size changes
             if (window.innerWidth <= 767) {
-                // Disable heavy animations on mobile
                 document.documentElement.style.setProperty('--animation-duration', '0.2s');
             } else {
                 document.documentElement.style.setProperty('--animation-duration', '0.3s');
             }
         }
-        
-        // Optimized orientation change handler
-        window.addEventListener('orientationchange', function() {
-            setTimeout(() => {
-                handleResize();
-            }, 300);
+
+        window.addEventListener('orientationchange', function () {
+            setTimeout(() => { handleResize(); }, 300);
         }, { passive: true });
-        
-        // Performance optimization: Pause animations when tab is not visible
-        document.addEventListener('visibilitychange', function() {
+
+        document.addEventListener('visibilitychange', function () {
             const body = document.body;
             if (document.hidden) {
                 body.style.animationPlayState = 'paused';
-                // Pause CSS animations
                 const style = document.createElement('style');
                 style.id = 'pause-animations';
                 style.textContent = '*, *::before, *::after { animation-play-state: paused !important; }';
                 document.head.appendChild(style);
             } else {
                 body.style.animationPlayState = 'running';
-                // Resume CSS animations
                 const pauseStyle = document.getElementById('pause-animations');
-                if (pauseStyle) {
-                    pauseStyle.remove();
-                }
+                if (pauseStyle) { pauseStyle.remove(); }
             }
         }, { passive: true });
-        
-        // Optimized intersection observer for animations
-        if ('IntersectionObserver' in window) {
-            const observer = new IntersectionObserver((entries) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        entry.target.classList.add('visible');
-                    }
-                });
-            }, {
-                threshold: 0.1,
-                rootMargin: '0px 0px -50px 0px'
-            });
-            
-            // Observe elements that should animate when in view
-            document.querySelectorAll('.card, .btn').forEach(el => {
-                observer.observe(el);
-            });
-        }
-        
-        // Optimized scroll performance
-        let ticking = false;
-        
-        function updateScrollEffects() {
-            // Add scroll-based effects here if needed
-            ticking = false;
-        }
-        
-        window.addEventListener('scroll', function() {
-            if (!ticking) {
-                requestAnimationFrame(updateScrollEffects);
-                ticking = true;
-            }
-        }, { passive: true });
-        
-        // Memory management - cleanup on page unload
-        window.addEventListener('beforeunload', function() {
-            // Clear any running timeouts/intervals
-            clearTimeout(resizeTimeout);
-            if (animationFrame) {
-                cancelAnimationFrame(animationFrame);
-            }
-        }, { passive: true });
-        
-        // Preload critical resources
-        const preloadLink = document.createElement('link');
-        preloadLink.rel = 'preload';
-        preloadLink.as = 'font';
-        preloadLink.type = 'font/woff2';
-        preloadLink.crossOrigin = 'anonymous';
-        document.head.appendChild(preloadLink);
-        
-        // Service Worker registration for better caching (optional)
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', function() {
-                // Register service worker if available
-                // navigator.serviceWorker.register('/sw.js');
-            });
-        }
-        
-        // Enhanced input validation with visual feedback
+
         function validateInput(input) {
             const value = input.value.trim();
-            const inputGroup = input.parentElement;
-            
+
             if (input.type === 'email') {
                 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
                 if (value && !emailRegex.test(value)) {
@@ -1354,8 +1060,8 @@
                     return true;
                 }
             }
-            
-            if (input.type === 'password' || input.type === 'text' && input.id === 'password') {
+
+            if (input.type === 'password' || (input.type === 'text' && input.id === 'password')) {
                 if (value && value.length < 3) {
                     input.style.borderColor = '#f39c12';
                     return false;
@@ -1364,35 +1070,24 @@
                     return true;
                 }
             }
-            
-            // Reset border color if empty
-            if (!value) {
-                input.style.borderColor = '';
-            }
-            
+
+            if (!value) { input.style.borderColor = ''; }
             return true;
         }
-        
-        // Add real-time validation
+
         document.querySelectorAll('.form-control').forEach(input => {
-            input.addEventListener('input', function() {
-                validateInput(this);
-            });
-            
-            input.addEventListener('blur', function() {
-                validateInput(this);
-            });
+            input.addEventListener('input', function () { validateInput(this); });
+            input.addEventListener('blur', function () { validateInput(this); });
         });
-        
-        // Keyboard navigation enhancement
-        document.addEventListener('keydown', function(e) {
+
+        document.addEventListener('keydown', function (e) {
             if (e.key === 'Enter') {
                 const activeElement = document.activeElement;
                 if (activeElement.tagName === 'INPUT') {
                     const form = activeElement.closest('form');
                     const inputs = form.querySelectorAll('input[required]');
                     const currentIndex = Array.from(inputs).indexOf(activeElement);
-                    
+
                     if (currentIndex < inputs.length - 1) {
                         e.preventDefault();
                         inputs[currentIndex + 1].focus();
@@ -1402,93 +1097,53 @@
                 }
             }
         });
-        
-        // Enhanced accessibility
+
         function improveAccessibility() {
-            // Add proper ARIA labels
-            document.querySelectorAll('.floating-label').forEach(label => {
-                const input = label.previousElementSibling;
-                if (input) {
-                    input.setAttribute('aria-label', label.textContent);
-                }
+            document.addEventListener('keydown', function (e) {
+                if (e.key === 'Tab') { document.body.classList.add('keyboard-nav'); }
             });
-            
-            // Add focus indicators for keyboard navigation
-            document.addEventListener('keydown', function(e) {
-                if (e.key === 'Tab') {
-                    document.body.classList.add('keyboard-nav');
-                }
-            });
-            
-            document.addEventListener('mousedown', function() {
+
+            document.addEventListener('mousedown', function () {
                 document.body.classList.remove('keyboard-nav');
             });
         }
-        
-        // Call accessibility improvements after DOM load
+
         document.addEventListener('DOMContentLoaded', improveAccessibility);
-        
-        // Progressive enhancement for modern browsers
-        if ('CSS' in window && CSS.supports('backdrop-filter', 'blur(10px)')) {
-            document.body.classList.add('backdrop-filter-support');
-        }
-        
-        // Touch device optimizations
+
         if ('ontouchstart' in window) {
             document.body.classList.add('touch-device');
-            
-            // Add touch-friendly hover effects
-            document.querySelectorAll('.btn, .demo-item, .password-toggle').forEach(element => {
-                element.addEventListener('touchstart', function() {
+
+            document.querySelectorAll('.btn, .password-toggle').forEach(element => {
+                element.addEventListener('touchstart', function () {
                     this.classList.add('touch-active');
                 }, { passive: true });
-                
-                element.addEventListener('touchend', function() {
-                    setTimeout(() => {
-                        this.classList.remove('touch-active');
-                    }, 150);
+
+                element.addEventListener('touchend', function () {
+                    setTimeout(() => { this.classList.remove('touch-active'); }, 150);
                 }, { passive: true });
             });
         }
-        
-        // Performance monitoring (optional)
-        if ('PerformanceObserver' in window) {
-            const observer = new PerformanceObserver((list) => {
-                for (const entry of list.getEntries()) {
-                    if (entry.entryType === 'measure') {
-                        console.log(`${entry.name}: ${entry.duration}ms`);
-                    }
-                }
-            });
-            observer.observe({ entryTypes: ['measure'] });
-        }
-        
-        // Error handling for animations
-        window.addEventListener('error', function(e) {
+
+        window.addEventListener('error', function (e) {
             if (e.message.includes('animation') || e.message.includes('transform')) {
                 console.warn('Animation error detected, falling back to basic styles');
                 document.body.classList.add('no-animations');
             }
         });
-        
-        // Final initialization
-        document.addEventListener('DOMContentLoaded', function() {
-            // Mark page as fully loaded for CSS
+
+        document.addEventListener('DOMContentLoaded', function () {
             document.body.classList.add('loaded');
-            
-            // Smooth scroll behavior
+
             if ('scrollBehavior' in document.documentElement.style) {
                 document.documentElement.style.scrollBehavior = 'smooth';
             }
-            
-            // Initialize theme detection
+
             if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
                 document.body.classList.add('dark-theme');
             }
-            
-            // Listen for theme changes
+
             if (window.matchMedia) {
-                window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function(e) {
+                window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function (e) {
                     if (e.matches) {
                         document.body.classList.add('dark-theme');
                     } else {
@@ -1497,6 +1152,12 @@
                 });
             }
         });
+
+        window.addEventListener('beforeunload', function () {
+            clearTimeout(resizeTimeout);
+            if (animationFrame) { cancelAnimationFrame(animationFrame); }
+        }, { passive: true });
     </script>
 </body>
+
 </html>

@@ -3,296 +3,795 @@
 {% block title %}Profile - {{ user.full_name }}{% endblock %}
 
 {% block content %}
-<div class="container mt-4">
-    <div class="row justify-content-center">
-        <div class="col-lg-8">
-            <!-- Profile Header -->
-            <div class="card shadow-lg border-0 mb-4" id="id-card">
-                <div class="card-body p-4">
-                    <div class="row align-items-center">
-                        <div class="col-auto">
-                            <div class="profile-avatar-large">
-                                {% if user.avatar_url %}
-                                <img src="{{ user.avatar_url }}" alt="Avatar" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">
-                                {% else %}
-                                <span class="avatar-text">{{ user.full_name[0] if user.full_name else 'U' }}</span>
-                                {% endif %}
-                                <div class="online-status"></div>
-                            </div>
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Serif+Display:ital@0;1&display=swap');
+
+    :root {
+        --indigo: #4f46e5;
+        --indigo-dk: #3730a3;
+        --indigo-lt: #eef2ff;
+        --violet: #7c3aed;
+        --surface: #ffffff;
+        --surface-2: #f8f8fb;
+        --border: #e8e7f0;
+        --text-1: #1a1830;
+        --text-2: #5c5a72;
+        --text-3: #9896ad;
+        --green: #16a34a;
+        --red: #dc2626;
+        --amber: #d97706;
+        --radius-lg: 20px;
+        --radius-md: 12px;
+        --shadow-sm: 0 1px 3px rgba(79, 70, 229, .06), 0 1px 2px rgba(0, 0, 0, .04);
+        --shadow-md: 0 4px 20px rgba(79, 70, 229, .10), 0 2px 6px rgba(0, 0, 0, .05);
+        --shadow-lg: 0 12px 40px rgba(79, 70, 229, .16), 0 4px 12px rgba(0, 0, 0, .06);
+    }
+
+    /* ── Page wrapper ── */
+    .profile-page {
+        min-height: 100vh;
+        background: var(--surface-2);
+        padding: 3rem 1.5rem 5rem;
+        font-family: 'DM Sans', sans-serif;
+    }
+
+    .profile-shell {
+        max-width: 860px;
+        margin: 0 auto;
+    }
+
+    /* ── Hero card ── */
+    .hero-card {
+        background: var(--surface);
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-lg);
+        overflow: hidden;
+        margin-bottom: 1.5rem;
+        animation: fadeUp .5s ease both;
+    }
+
+    .hero-banner {
+        height: 108px;
+        background: linear-gradient(130deg, #4f46e5 0%, #7c3aed 60%, #a855f7 100%);
+        position: relative;
+    }
+
+    .hero-banner::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.06'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    }
+
+    .hero-body {
+        padding: 0 2.5rem 2.25rem;
+        position: relative;
+    }
+
+    /* Avatar */
+    .avatar-wrap {
+        position: relative;
+        display: inline-block;
+        margin-top: -44px;
+        margin-bottom: 0.75rem;
+    }
+
+    .avatar-ring {
+        width: 88px;
+        height: 88px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #4f46e5, #7c3aed);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: 'DM Serif Display', serif;
+        font-size: 2.25rem;
+        color: #fff;
+        border: 4px solid #fff;
+        box-shadow: var(--shadow-md);
+        overflow: hidden;
+    }
+
+    .avatar-ring img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 50%;
+    }
+
+    .avatar-dot {
+        position: absolute;
+        bottom: 4px;
+        right: 4px;
+        width: 18px;
+        height: 18px;
+        background: #22c55e;
+        border: 3px solid #fff;
+        border-radius: 50%;
+    }
+
+    /* Name / meta row */
+    .hero-meta {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .hero-name {
+        font-family: 'DM Serif Display', serif;
+        font-size: 1.75rem;
+        color: var(--text-1);
+        margin: 0 0 .25rem;
+        line-height: 1.15;
+    }
+
+    .hero-chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: .4rem;
+        margin-top: .35rem;
+    }
+
+    .chip {
+        display: inline-flex;
+        align-items: center;
+        gap: .3rem;
+        font-size: .78rem;
+        font-weight: 500;
+        padding: .28rem .7rem;
+        border-radius: 999px;
+        border: 1px solid var(--border);
+        color: var(--text-2);
+        background: var(--surface-2);
+        white-space: nowrap;
+    }
+
+    .chip i {
+        font-size: .72rem;
+        color: var(--indigo);
+    }
+
+    .chip.role-chip {
+        background: var(--indigo-lt);
+        border-color: #c7d2fe;
+        color: var(--indigo-dk);
+        font-weight: 600;
+    }
+
+    .chip.status-active {
+        background: #dcfce7;
+        border-color: #bbf7d0;
+        color: #15803d;
+    }
+
+    .chip.status-inactive {
+        background: #fee2e2;
+        border-color: #fecaca;
+        color: #b91c1c;
+    }
+
+    /* Edit button in hero */
+    .btn-hero-edit {
+        display: inline-flex;
+        align-items: center;
+        gap: .45rem;
+        padding: .55rem 1.2rem;
+        background: var(--indigo);
+        color: #fff;
+        border: none;
+        border-radius: var(--radius-md);
+        font-family: 'DM Sans', sans-serif;
+        font-size: .875rem;
+        font-weight: 500;
+        cursor: pointer;
+        text-decoration: none;
+        box-shadow: 0 2px 8px rgba(79, 70, 229, .35);
+        transition: background .18s, transform .15s, box-shadow .18s;
+        flex-shrink: 0;
+    }
+
+    .btn-hero-edit:hover {
+        background: var(--indigo-dk);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 14px rgba(79, 70, 229, .4);
+        color: #fff;
+        text-decoration: none;
+    }
+
+    /* ── Two info cards ── */
+    .info-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.25rem;
+        margin-bottom: 1.5rem;
+        animation: fadeUp .5s .1s ease both;
+    }
+
+    .info-card {
+        background: var(--surface);
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-md);
+        overflow: hidden;
+    }
+
+    .info-card-head {
+        display: flex;
+        align-items: center;
+        gap: .65rem;
+        padding: 1.1rem 1.75rem;
+        background: linear-gradient(130deg, #4f46e5, #7c3aed);
+        color: #fff;
+    }
+
+    .info-card-head.teal {
+        background: linear-gradient(130deg, #0891b2, #0e7490);
+    }
+
+    .info-card-head .head-icon {
+        width: 32px;
+        height: 32px;
+        background: rgba(255, 255, 255, .18);
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: .9rem;
+    }
+
+    .info-card-head h5 {
+        font-size: .9rem;
+        font-weight: 600;
+        margin: 0;
+        letter-spacing: .01em;
+    }
+
+    .info-card-body {
+        padding: 1.6rem 1.75rem;
+    }
+
+    .info-row {
+        display: flex;
+        flex-direction: column;
+        gap: .15rem;
+        padding: .7rem 0;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .info-row:last-child {
+        border-bottom: none;
+        padding-bottom: 0;
+    }
+
+    .info-row:first-child {
+        padding-top: 0;
+    }
+
+    .info-label {
+        font-size: .73rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: .06em;
+        color: var(--text-3);
+    }
+
+    .info-value {
+        font-size: .9rem;
+        color: var(--text-1);
+        font-weight: 400;
+    }
+
+    .info-value .badge-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: .3rem;
+        padding: .25rem .75rem;
+        border-radius: 999px;
+        font-size: .8rem;
+        font-weight: 600;
+    }
+
+    .pill-admin {
+        background: #fef9c3;
+        color: #854d0e;
+        border: 1px solid #fde68a;
+    }
+
+    .pill-manager {
+        background: #ede9fe;
+        color: #5b21b6;
+        border: 1px solid #ddd6fe;
+    }
+
+    .pill-member {
+        background: #e0f2fe;
+        color: #075985;
+        border: 1px solid #bae6fd;
+    }
+
+    .pill-default {
+        background: var(--surface-2);
+        color: var(--text-2);
+        border: 1px solid var(--border);
+    }
+
+    .pill-active {
+        background: #dcfce7;
+        color: #15803d;
+        border: 1px solid #bbf7d0;
+    }
+
+    .pill-inactive {
+        background: #fee2e2;
+        color: #b91c1c;
+        border: 1px solid #fecaca;
+    }
+
+    /* ── Actions card ── */
+    .actions-card {
+        background: var(--surface);
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-md);
+        padding: 2rem 2.5rem;
+        animation: fadeUp .5s .2s ease both;
+    }
+
+    .actions-label {
+        font-size: .72rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: .07em;
+        color: var(--text-3);
+        margin-bottom: 1rem;
+    }
+
+    .actions-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: .65rem;
+        align-items: center;
+    }
+
+    /* ── Action buttons ── */
+    .act-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: .45rem;
+        padding: .6rem 1.15rem;
+        border-radius: var(--radius-md);
+        font-family: 'DM Sans', sans-serif;
+        font-size: .855rem;
+        font-weight: 500;
+        text-decoration: none;
+        cursor: pointer;
+        border: none;
+        transition: transform .15s, box-shadow .18s, background .15s;
+        white-space: nowrap;
+    }
+
+    .act-btn:hover {
+        transform: translateY(-1px);
+        text-decoration: none;
+    }
+
+    .act-primary {
+        background: var(--indigo);
+        color: #fff;
+        box-shadow: 0 2px 8px rgba(79, 70, 229, .3);
+    }
+
+    .act-primary:hover {
+        background: var(--indigo-dk);
+        box-shadow: 0 4px 14px rgba(79, 70, 229, .4);
+        color: #fff;
+    }
+
+    .act-success {
+        background: #16a34a;
+        color: #fff;
+        box-shadow: 0 2px 8px rgba(22, 163, 74, .25);
+    }
+
+    .act-success:hover {
+        background: #15803d;
+        box-shadow: 0 4px 12px rgba(22, 163, 74, .35);
+        color: #fff;
+    }
+
+    .act-outline {
+        background: var(--surface);
+        color: var(--text-2);
+        border: 1.5px solid var(--border);
+        box-shadow: var(--shadow-sm);
+    }
+
+    .act-outline:hover {
+        border-color: #a5b4fc;
+        color: var(--indigo);
+        background: var(--indigo-lt);
+    }
+
+    .act-amber {
+        background: #fffbeb;
+        color: #92400e;
+        border: 1.5px solid #fde68a;
+    }
+
+    .act-amber:hover {
+        background: #fef3c7;
+        color: #78350f;
+    }
+
+    .act-ghost {
+        background: var(--surface-2);
+        color: var(--text-2);
+        border: 1.5px solid var(--border);
+    }
+
+    .act-ghost:hover {
+        background: #f1f0f8;
+        color: var(--text-1);
+    }
+
+    /* dropdown wrapper */
+    .act-dropdown {
+        position: relative;
+        display: inline-block;
+    }
+
+    .act-dropdown-menu {
+        display: none;
+        position: absolute;
+        top: calc(100% + 6px);
+        left: 0;
+        background: var(--surface);
+        border: 1.5px solid var(--border);
+        border-radius: var(--radius-md);
+        box-shadow: var(--shadow-lg);
+        min-width: 160px;
+        z-index: 100;
+        overflow: hidden;
+    }
+
+    .act-dropdown-menu.open {
+        display: block;
+    }
+
+    .act-dropdown-item {
+        display: flex;
+        align-items: center;
+        gap: .5rem;
+        padding: .65rem 1rem;
+        font-size: .855rem;
+        color: var(--text-2);
+        text-decoration: none;
+        transition: background .12s;
+        cursor: pointer;
+    }
+
+    .act-dropdown-item:hover {
+        background: var(--indigo-lt);
+        color: var(--indigo);
+        text-decoration: none;
+    }
+
+    .act-dropdown-item i {
+        font-size: .82rem;
+        width: 14px;
+    }
+
+    /* divider between groups */
+    .act-divider {
+        width: 1px;
+        height: 28px;
+        background: var(--border);
+        display: inline-block;
+        vertical-align: middle;
+        margin: 0 .15rem;
+    }
+
+    /* ── Animations ── */
+    @keyframes fadeUp {
+        from {
+            opacity: 0;
+            transform: translateY(18px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 700px) {
+        .info-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .hero-banner {
+            height: 80px;
+        }
+
+        .hero-body {
+            padding: 0 1.25rem 1.5rem;
+        }
+
+        .actions-card {
+            padding: 1.25rem;
+        }
+
+        .act-btn {
+            font-size: .82rem;
+            padding: .55rem .9rem;
+        }
+
+        .act-divider {
+            display: none;
+        }
+
+        .hero-meta {
+            flex-direction: column;
+            gap: .75rem;
+        }
+
+        .hero-name {
+            font-size: 1.45rem;
+        }
+
+        .avatar-ring {
+            width: 76px;
+            height: 76px;
+            font-size: 1.9rem;
+        }
+    }
+</style>
+
+<div class="profile-page">
+    <div class="profile-shell">
+
+        <!-- ── Hero Card ── -->
+        <div class="hero-card" id="id-card">
+            <div class="hero-banner"></div>
+            <div class="hero-body">
+                <div class="avatar-wrap">
+                    <div class="avatar-ring">
+                        {% if user.avatar_url %}
+                        <img src="{{ user.avatar_url }}" alt="Avatar">
+                        {% else %}
+                        {{ user.full_name[0] if user.full_name else 'U' }}
+                        {% endif %}
+                    </div>
+                    <div class="avatar-dot"></div>
+                </div>
+
+                <div class="hero-meta">
+                    <div>
+                        <h2 class="hero-name">{{ user.full_name }}</h2>
+                        <div class="hero-chips">
+                            <span class="chip role-chip">
+                                <i class="fas fa-user-tag"></i>{{ user.role|title }}
+                            </span>
+                            <span class="chip">
+                                <i class="fas fa-envelope"></i>{{ user.email or (session.user_email or 'No email') }}
+                            </span>
+                            <span class="chip">
+                                <i class="fas fa-building"></i>{{ user.organization_name or session.organization_name or
+                                'Organization' }}
+                            </span>
                         </div>
-                        <div class="col">
-                            <h2 class="mb-1">{{ user.full_name }}</h2>
-                            <p class="text-muted mb-2">
-                                <i class="fas fa-user-tag me-2"></i>{{ user.role|title }}
-                            </p>
-                            <p class="text-muted mb-1">
-                                <i class="fas fa-envelope me-2"></i>{{ user.email or (session.user_email or 'No email available') }}
-                            </p>
-                            <p class="text-muted mb-0">
-                                <i class="fas fa-building me-2"></i>{{ user.organization_name or session.organization_name or 'Organization' }}
-                            </p>
-                        </div>
-                        <div class="col-auto">
-                            <a href="{{ url_for('edit_profile') }}" class="btn btn-primary">
-                                <i class="fas fa-edit me-2"></i>Edit Profile
-                            </a>
-                        </div>
+                    </div>
+                    <a href="{{ url_for('edit_profile') }}" class="btn-hero-edit">
+                        <i class="fas fa-pen"></i> Edit Profile
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- ── Info Grid ── -->
+        <div class="info-grid">
+            <!-- Personal Info -->
+            <div class="info-card">
+                <div class="info-card-head">
+                    <div class="head-icon"><i class="fas fa-user"></i></div>
+                    <h5>Personal Information</h5>
+                </div>
+                <div class="info-card-body">
+                    <div class="info-row">
+                        <span class="info-label">Full Name</span>
+                        <span class="info-value">{{ user.full_name }}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Email</span>
+                        <span class="info-value">{{ user.email }}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Phone</span>
+                        <span class="info-value">{{ user.phone or 'Not provided' }}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Role</span>
+                        <span class="info-value">
+                            <span
+                                class="badge-pill {{ 'pill-admin' if user.role == 'admin' else 'pill-manager' if user.role == 'manager' else 'pill-member' }}">
+                                <i
+                                    class="fas fa-{{ 'shield-alt' if user.role == 'admin' else 'users-cog' if user.role == 'manager' else 'user' }}"></i>
+                                {{ user.role|title }}
+                            </span>
+                        </span>
                     </div>
                 </div>
             </div>
 
-            <!-- Profile Details -->
-            <div class="row">
-                <div class="col-md-6 mb-4">
-                    <div class="card shadow-sm border-0 h-100">
-                        <div class="card-header bg-primary text-white">
-                            <h5 class="mb-0">
-                                <i class="fas fa-info-circle me-2"></i>Personal Information
-                            </h5>
-                        </div>
-                        <div class="card-body">
-                            <div class="mb-3">
-                                <label class="form-label fw-bold">Full Name</label>
-                                <p class="mb-0">{{ user.full_name }}</p>
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label fw-bold">Email</label>
-                                <p class="mb-0">{{ user.email }}</p>
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label fw-bold">Phone</label>
-                                <p class="mb-0">{{ user.phone or 'Not provided' }}</p>
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label fw-bold">Role</label>
-                                <span class="badge bg-{{ 'success' if user.role == 'admin' else 'info' if user.role == 'manager' else 'secondary' }}">
-                                    {{ user.role|title }}
-                                </span>
-                            </div>
-                        </div>
-                    </div>
+            <!-- Account Info -->
+            <div class="info-card">
+                <div class="info-card-head">
+                    <div class="head-icon"><i class="fas fa-clock"></i></div>
+                    <h5>Account Information</h5>
                 </div>
-
-                <div class="col-md-6 mb-4">
-                    <div class="card shadow-sm border-0 h-100">
-                        <div class="card-header bg-info text-white">
-                            <h5 class="mb-0">
-                                <i class="fas fa-clock me-2"></i>Account Information
-                            </h5>
-                        </div>
-                        <div class="card-body">
-                            <div class="mb-3">
-                                <label class="form-label fw-bold">User ID</label>
-                                <p class="mb-0">{{ user.id }}</p>
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label fw-bold">Member Since</label>
-                                <p class="mb-0">{% if user.created_at %}{{ user.created_at.strftime('%B %d, %Y') }}{% elif session.user_created_at %}{{ session.user_created_at }}{% else %}Unknown{% endif %}</p>
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label fw-bold">Last Updated</label>
-                                <p class="mb-0">{{ user.updated_at.strftime('%B %d, %Y') if user.updated_at else 'Never' }}</p>
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label fw-bold">Status</label>
-                                <span class="badge bg-{{ 'success' if user.is_active else 'danger' }}">
-                                    {{ 'Active' if user.is_active else 'Inactive' }}
-                                </span>
-                            </div>
-                        </div>
+                <div class="info-card-body">
+                    <div class="info-row">
+                        <span class="info-label">User ID</span>
+                        <span class="info-value">{{ user.id }}</span>
                     </div>
-                </div>
-            </div>
-
-            <!-- Action Buttons -->
-            <div class="row">
-                <div class="col-12">
-                    <div class="card shadow-sm border-0">
-                        <div class="card-body text-center">
-                            <a href="{{ url_for('edit_profile') }}" class="btn btn-primary me-3">
-                                <i class="fas fa-edit me-2"></i>Edit Profile
-                            </a>
-                            <button type="button" class="btn btn-success me-3" id="downloadIdBtn">
-                                <i class="fas fa-download me-2"></i>Download ID Card
-                            </button>
-                            <div class="d-inline-block dropdown me-3">
-                                <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="downloadProfileMenu" data-bs-toggle="dropdown" aria-expanded="false">
-                                    <i class="fas fa-file-download me-2"></i>Download Profile
-                                </button>
-                                <ul class="dropdown-menu" aria-labelledby="downloadProfileMenu">
-                                    <li><a class="dropdown-item" href="#" id="downloadProfilePng">Save as PNG</a></li>
-                                    <li><a class="dropdown-item" href="#" id="downloadProfilePdf">Save as PDF</a></li>
-                                </ul>
-                            </div>
-                            {% if session.user_role in ['admin', 'manager'] %}
-                            <a href="{{ url_for('change_password') }}" class="btn btn-warning me-3">
-                                <i class="fas fa-key me-2"></i>Change Password
-                            </a>
-                            {% endif %}
-                            <a href="{{ url_for('dashboard') if session.user_role == 'admin' else url_for('manager_dashboard') if session.user_role == 'manager' else url_for('member_dashboard') }}" class="btn btn-secondary">
-                                <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
-                            </a>
-                        </div>
+                    <div class="info-row">
+                        <span class="info-label">Member Since</span>
+                        <span class="info-value">
+                            {% if user.created_at %}{{ user.created_at.strftime('%B %d, %Y') }}
+                            {% elif session.user_created_at %}{{ session.user_created_at }}
+                            {% else %}Unknown{% endif %}
+                        </span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Last Updated</span>
+                        <span class="info-value">{{ user.updated_at.strftime('%B %d, %Y') if user.updated_at else
+                            'Never' }}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Status</span>
+                        <span class="info-value">
+                            <span class="badge-pill {{ 'pill-active' if user.is_active else 'pill-inactive' }}">
+                                <i class="fas fa-{{ 'check-circle' if user.is_active else 'times-circle' }}"></i>
+                                {{ 'Active' if user.is_active else 'Inactive' }}
+                            </span>
+                        </span>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
-</div>
 
-<style>
-.profile-avatar-large {
-    position: relative;
-    width: 100px;
-    height: 100px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 2.5rem;
-    font-weight: bold;
-    color: white;
-    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
-}
+        <!-- ── Actions Card ── -->
+        <div class="actions-card">
+            <p class="actions-label">Actions</p>
+            <div class="actions-row">
+                <a href="{{ url_for('edit_profile') }}" class="act-btn act-primary">
+                    <i class="fas fa-edit"></i> Edit Profile
+                </a>
 
-.online-status {
-    position: absolute;
-    bottom: 5px;
-    right: 5px;
-    width: 20px;
-    height: 20px;
-    background-color: #28a745;
-    border: 3px solid white;
-    border-radius: 50%;
-}
+                <button type="button" class="act-btn act-primary" id="downloadIdBtn">
+                    <i class="fas fa-id-badge"></i> Download ID Card
+                </button>
 
-.card {
-    transition: transform 0.2s ease-in-out;
-}
+                <div class="act-dropdown">
+                    <button class="act-btn act-primary" id="downloadProfileToggle">
+                        <i class="fas fa-file-download"></i> Download Profile
+                        <i class="fas fa-chevron-down" style="font-size:.7rem;margin-left:.2rem;"></i>
+                    </button>
+                    <div class="act-dropdown-menu" id="downloadProfileMenu">
+                        <a class="act-dropdown-item" href="#" id="downloadProfilePng">
+                            <i class="fas fa-image"></i> Save as PNG
+                        </a>
+                        <a class="act-dropdown-item" href="#" id="downloadProfilePdf">
+                            <i class="fas fa-file-pdf"></i> Save as PDF
+                        </a>
+                    </div>
+                </div>
 
-.card:hover {
-    transform: translateY(-2px);
-}
+                <span class="act-divider"></span>
 
-.card-header {
-    border-bottom: none;
-}
+                {% if session.user_role in ['admin', 'manager'] %}
+                <a href="{{ url_for('change_password') }}" class="act-btn act-primary">
+                    <i class="fas fa-key"></i> Change Password
+                </a>
+                {% endif %}
 
-.badge {
-    font-size: 0.9rem;
-    padding: 0.5rem 0.75rem;
-}
+                <a href="{{ url_for('dashboard') if session.user_role == 'admin' else url_for('manager_dashboard') if session.user_role == 'manager' else url_for('member_dashboard') }}"
+                    class="act-btn act-primary">
+                    <i class="fas fa-arrow-left"></i> Back to Dashboard
+                </a>
+            </div>
+        </div>
 
-.btn {
-    padding: 0.75rem 1.5rem;
-    font-weight: 500;
-    border-radius: 8px;
-    transition: all 0.2s ease-in-out;
-}
+    </div><!-- /profile-shell -->
+</div><!-- /profile-page -->
 
-.btn:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-}
-
-@media (max-width: 768px) {
-    .profile-avatar-large {
-        width: 80px;
-        height: 80px;
-        font-size: 2rem;
-    }
-    
-    .btn {
-        display: block;
-        width: 100%;
-        margin-bottom: 0.5rem;
-    }
-    
-    .btn:last-child {
-        margin-bottom: 0;
-    }
-}
-</style>
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const btn = document.getElementById('downloadIdBtn');
-    if (!btn) return;
-    btn.addEventListener('click', async function() {
-        const card = document.getElementById('id-card');
-        if (!card) return;
-        // Ensure avatar images are loaded before capture
-        const images = Array.from(card.querySelectorAll('img'));
-        await Promise.all(images.map(img => new Promise(resolve => {
-            if (img.complete) return resolve();
-            img.onload = resolve; img.onerror = resolve;
-        })));
-        html2canvas(card, { scale: 2, backgroundColor: null, useCORS: true }).then(canvas => {
-            const link = document.createElement('a');
-            link.download = `id-card-{{ user.id }}.png`;
-            link.href = canvas.toDataURL('image/png');
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        });
-    });
+    document.addEventListener('DOMContentLoaded', function () {
 
-    // Download entire profile page (container) as PNG/PDF
-    const container = document.querySelector('.container');
-    const pngBtn = document.getElementById('downloadProfilePng');
-    const pdfBtn = document.getElementById('downloadProfilePdf');
+        /* ── Dropdown toggle ── */
+        const toggle = document.getElementById('downloadProfileToggle');
+        const menu = document.getElementById('downloadProfileMenu');
+        if (toggle && menu) {
+            toggle.addEventListener('click', function (e) {
+                e.stopPropagation();
+                menu.classList.toggle('open');
+            });
+            document.addEventListener('click', function () { menu.classList.remove('open'); });
+        }
 
-    async function captureContainer() {
-        // Ensure images/fonts are ready
-        const images = Array.from(container.querySelectorAll('img'));
-        await Promise.all(images.map(img => new Promise(resolve => {
-            if (img.complete) return resolve();
-            img.onload = resolve; img.onerror = resolve;
-        })));
-        return html2canvas(container, { scale: 2, backgroundColor: '#ffffff', useCORS: true });
-    }
+        /* ── Download ID card ── */
+        const btn = document.getElementById('downloadIdBtn');
+        if (btn) {
+            btn.addEventListener('click', async function () {
+                const card = document.getElementById('id-card');
+                if (!card) return;
+                const images = Array.from(card.querySelectorAll('img'));
+                await Promise.all(images.map(img => new Promise(r => {
+                    if (img.complete) return r(); img.onload = r; img.onerror = r;
+                })));
+                html2canvas(card, { scale: 2, backgroundColor: null, useCORS: true }).then(canvas => {
+                    const link = document.createElement('a');
+                    link.download = `id-card-{{ user.id }}.png`;
+                    link.href = canvas.toDataURL('image/png');
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                });
+            });
+        }
 
-    if (pngBtn) {
-        pngBtn.addEventListener('click', async function(e) {
-            e.preventDefault();
-            const canvas = await captureContainer();
-            const link = document.createElement('a');
-            link.download = `profile-{{ user.id }}.png`;
-            link.href = canvas.toDataURL('image/png');
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        });
-    }
+        /* ── Download full profile ── */
+        const container = document.querySelector('.profile-page');
 
-    if (pdfBtn) {
-        pdfBtn.addEventListener('click', async function(e) {
-            e.preventDefault();
-            const canvas = await captureContainer();
-            const imgData = canvas.toDataURL('image/png');
-            const { jsPDF } = window.jspdf;
-            const pdf = new jsPDF('p', 'mm', 'a4');
-            const pageWidth = pdf.internal.pageSize.getWidth();
-            const pageHeight = pdf.internal.pageSize.getHeight();
-            const imgWidth = pageWidth;
-            const imgHeight = canvas.height * imgWidth / canvas.width;
-            let position = 0;
-            let heightLeft = imgHeight;
+        async function captureContainer() {
+            const images = Array.from(container.querySelectorAll('img'));
+            await Promise.all(images.map(img => new Promise(r => {
+                if (img.complete) return r(); img.onload = r; img.onerror = r;
+            })));
+            return html2canvas(container, { scale: 2, backgroundColor: '#f8f8fb', useCORS: true });
+        }
 
-            // Add pages if content overflows
-            pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight, undefined, 'FAST');
-            heightLeft -= pageHeight;
-            while (heightLeft > 0) {
-                pdf.addPage();
-                position = heightLeft - imgHeight;
+        const pngBtn = document.getElementById('downloadProfilePng');
+        if (pngBtn) {
+            pngBtn.addEventListener('click', async function (e) {
+                e.preventDefault();
+                const canvas = await captureContainer();
+                const link = document.createElement('a');
+                link.download = `profile-{{ user.id }}.png`;
+                link.href = canvas.toDataURL('image/png');
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            });
+        }
+
+        const pdfBtn = document.getElementById('downloadProfilePdf');
+        if (pdfBtn) {
+            pdfBtn.addEventListener('click', async function (e) {
+                e.preventDefault();
+                const canvas = await captureContainer();
+                const imgData = canvas.toDataURL('image/png');
+                const { jsPDF } = window.jspdf;
+                const pdf = new jsPDF('p', 'mm', 'a4');
+                const pageWidth = pdf.internal.pageSize.getWidth();
+                const pageHeight = pdf.internal.pageSize.getHeight();
+                const imgWidth = pageWidth;
+                const imgHeight = canvas.height * imgWidth / canvas.width;
+                let position = 0, heightLeft = imgHeight;
                 pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight, undefined, 'FAST');
                 heightLeft -= pageHeight;
-            }
-            pdf.save(`profile-{{ user.id }}.pdf`);
-        });
-    }
-});
+                while (heightLeft > 0) {
+                    pdf.addPage();
+                    position = heightLeft - imgHeight;
+                    pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight, undefined, 'FAST');
+                    heightLeft -= pageHeight;
+                }
+                pdf.save(`profile-{{ user.id }}.pdf`);
+            });
+        }
+    });
 </script>
 {% endblock %}

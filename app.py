@@ -725,6 +725,10 @@ def edit_user(id):
     
     # Get current user info for role checking
     current_user = db.get_user_by_id(session['user_id'])
+
+    if current_user['role'] == 'manager' and user['id'] != session['user_id']:
+        flash('Access denied. Managers cannot edit other users.', 'error')
+        return redirect(url_for('users'))
     
     # Prevent editing own admin role
     if user['id'] == session['user_id'] and user['role'] == 'admin':
