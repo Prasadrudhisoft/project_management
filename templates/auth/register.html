@@ -14,8 +14,8 @@
         }
 
         html {
-            min-height: 100%;
             height: 100%;
+            overflow: hidden;
             background: url('/static/images/login.jpg') center center / cover no-repeat fixed;
             background-size: cover;
         }
@@ -26,16 +26,14 @@
             color: #212529;
             background: url('/static/images/login.jpg') center center / cover no-repeat fixed;
             background-size: cover;
-            min-height: 100%;
-            overflow-x: hidden;
-            overflow-y: auto;
+            height: 100%;
+            overflow: hidden;
             display: flex;
-            align-items: flex-start;
+            align-items: center;
             justify-content: center;
             position: relative;
         }
 
-        /* Dark overlay — same as login */
         body::after {
             content: '';
             position: fixed;
@@ -44,7 +42,6 @@
             z-index: -1;
         }
 
-        /* Your overlay — now backdrop-filter works because ::after is behind it */
         body::before {
             content: '';
             position: fixed;
@@ -65,10 +62,10 @@
             z-index: 1;
             width: 100%;
             max-width: 500px;
-            padding: 4.5rem 1rem 2.5rem;
+            padding: 4rem 1rem 1rem;
         }
 
-        /* ── Card — white like login ── */
+        /* ── Card ── */
         .card {
             background: rgba(255, 255, 255, 0.97);
             border: 1px solid rgba(0, 0, 0, 0.08);
@@ -84,9 +81,9 @@
             transform: translateY(-3px) translateZ(0);
         }
 
-        /* ── Card header — same gradient as login ── */
+        /* ── Card header ── */
         .card-header {
-            padding: 1.5rem 1rem;
+            padding: 0.9rem 1rem;
             background: linear-gradient(135deg, #2e3192, #4f46e5);
             text-align: center;
             position: relative;
@@ -120,15 +117,15 @@
             z-index: 1;
         }
 
-        /* ── Card body — white like login ── */
+        /* ── Card body ── */
         .card-body {
-            padding: 1.75rem 1.75rem 1.5rem;
+            padding: 0.85rem 1.75rem 0.75rem;
             background: #fff;
         }
 
-        /* ── Card footer — same as login ── */
+        /* ── Card footer ── */
         .card-footer {
-            padding: 1rem 1.75rem;
+            padding: 0.65rem 1.75rem;
             background: linear-gradient(135deg, rgba(46, 49, 146, 0.05), rgba(79, 70, 229, 0.03));
             border-top: 1px solid rgba(79, 70, 229, 0.15);
             text-align: center;
@@ -142,21 +139,20 @@
 
         /* ── Form fields ── */
         .field {
-            margin-bottom: 1rem;
+            margin-bottom: 0.45rem;
         }
 
         .field label {
             display: block;
-            margin-bottom: 0.35rem;
+            margin-bottom: 0.25rem;
             font-size: 0.875rem;
             font-weight: 600;
             color: #495057;
-            /* exact same as login */
         }
 
         .field .hint {
             display: block;
-            margin-top: 0.3rem;
+            margin-top: 0.25rem;
             font-size: 0.78rem;
             color: #6c757d;
         }
@@ -169,11 +165,11 @@
             color: #e74c3c;
         }
 
-        /* ── Inputs — exactly matching login ── */
+        /* ── Inputs ── */
         .form-control {
             display: block;
             width: 100%;
-            padding: 0.75rem 1rem;
+            padding: 0.55rem 1rem;
             font-size: 1rem;
             line-height: 1.5;
             color: #212529;
@@ -212,7 +208,7 @@
             box-shadow: 0 0 0 0.25rem rgba(231, 76, 60, 0.12);
         }
 
-        /* ── Password wrapper — same as login ── */
+        /* ── Password wrapper ── */
         .password-wrapper {
             position: relative;
         }
@@ -240,7 +236,7 @@
             background: #fff;
         }
 
-        /* ── Eye button — same as login ── */
+        /* ── Eye button ── */
         .eye-btn {
             position: absolute;
             right: 0.75rem;
@@ -291,7 +287,7 @@
         /* ── Password strength bar ── */
         .strength-bar {
             height: 4px;
-            margin-top: 7px;
+            margin-top: 6px;
             border-radius: 4px;
             background: #e9ecef;
             overflow: hidden;
@@ -304,12 +300,12 @@
             transition: width 0.35s ease, background-color 0.35s ease;
         }
 
-        /* ── Submit button — same as login .btn-primary ── */
+        /* ── Submit button ── */
         .btn-submit {
             display: block;
             width: 100%;
-            padding: 0.75rem 2rem;
-            margin-top: 0.75rem;
+            padding: 0.6rem 2rem;
+            margin-top: 0.5rem;
             font-size: 1rem;
             font-weight: 600;
             color: #fff;
@@ -373,7 +369,7 @@
             }
         }
 
-        /* ── Back button — fixed top left, same as login ── */
+        /* ── Back button ── */
         .btn-back {
             position: fixed;
             top: 1rem;
@@ -407,7 +403,7 @@
             transform: translateY(0);
         }
 
-        /* ── Links — same as login ── */
+        /* ── Links ── */
         a {
             color: #4f46e5;
             text-decoration: none;
@@ -481,38 +477,240 @@
             }
         }
 
-        /* ── Responsive ── */
+        /* ══════════════════════════════════════════
+           RESPONSIVE BREAKPOINTS
+        ══════════════════════════════════════════ */
+
+        /* ── Mobile S/M — up to 575px ── */
         @media (max-width: 575px) {
+
+            html,
+            body {
+                overflow-y: auto;
+                height: auto;
+                min-height: 100%;
+                align-items: flex-start;
+            }
+
             .page-wrapper {
-                padding: 4.5rem 0.75rem 2rem;
+                padding: 4.5rem 0.75rem 1.5rem;
+                max-width: 100%;
+            }
+
+            .card-header {
+                padding: 0.75rem 1rem;
+            }
+
+            .card-header h4 {
+                font-size: 1.05rem;
             }
 
             .card-body {
-                padding: 1.5rem 1.25rem;
+                padding: 0.75rem 1.1rem 0.65rem;
+            }
+
+            .card-footer {
+                padding: 0.6rem 1.1rem;
+            }
+
+            .field {
+                margin-bottom: 0.35rem;
+            }
+
+            .field label {
+                margin-bottom: 0.2rem;
+                font-size: 0.82rem;
             }
 
             .form-control {
+                padding: 0.45rem 0.85rem;
                 font-size: 16px;
+                border-radius: 10px;
             }
 
             .password-wrapper .form-control {
                 font-size: 18px !important;
                 letter-spacing: 0.25em !important;
             }
+
+            .btn-submit {
+                padding: 0.55rem 2rem;
+                margin-top: 0.4rem;
+                font-size: 0.95rem;
+            }
+
+            .field .hint {
+                font-size: 0.72rem;
+                margin-top: 0.2rem;
+            }
+
+            .strength-bar {
+                margin-top: 4px;
+            }
         }
 
-        @media (min-width: 576px) {
+        /* ── Tablet — 576px to 767px ── */
+        @media (min-width: 576px) and (max-width: 767px) {
+
+            html,
             body {
-                align-items: center;
-                min-height: 100vh;
+                overflow-y: auto;
+                height: auto;
+                min-height: 100%;
+                align-items: flex-start;
             }
 
             .page-wrapper {
-                padding: 5rem 1rem 2.5rem;
+                padding: 4.5rem 1rem 1.5rem;
+                max-width: 480px;
+                margin: 0 auto;
+            }
+
+            .card-header {
+                padding: 0.8rem 1rem;
+            }
+
+            .card-body {
+                padding: 0.8rem 1.5rem 0.7rem;
+            }
+
+            .card-footer {
+                padding: 0.6rem 1.5rem;
+            }
+
+            .field {
+                margin-bottom: 0.4rem;
+            }
+
+            .form-control {
+                padding: 0.5rem 1rem;
+                font-size: 16px;
+            }
+
+            .btn-submit {
+                padding: 0.58rem 2rem;
+                margin-top: 0.45rem;
             }
         }
 
-        /* Dark mode — keep background image, white card stays white */
+        /* ── Tablet L / Small Laptop — 768px to 1023px ── */
+        @media (min-width: 768px) and (max-width: 1023px) {
+            body {
+                align-items: center;
+                overflow: hidden;
+                height: 100%;
+            }
+
+            .page-wrapper {
+                padding: 4rem 1rem 1rem;
+                max-width: 490px;
+            }
+
+            .card-header {
+                padding: 0.85rem 1rem;
+            }
+
+            .card-body {
+                padding: 0.8rem 1.6rem 0.7rem;
+            }
+
+            .card-footer {
+                padding: 0.62rem 1.6rem;
+            }
+
+            .field {
+                margin-bottom: 0.42rem;
+            }
+
+            .form-control {
+                padding: 0.52rem 1rem;
+            }
+
+            .btn-submit {
+                padding: 0.58rem 2rem;
+                margin-top: 0.45rem;
+            }
+        }
+
+        /* ── Laptop — 1024px to 1439px ── */
+        @media (min-width: 1024px) and (max-width: 1439px) {
+            body {
+                align-items: center;
+                overflow: hidden;
+                height: 100%;
+            }
+
+            .page-wrapper {
+                padding: 4rem 1rem 1rem;
+                max-width: 500px;
+            }
+
+            .card-header {
+                padding: 0.9rem 1rem;
+            }
+
+            .card-body {
+                padding: 0.85rem 1.75rem 0.75rem;
+            }
+
+            .card-footer {
+                padding: 0.65rem 1.75rem;
+            }
+
+            .field {
+                margin-bottom: 0.45rem;
+            }
+
+            .form-control {
+                padding: 0.55rem 1rem;
+            }
+
+            .btn-submit {
+                padding: 0.6rem 2rem;
+                margin-top: 0.5rem;
+            }
+        }
+
+        /* ── Laptop L — 1440px and above ── */
+        @media (min-width: 1440px) {
+            body {
+                align-items: center;
+                overflow: hidden;
+                height: 100%;
+            }
+
+            .page-wrapper {
+                padding: 4rem 1rem 1rem;
+                max-width: 520px;
+            }
+
+            .card-header {
+                padding: 1rem 1rem;
+            }
+
+            .card-body {
+                padding: 1rem 1.75rem 0.85rem;
+            }
+
+            .card-footer {
+                padding: 0.75rem 1.75rem;
+            }
+
+            .field {
+                margin-bottom: 0.5rem;
+            }
+
+            .form-control {
+                padding: 0.65rem 1rem;
+            }
+
+            .btn-submit {
+                padding: 0.65rem 2rem;
+                margin-top: 0.55rem;
+            }
+        }
+
+        /* ── Dark mode ── */
         @media (prefers-color-scheme: dark) {
 
             html,
@@ -522,7 +720,7 @@
             }
         }
 
-        /* Reduced motion */
+        /* ── Reduced motion ── */
         @media (prefers-reduced-motion: reduce) {
 
             *,
@@ -612,8 +810,8 @@
                             <span style="font-weight:400; color:#9ca3af; font-size:0.8rem;">(Optional)</span>
                         </label>
                         <input type="tel" class="form-control" id="phone" name="phone"
-                            placeholder="Enter your phone number" pattern="[0-9]" maxlength="10"
-                            inputmode="numeric" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+                            placeholder="Enter your phone number" pattern="[0-9]" maxlength="10" inputmode="numeric"
+                            oninput="this.value = this.value.replace(/[^0-9]/g, '')">
                     </div>
 
                     <button type="submit" class="btn-submit" id="submitBtn">
@@ -713,7 +911,7 @@
                 strengthFill.style.backgroundColor = s < 2 ? '#ef4444' : s < 3 ? '#f59e0b' : '#22c55e';
             }, 200));
 
-            // Input border highlight — same logic as login
+            // Input border highlight
             document.querySelectorAll('.form-control').forEach(input => {
                 input.addEventListener('input', function () {
                     if (this.id !== 'email') {
@@ -729,7 +927,7 @@
                 });
             });
 
-            // Real-time validation — same as login
+            // Real-time validation
             function validateInput(input) {
                 const value = input.value.trim();
                 if (input.type === 'email') {
@@ -814,7 +1012,7 @@
                 }
             });
 
-            // Card hover — same as login
+            // Card hover
             if (window.innerWidth > 767) {
                 const card = document.querySelector('.card');
                 let hoverTimeout;
@@ -832,7 +1030,7 @@
             }
         });
 
-        // Visibility change — pause/resume animations
+        // Visibility change
         document.addEventListener('visibilitychange', function () {
             const id = 'pause-animations';
             if (document.hidden) {
