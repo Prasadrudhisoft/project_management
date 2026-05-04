@@ -113,8 +113,15 @@
             padding: 0 1.5rem;
             display: flex;
             align-items: center;
-            justify-content: space-between;
             height: 68px;
+        }
+
+        .logo {
+            margin-right: auto;
+        }
+
+        .nav-actions {
+            margin-left: auto;
         }
 
         .logo {
@@ -176,9 +183,9 @@
         }
 
         .btn-outline {
-            background: transparent;
-            color: var(--p1);
-            border: 1.5px solid rgba(79, 70, 229, 0.4);
+            background: var(--p-gradient);
+            color: white;
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25);
         }
 
         .btn-solid {
@@ -804,6 +811,12 @@
             }
 
             .nav-actions {
+                display: flex;
+                margin-left: auto;
+                margin-right: 0.75rem;
+            }
+
+            .nav-actions .btn-solid {
                 display: none;
             }
 
@@ -902,7 +915,7 @@
             </p>
             <div class="hero-ctas">
                 <a href="/register" class="btn-hero-white">
-                    <i class="fas fa-rocket"></i> Start Free Trial
+                    <i class="fas fa-rocket"></i> Register
                 </a>
                 <a href="#features" class="btn-hero-ghost">
                     <i class="fas fa-play"></i> Watch Demo
